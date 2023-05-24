@@ -1,29 +1,49 @@
-const harakat = {
-    "DAMMA": "\u064f",
-    "DAMMATAN": "\u064c",
-    "FATHA": "\u064e",
-    "FATHATAN": "\u064b",
-    "KASRA": "\u0650",
-    "KASRATAN": "\u064d",
-    "SUKOON": "\u0652",
-    "DOTTED_CIRCLE": "\u25cc",
+// If you want only the harakah, then (ex): DAMMA[0]
+const svowel = {
+    "DAMMA": "\u064f\u25cc",
+    "DAMMATAN": "\u064c\u25cc",
+    "FATHA": "\u064e\u25cc",
+    "FATHATAN": "\u064b\u25cc",
+    "KASRA": "\u0650\u25cc",
+    "KASRATAN": "\u064d\u25cc",
+    "SUKOON": "\u0652\u25cc",
 };
 
-const questions = [
+const questionsData = [
     {
-        type: "single",
         input: {
-            language: "ar",
-            layout: "full without tanween",
-            grayed: [], // Buttons which are grayed out
+            letters: true, // all 29 letters
+            single: true, // single harakat
+            double: false, // tanween
         },
-        answers: ["DAMMA", "و", "ا", "ن"],
-        question: "What are the four signs of رفع?",
+        answers: [`${svowel.DAMMA}`, "و", "ا", "ن"],
+        prompt: "What are the four signs of رفع?",
     },
     {
-        type: "word_picture",
-        pictures: [],
-        answer: 1, // pictures[answer]
-        question: "What's the meaning of فلق؟",
-    }
+        input: {
+            letters: true, // all 29 letters
+            single: true, // single harakat
+            double: false, // tanween
+        },
+        answers: [`${svowel.FATHA}`, `${svowel.KASRA}`, "ي", "ا"],
+        prompt: "What are the four signs of نصب (ignore the omitted sign)?",
+    },
+    {
+        input: {
+            letters: true,
+            single: false,
+            double: false,
+        },
+        answers: ["ن"],
+        prompt: "Which letter is the omitted as the fifth sign of نصب?",
+    },
+    {
+        input: {
+            letters: true, // all 29 letters
+            single: true, // single harakat
+            double: false, // tanween
+        },
+        answers: [`${svowel.KASRA}`, "ي", `${svowel.FATHA}`],
+        prompt: "What are the three signs of خفض?",
+    },
 ];

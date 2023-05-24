@@ -1,166 +1,214 @@
-let activeKeyboard;
-let activePrompt;
+class Question {
+    constructor(data) {
+        this.data = data;
+        this.done = false; // is the question complete?
+    }
 
-function generateQuestion(question) {
-    if (question.type == "single")
-        return generateSingleQuestion(question);
-}
+    complete() {
+        this.HTML.input.root.setAttribute("hidden", "");
+        this.HTML.hint.className = "correct";
+        this.HTML.hint.innerText = this.data.answers.join(", ");
+        this.HTML.hint.removeAttribute("hidden");
+        this.done = true;
 
-function generateSingleQuestion(question) {
-    q_div = document.createElement("div");
-    q_div.className = "question";
+        // all questions complete
+        if (questions.reduce((a, b) => a && b.done, true)) {
+            let incorrect_guesses = questions.reduce((a, b) => a + b.input.wrong.length, 0);
+            let p = document.createElement("p");
+            p.className = "done";
+            p.innerText = `Incorrect guesses: ${incorrect_guesses}`;
+            if (incorrect_guesses > 0) {
+                p.className = "wrong";
+            } else {
+                p.className = "correct";
+            }
+            document.querySelector("#questions").appendChild(p);
+        }
+    }
 
-    let prompt_p = document.createElement("p");
-    prompt_p.setAttribute("type", "regular");
-    let prompt_node = document.createTextNode(question.question);
-    prompt_p.appendChild(prompt_node);
-    activePrompt = prompt_p;
-    q_div.appendChild(prompt_p);
+    // () => HTMLDivElement
+    generateHTML() {
+        return this.generateSingleQuestion();
+    }
 
-    let input_div = generateKeyboard(question);
-    q_div.appendChild(input_div);
-    return q_div;
-}
-
-// Should take a config soon
-function generateKeyboard(question) {
-    const keyboard_click = function(e) {
-        if (activeKeyboard.grayed.indexOf(e.target) !== -1 ||
-            activeKeyboard.wrong.indexOf(e.target) !== -1 ||
-            activeKeyboard.correct.indexOf(e.target) !== -1) {
+    updateHint() {
+        if (this.hasOwnProperty("input")) {
+            if (this.input.guesses[this.input.guesses.length - 1].correct) {
+                this.HTML.hint.removeAttribute("hidden");
+            }
+        } else {
             return;
         }
+        let answersLeft = this.data.answers.length - this.input.correct.length;
+        if (answersLeft === 1) {
+            this.HTML.hint.innerText = "There is one answer left";
+        } else {
+            this.HTML.hint.innerText = `There are ${answersLeft} answers left`;
+        }
+    }
 
-        if (activeKeyboard.activeKey)
-            activeKeyboard.activeKey.removeAttribute("active");
-        else
-            activeKeyboard.submitBtn.removeAttribute("disabled")
-        activeKeyboard.activeKey = e.target;
-        e.target.setAttribute("active", "");
-        activePrompt.setAttribute("feedback", e.target.innerText);
-    };
+    // temporary name
+    generateSingleQuestion() {
+        // Create root
+        this.HTML = {};
+        this.HTML.root = document.createElement("div");
+        this.HTML.root.className = "question";
 
-    const submit = function(e) {
-        // Check the answer
-        let correct = false;
-        for (let a of activeKeyboard.question.answers) {
-            if (a in harakat) {
-                console.log(activeKeyboard.activeKey.innerText[0], "  ", harakat[a]);
-                if (activeKeyboard.activeKey.innerText[0] === harakat[a]) {
-                    correct = true;
-                    break;
-                }
-            } else {
-                if (activeKeyboard.activeKey.innerText === a) {
+        // Create prompt
+        this.HTML.prompt = document.createElement("p");
+        this.HTML.prompt.setAttribute("type", "regular");
+        let promptNode = document.createTextNode(this.data.prompt);
+        this.HTML.prompt.appendChild(promptNode);
+        this.HTML.root.appendChild(this.HTML.prompt);
+
+        // Create hint
+        this.HTML.hint = document.createElement("p");
+        this.HTML.hint.className = "hint";
+        this.HTML.hint.setAttribute("hidden", "");
+        this.updateHint();
+        this.HTML.root.appendChild(this.HTML.hint);
+
+        // Create keyboard
+        this.generateKeyboard();
+        return this.HTML.root;
+    }
+
+    generateKeyboard() {
+        const keyboard_click = function(e) {
+            const q = this.question;
+            if (q.input.grayed.indexOf(e.target) !== -1 ||
+                q.input.wrong.indexOf(e.target) !== -1 ||
+                q.input.correct.indexOf(e.target) !== -1) {
+                return;
+            }
+
+            if (q.input.activeKey)
+                q.input.activeKey.removeAttribute("active");
+            else
+                q.HTML.input.submitBtn.removeAttribute("disabled")
+            q.input.activeKey = e.target;
+            e.target.setAttribute("active", "");
+            q.HTML.prompt.setAttribute("feedback", e.target.innerText);
+        };
+
+        const submit = function(e) {
+            const q = this.question;
+            // Check the answer
+            let correct = false;
+            for (let a of q.data.answers) {
+                if (q.input.activeKey.innerText === a) {
                     correct = true;
                     break;
                 }
             }
+            // Make itself disabled
+            q.HTML.input.submitBtn.setAttribute("disabled", "");
+            // Either mark the answer wrong or right
+            if (correct) {
+                q.input.activeKey.setAttribute("correct", "");
+                q.input.correct.push(q.input.activeKey);
+                q.HTML.prompt.setAttribute("feedback", "✅");
+            } else {
+                q.input.activeKey.setAttribute("wrong", "");
+                q.input.wrong.push(q.input.activeKey);
+                q.HTML.prompt.setAttribute("feedback", "❌");
+            }
+            // Remove the activekey
+            q.input.guesses.push({guess: q.input.activeKey.innerText, correct});
+            q.input.activeKey = null;
+            q.updateHint();
+
+            // If the question is complete:
+            if (q.input.correct.length === q.data.answers.length) {
+                q.complete();
+            }
+        };
+
+        function createButtons(chars, row, q) {
+            for (let char of chars) {
+                const button = document.createElement("div");
+                button.question = q;
+                const node = document.createTextNode(char);
+                button.appendChild(node);
+                button.addEventListener("click", keyboard_click);
+                row.appendChild(button);
+            }
         }
-        // Make itself disabled
-        activeKeyboard.submitBtn.setAttribute("disabled", "");
-        // Either mark the answer wrong or right
-        if (correct) {
-            activeKeyboard.activeKey.setAttribute("correct", "");
-            activeKeyboard.correct.push(activeKeyboard.activeKey);
-            activePrompt.setAttribute("feedback", "✅");
-        } else {
-            activeKeyboard.activeKey.setAttribute("wrong", "");
-            activeKeyboard.wrong.push(activeKeyboard.activeKey);
-            activePrompt.setAttribute("feedback", "❌");
+
+        console.warn("Keyboard only accepts one letter per submission!!");
+        this.input = {};
+        this.HTML.input = {};
+        this.HTML.input.root = document.createElement("div");
+        this.HTML.input.root.className = "arabic-keyboard";
+        this.input.activeKey = undefined;
+        this.input.grayed = [];
+        this.input.correct = [];
+        this.input.wrong = [];
+        this.input.guesses = [];
+
+        this.HTML.input.svowelRow = document.createElement("div");
+        this.HTML.input.topRow = document.createElement("div");
+        this.HTML.input.middleRow = document.createElement("div");
+        this.HTML.input.bottomRow = document.createElement("div");
+        
+        let svowelRowChars = [];
+        if (this.data.input.single) {
+            svowelRowChars.push(svowel.DAMMA, svowel.FATHA,
+            svowel.KASRA, svowel.SUKOON);
         }
-        // Remove the activekey
-        activeKeyboard.activeKey = null;
-    };
-
-    console.warn("Keyboard only assumes single type!!");
-    const top_div = document.createElement("div");
-    top_div.className = "arabic-keyboard";
-
-    activeKeyboard = {};
-    activeKeyboard.html = top_div;
-    activeKeyboard.activeKey = undefined;
-    activeKeyboard.grayed = [];
-    activeKeyboard.correct = [];
-    activeKeyboard.wrong = [];
-    activeKeyboard.question = question;
-
-    const haraka_row = document.createElement("div");
-    const top_row = document.createElement("div");
-    const middle_row = document.createElement("div");
-    const bottom_row = document.createElement("div");
-    let haraka_row_chars;
-    if (question.input.layout.indexOf("without tanween") !== -1) {
-        haraka_row_chars = [
-        "\u064f\u25cc", "\u064e\u25cc", "\u0650\u25cc",
-        "\u0652\u25cc"];
-    } else {
-        haraka_row_chars = [
-        "\u064f\u25cc", "\u064c\u25cc", "\u064e\u25cc",
-        "\u064b\u25cc", "\u0650\u25cc", "\u064d\u25cc",
-        "\u0652\u25cc"];
-    }
-    const top_row_chars = ["ض", "ص", "ث", "ق", "ف",
-        "غ", "ع", "ه", "خ", "ح", "ج", "د"];
-    const middle_row_chars = ["ذ", "ش", "س", "ي", "ب",
-        "ل","ا","ت","ن","م","ك","ط"];
-    const bottom_row_chars = ["ئ", "ء", "ؤ", "ر", "ﻻ", "ى",
-        "ة", "و", "ز", "ظ", "➡"];
-
-    for (let btn_text of haraka_row_chars) {
-        const temp_div = document.createElement("div");
-        const text_node = document.createTextNode(btn_text);
-        temp_div.appendChild(text_node);
-        temp_div.addEventListener("click", keyboard_click);
-        haraka_row.appendChild(temp_div);
-    }
-
-    for (let btn_text of top_row_chars) {
-        const temp_div = document.createElement("div");
-        const text_node = document.createTextNode(btn_text);
-        temp_div.appendChild(text_node);
-        temp_div.addEventListener("click", keyboard_click);
-        top_row.appendChild(temp_div);
-    }
-
-    for (let btn_text of middle_row_chars) {
-        const temp_div = document.createElement("div");
-        const text_node = document.createTextNode(btn_text);
-        temp_div.appendChild(text_node);
-        temp_div.addEventListener("click", keyboard_click);
-        middle_row.appendChild(temp_div);
-    }
-
-    for (let btn_text of bottom_row_chars) {
-        const temp_div = document.createElement("div");
-        const text_node = document.createTextNode(btn_text);
-        temp_div.appendChild(text_node);
-        if (btn_text === "➡") {
-            temp_div.addEventListener("click", submit);
-            temp_div.setAttribute("disabled", "");
-            activeKeyboard.submitBtn = temp_div;
+        if (this.data.input.double) {
+            svowelRowChars.push(svowel.DAMMATAN, svowel.FATHATAN, svowel.KASRATAN);
         }
-        else
-            temp_div.addEventListener("click", keyboard_click);
-        bottom_row.appendChild(temp_div);
-    }
 
-    top_div.appendChild(haraka_row);
-    top_div.appendChild(top_row);
-    top_div.appendChild(middle_row);
-    top_div.appendChild(bottom_row);
-    
-    return top_div;
+        const topRowChars = ["ض", "ص", "ث", "ق", "ف",
+            "غ", "ع", "ه", "خ", "ح", "ج", "د"];
+        const middleRowChars = ["ذ", "ش", "س", "ي", "ب",
+            "ل","ا","ت","ن","م","ك","ط"];
+        const bottomRowChars = ["ئ", "ء", "ؤ", "ر", "ﻻ", "ى",
+            "ة", "و", "ز", "ظ"];
+
+        createButtons(svowelRowChars, this.HTML.input.svowelRow, this);
+        if (this.data.input.letters) {
+            createButtons(topRowChars, this.HTML.input.topRow, this);
+            createButtons(middleRowChars, this.HTML.input.middleRow, this);
+            createButtons(bottomRowChars, this.HTML.input.bottomRow, this);            
+        }
+
+        let submitNode = document.createTextNode("➡");
+        let submitDiv = document.createElement("div");
+        submitDiv.question = this;
+        submitDiv.appendChild(submitNode);
+        submitDiv.addEventListener("click", submit);
+        submitDiv.setAttribute("disabled", "");
+        this.HTML.input.submitBtn = submitDiv;
+        this.HTML.input.bottomRow.appendChild(submitDiv);
+
+        this.HTML.input.root.appendChild(this.HTML.input.svowelRow);
+        this.HTML.input.root.appendChild(this.HTML.input.topRow);
+        this.HTML.input.root.appendChild(this.HTML.input.middleRow);
+        this.HTML.input.root.appendChild(this.HTML.input.bottomRow);
+        this.HTML.root.appendChild(this.HTML.input.root);
+    }
 }
 
 function loadQuestions() {
-    let questions_div = document.querySelector("#questions");
-    for (let q of questions) {
-        let node = generateQuestion(q);
-        if (!node) console.warn(`Question of type ${q.type} is not supported.`)
-        else questions_div.appendChild(node);
+    let questionsDiv = document.querySelector("#questions");
+    for (let q of questionsData) {
+        let question = new Question(q);
+        questions.push(question)
+        let root = question.generateHTML();
+        questionsDiv.appendChild(root);
     }
 }
 
+function setVW(e) {
+    let r = document.querySelector(":root");
+    let vw = document.body.clientWidth / 100;
+    r.style.setProperty("--vw", `${vw}px`);
+}
+
+window.addEventListener("resize", setVW);
+
+let questions = [];
 loadQuestions();
-console.warn("Active prompt/keyboard are not set correctly, probably!");
+setVW({});
