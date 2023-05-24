@@ -32,13 +32,15 @@ class Question {
     }
 
     updateHint() {
-        if (this.hasOwnProperty("input")) {
-            if (this.input.guesses[this.input.guesses.length - 1].correct) {
+        if (this.input.guesses[this.input.guesses.length - 1].correct) {
+            if (!this.hint.visible) {
                 this.HTML.hint.removeAttribute("hidden");
+                this.hint.visible = true;
             }
-        } else {
-            return;
+            this.hint.showAnswersLeft = true;
         }
+
+        if (!this.hint.showAnswersLeft) return;
         let answersLeft = this.data.answers.length - this.input.correct.length;
         if (answersLeft === 1) {
             this.HTML.hint.innerText = "There is one answer left";
@@ -68,8 +70,14 @@ class Question {
         // Create hint
         this.HTML.hint = document.createElement("p");
         this.HTML.hint.className = "hint";
-        this.HTML.hint.setAttribute("hidden", "");
-        this.updateHint();
+        this.hint = {};
+        if (this.data.hint) {
+            this.HTML.hint.innerText = this.data.hint;
+            this.hint.visible = true;
+        } else {
+            this.HTML.hint.setAttribute("hidden", "");
+            this.hint.visible = false;
+        }
         this.HTML.root.appendChild(this.HTML.hint);
 
         // Create keyboard

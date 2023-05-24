@@ -18,6 +18,7 @@ const questionsData = [
         },
         answers: [`${svowel.DAMMA}`, "و", "ا", "ن"],
         prompt: "What are the four signs of رفع?",
+        hint: "Select while holding ctrl to multiselect!"
     },
     {
         input: {
