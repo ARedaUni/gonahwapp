@@ -40,6 +40,9 @@ body {
     margin: 0 auto;
     background-color: var(--banner-color);
     padding-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .question {
@@ -155,7 +158,7 @@ button {
 
 .arabic-keyboard div div[wrong] {
     background: var(--wrong);
-    opacity: .7;
+    opacity: .2;
 }
 
 .arabic-keyboard div div[correct] {
@@ -163,7 +166,7 @@ button {
 }
 
 
-@media (max-width: 800px) {
+@media only screen and (max-device-width: 800px) {
     #questions {
         width: calc(100 * var(--vw));
     }

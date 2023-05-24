@@ -7,5 +7,6 @@
 - [ ] Supporting printing webpage (low priority)
 - [ ] Write a program that generates `questions.js` (low priority)
 
-
+- [ ] Support for quiz mode (doesn't tell you the correct answers until the end)
 - [ ] Show one question at a time, but add a skip button
+- [ ] After question is complete, click hint to expand tries (if keyboard, all buttons are grayed out except rigth ones)
