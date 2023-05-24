@@ -56,10 +56,14 @@ class Question {
 
         // Create prompt
         this.HTML.prompt = document.createElement("p");
-        this.HTML.prompt.setAttribute("type", "regular");
         let promptNode = document.createTextNode(this.data.prompt);
         this.HTML.prompt.appendChild(promptNode);
         this.HTML.root.appendChild(this.HTML.prompt);
+
+        // Create feedback
+        this.HTML.feedback = document.createElement("span");
+        this.HTML.feedback.className = "feedback";
+        this.HTML.prompt.appendChild(this.HTML.feedback);
 
         // Create hint
         this.HTML.hint = document.createElement("p");
@@ -73,6 +77,24 @@ class Question {
         return this.HTML.root;
     }
 
+    // Grades is an array like: [{correct: false, entry: 'a'}]
+    updateFeedback(grades=null) {
+        this.HTML.feedback.innerHTML = "";
+        if (!grades) {
+            this.HTML.feedback.innerHTML = 
+                `<span class="regular">\u202D${this.input.activeKeys.map(k => k.innerText).join(", ")}</span>`;
+        } else {
+            for (let i = 0; i < grades.length; ++i) {
+                let g = grades[i];
+                this.HTML.feedback.innerHTML += `<span class="${g.correct ? "correct" : "wrong"}">\u202D${g.entry}`;
+                if (i !== grades.length - 1) {
+                    this.HTML.feedback.innerHTML += ",";
+                }
+                this.HTML.feedback.innerHTML += "</span>";
+            }
+        }
+    }
+
     generateKeyboard() {
         const keyboard_click = function(e) {
             const q = this.question;
@@ -82,40 +104,57 @@ class Question {
                 return;
             }
 
-            if (q.input.activeKey)
-                q.input.activeKey.removeAttribute("active");
-            else
-                q.HTML.input.submitBtn.removeAttribute("disabled")
-            q.input.activeKey = e.target;
-            e.target.setAttribute("active", "");
-            q.HTML.prompt.setAttribute("feedback", e.target.innerText);
+            if (!q.input.activeKeys)
+                q.input.activeKeys = [];
+
+            if (!e.ctrlKey) {
+                q.input.activeKeys.forEach(k => k.removeAttribute("active"));
+                q.input.activeKeys = [e.target];
+                e.target.setAttribute("active", "");
+            } else {
+                let index = q.input.activeKeys.indexOf(e.target);
+                if (index === -1) {
+                    e.target.setAttribute("active", "");
+                    q.input.activeKeys.push(e.target);                    
+                }
+                else {
+                    q.input.activeKeys.splice(index, 1)[0].removeAttribute("active");
+                }
+            }
+
+            q.updateFeedback();
+
+            if (q.input.activeKeys.length > 0) {
+                q.HTML.input.submitBtn.removeAttribute("disabled");
+            } else {
+                q.HTML.input.submitBtn.setAttribute("disabled", "");
+            }
         };
 
         const submit = function(e) {
             const q = this.question;
+            q.HTML.input.submitBtn.setAttribute("disabled", "");
             // Check the answer
-            let correct = false;
-            for (let a of q.data.answers) {
-                if (q.input.activeKey.innerText === a) {
-                    correct = true;
-                    break;
+            let entries = [];
+            for (let entry of q.input.activeKeys) {
+                // Wrong answer
+                if (q.data.answers.indexOf(entry.innerText) === -1) {
+                    entries.push({correct: false, entry: entry.innerText});
+                    q.input.wrong.push(entry);
+                    entry.setAttribute("wrong", "");
+                } else {
+                    entries.push({correct: true, entry: entry.innerText});
+                    q.input.correct.push(entry);
+                    entry.setAttribute("correct", "");
                 }
             }
-            // Make itself disabled
-            q.HTML.input.submitBtn.setAttribute("disabled", "");
-            // Either mark the answer wrong or right
-            if (correct) {
-                q.input.activeKey.setAttribute("correct", "");
-                q.input.correct.push(q.input.activeKey);
-                q.HTML.prompt.setAttribute("feedback", "✅");
-            } else {
-                q.input.activeKey.setAttribute("wrong", "");
-                q.input.wrong.push(q.input.activeKey);
-                q.HTML.prompt.setAttribute("feedback", "❌");
-            }
+
+            q.updateFeedback(entries);
+
             // Remove the activekey
-            q.input.guesses.push({guess: q.input.activeKey.innerText, correct});
-            q.input.activeKey = null;
+            q.input.guesses.push(...entries);
+            q.input.activeKeys.forEach(k => k.removeAttribute("active"));
+            q.input.activeKeys = [];
             q.updateHint();
 
             // If the question is complete:
@@ -140,7 +179,7 @@ class Question {
         this.HTML.input = {};
         this.HTML.input.root = document.createElement("div");
         this.HTML.input.root.className = "arabic-keyboard";
-        this.input.activeKey = undefined;
+        this.input.activeKeys = undefined;
         this.input.grayed = [];
         this.input.correct = [];
         this.input.wrong = [];
@@ -188,8 +227,8 @@ class Question {
         this.HTML.input.root.appendChild(this.HTML.input.middleRow);
         this.HTML.input.root.appendChild(this.HTML.input.bottomRow);
         this.HTML.root.appendChild(this.HTML.input.root);
-    }
-}
+    
+}}
 
 function loadQuestions() {
     let questionsDiv = document.querySelector("#questions");

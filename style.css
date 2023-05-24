@@ -69,22 +69,8 @@ p {
     margin-bottom: 5px;
 }
 
-p:after {
-    content: "\202d " attr(feedback);
-    direction: rtl;
+.feedback {
     margin-left: 5px;
-}
-
-p[type="regular"]::after {
-    color: var(--regular);
-}
-
-p[type="correct"]::after {
-    color: var(--correct);
-}
-
-p[type="wrong"]::after {
-    color: var(--wrong);
 }
 
 .hint {
@@ -97,6 +83,10 @@ p[type="wrong"]::after {
 
 .wrong {
     color: var(--wrong);
+}
+
+.regular {
+    color: var(--regular);
 }
 
 input[type="text"] {
