@@ -67,13 +67,17 @@ class Question {
         this.HTML.hint = document.createElement("p");
         this.HTML.hint.className = "hint";
         this.hint = {};
-        if (this.data.hint) {
-            this.HTML.hint.innerText = this.data.hint;
-        }
         this.HTML.root.appendChild(this.HTML.hint);
 
         // Create keyboard
         this.generateKeyboard();
+
+        // I placed the code here since updateHint depends on this.input
+        if (this.data.hint) {
+            this.HTML.hint.innerText = this.data.hint;
+        } else {
+            this.updateHint();
+        }
         return this.HTML.root;
     }
 
