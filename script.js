@@ -31,17 +31,13 @@ class Question {
         return this.generateSingleQuestion();
     }
 
-    updateHint() {
-        if (this.input.guesses[this.input.guesses.length - 1].correct) {
-            if (!this.hint.visible) {
-                this.HTML.hint.removeAttribute("hidden");
-                this.hint.visible = true;
-            }
-            this.hint.showAnswersLeft = true;
+    updateHint(overSelecting=false) {
+        let answersLeft = this.data.answers.length - this.input.correct.length;
+        if (overSelecting) {
+            this.HTML.hint.innerText = `You cannot select more than ${answersLeft} answers`;
+            return;
         }
 
-        if (!this.hint.showAnswersLeft) return;
-        let answersLeft = this.data.answers.length - this.input.correct.length;
         if (answersLeft === 1) {
             this.HTML.hint.innerText = "There is one answer left";
         } else {
@@ -73,10 +69,6 @@ class Question {
         this.hint = {};
         if (this.data.hint) {
             this.HTML.hint.innerText = this.data.hint;
-            this.hint.visible = true;
-        } else {
-            this.HTML.hint.setAttribute("hidden", "");
-            this.hint.visible = false;
         }
         this.HTML.root.appendChild(this.HTML.hint);
 
@@ -87,14 +79,15 @@ class Question {
 
     // Grades is an array like: [{correct: false, entry: 'a'}]
     updateFeedback(grades=null) {
+        const OVERRIDE_LTR = "\u202D";
         this.HTML.feedback.innerHTML = "";
         if (!grades) {
             this.HTML.feedback.innerHTML = 
-                `<span class="regular">\u202D${this.input.activeKeys.map(k => k.innerText).join(", ")}</span>`;
+                `<span class="regular">${OVERRIDE_LTR}${this.input.activeKeys.map(k => k.innerText).join(", ")}</span>`;
         } else {
             for (let i = 0; i < grades.length; ++i) {
                 let g = grades[i];
-                this.HTML.feedback.innerHTML += `<span class="${g.correct ? "correct" : "wrong"}">\u202D${g.entry}`;
+                this.HTML.feedback.innerHTML += `<span class="${g.correct ? "correct" : "wrong"}">${OVERRIDE_LTR}${g.entry}`;
                 if (i !== grades.length - 1) {
                     this.HTML.feedback.innerHTML += ",";
                 }
@@ -112,6 +105,7 @@ class Question {
                 return;
             }
 
+            q.updateHint();
             if (!q.input.activeKeys)
                 q.input.activeKeys = [];
 
@@ -122,8 +116,13 @@ class Question {
             } else {
                 let index = q.input.activeKeys.indexOf(e.target);
                 if (index === -1) {
-                    e.target.setAttribute("active", "");
-                    q.input.activeKeys.push(e.target);                    
+                    let answersLeft = q.data.answers.length - q.input.correct.length;
+                    if (q.input.activeKeys.length === answersLeft) {
+                        q.updateHint(`You can't select more than ${answersLeft}`);
+                    } else {
+                        e.target.setAttribute("active", "");
+                        q.input.activeKeys.push(e.target);                    
+                    }
                 }
                 else {
                     q.input.activeKeys.splice(index, 1)[0].removeAttribute("active");
