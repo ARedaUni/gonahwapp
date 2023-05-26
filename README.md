@@ -9,7 +9,7 @@ Why not use Anki?
 
 I hope to update my engine as I begin to ask different questions, but that may eventually lead to old quizzes breaking, and thus I plan to start a new repo for every quiz. However, I may merge quizzes every now and then. Below is the quiz engine version in case you'd like to make your own quiz and you want to use the latest version.
 
-**Amr's Quiz Engine: v0.0.5.**
+**Amr's Quiz Engine: v0.0.5 (MASTER).**
 
 # Arabic
 
