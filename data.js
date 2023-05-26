@@ -39,7 +39,7 @@ const questionsData = [
             double: false,
         },
         answers: ["ن"],
-        prompt: "Which letter is the omitted as the fifth sign of نصب?",
+        prompt: "Which letter is omitted as the fifth sign of نصب?",
     },
     {
         type: "arabic-keyboard-single",
