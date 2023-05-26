@@ -123,7 +123,7 @@ button {
 }
 
 /* Individual keyboard buttons  */
-.arabic-keyboard div div {
+.arabic-keyboard-btn {
     background: var(--keyboard-color);
     width: 1.6em;
     margin: 0 5px 5px 5px;
@@ -133,28 +133,33 @@ button {
     transition: opacity .2s, background .2s;
 }
 
-.arabic-keyboard div div:not([disabled]):not([wrong]):not(correct):hover {
+.arabic-keyboard-btn:not([disabled]):not([wrong]):not(correct):hover {
     background: var(--orange);
     cursor: pointer;
 }
 
-.arabic-keyboard div div[disabled] {
+.arabic-keyboard-btn[disabled] {
     opacity: 0;
 }
 
-.arabic-keyboard div div[active] {
+.arabic-keyboard-btn[active] {
     background: var(--regular);
 }
 
-.arabic-keyboard div div[wrong] {
+.arabic-keyboard-btn[wrong] {
     background: var(--wrong);
     opacity: .2;
 }
 
-.arabic-keyboard div div[correct] {
+.arabic-keyboard-btn[correct] {
     background: var(--correct);
 }
 
+
+.submit-btn {
+    background: var(--regular);
+    width: 2.1em;
+}
 
 @media only screen and (max-device-width: 800px) {
     #questions {

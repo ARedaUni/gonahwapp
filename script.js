@@ -125,7 +125,7 @@ class Question {
                         q.updateHint(`You can't select more than ${answersLeft}`);
                     } else {
                         e.target.setAttribute("active", "");
-                        q.input.activeKeys.push(e.target);                    
+                        q.input.activeKeys.push(e.target);
                     }
                 }
                 else {
@@ -177,6 +177,7 @@ class Question {
         function createButtons(chars, row, q) {
             for (let char of chars) {
                 const button = document.createElement("div");
+                button.className = "arabic-keyboard-btn";
                 button.question = q;
                 const node = document.createTextNode(char);
                 button.appendChild(node);
@@ -227,6 +228,7 @@ class Question {
         let submitNode = document.createTextNode("➡");
         let submitDiv = document.createElement("div");
         submitDiv.question = this;
+        submitDiv.className = "arabic-keyboard-btn submit-btn";
         submitDiv.appendChild(submitNode);
         submitDiv.addEventListener("click", submit);
         submitDiv.setAttribute("disabled", "");
