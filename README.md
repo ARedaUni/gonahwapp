@@ -14,3 +14,22 @@ I hope to update my engine as I begin to ask different questions, but that may e
 # Arabic
 
 I found a [free course on SeekersGuidance](https://academy.seekersguidance.org/enrol/index.php?id=126), and I'll be writing my quizzes as I progress through the course inshallah. Feel free to follow along!
+
+- [ ] Lesson 1
+- [ ] Lesson 2
+- [ ] Lesson 3
+- [ ] Lesson 4
+- [ ] Lesson 5
+- [ ] Lesson 6
+- [ ] Lesson 7
+- [ ] Lesson 8
+- [ ] Lesson 9
+- [ ] Lesson 10
+- [ ] Lesson 11
+- [ ] Lesson 12
+
+# Planned Quiz features
+
+- [ ] Multiple choice
+- [ ] Short answer
+- [ ] I'rab questions (given a sentence, mark the endings of each word)
