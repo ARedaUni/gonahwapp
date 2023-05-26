@@ -1,3 +1,5 @@
+"use strict";
+
 function loadQuestions() {
     let questionsDiv = document.querySelector("#questions");
     for (let q of questionsData) {

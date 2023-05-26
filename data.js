@@ -1,3 +1,5 @@
+"use strict";
+
 // If you want only the harakah, then (ex): DAMMA[0]
 const svowel = {
     "DAMMA": "\u064f\u25cc",

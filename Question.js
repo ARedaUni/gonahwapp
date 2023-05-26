@@ -1,3 +1,5 @@
+"use strict";
+
 class Question {
     constructor(data) {
         this.data = data;
