@@ -36,3 +36,6 @@ I found a [free course on SeekersGuidance](https://academy.seekersguidance.org/e
 - [ ] Refactor `Question` into `QuestionState` and `QuestionGenerator`
 - [ ] Refactor to include `PageState` and `PageGenerator` (the State types should be persistent)
 - [ ] Ability to generate + navigate different lessons
+- [ ] Button to display original hint
+- [ ] Button to expand previous attempts once a question is complete
+- [ ] Cache?
