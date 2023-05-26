@@ -33,3 +33,6 @@ I found a [free course on SeekersGuidance](https://academy.seekersguidance.org/e
 - [ ] Multiple choice
 - [ ] Short answer
 - [ ] I'rab questions (given a sentence, mark the endings of each word)
+- [ ] Refactor `Question` into `QuestionState` and `QuestionGenerator`
+- [ ] Refactor to include `PageState` and `PageGenerator` (the State types should be persistent)
+- [ ] Ability to generate + navigate different lessons
