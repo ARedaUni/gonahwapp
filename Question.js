@@ -87,6 +87,7 @@ class Question {
         this.HTML.input.root.appendChild(this.HTML.input.button);
 
         this.HTML.input.button.addEventListener("click", (e) => {
+            console.warn("Doesn't support incorrect answers");
             const t = e.target;
             const q = t.question;
             const value = q.HTML.input.text.value;
@@ -98,6 +99,8 @@ class Question {
                 q.HTML.input.root.setAttribute("hidden", "");
                 q.HTML.input.text.setAttribute("hidden", "");
                 q.HTML.input.button.setAttribute("hidden", "");
+            } else {
+                
             }
         });
 
@@ -311,7 +314,7 @@ class Question {
         }
 
         const backspace = function(e) {
-
+            console.error("Backspace is not supported yet!")
         }
 
         const space = function(e) {
@@ -364,7 +367,6 @@ class Question {
             }
         }
 
-        console.warn("Keyboard only accepts one letter per submission!!");
         this.keyboard = {};
         this.HTML.keyboard = {};
         this.HTML.keyboard.root = document.createElement("div");
