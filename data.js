@@ -12,45 +12,39 @@ const svowel = {
 };
 
 const questionsData = [
-    {
-        type: "arabic-keyboard-single",
+    { // Display feedback by pretty much using the WORDL technique
+        type: "short-answer",
         input: {
-            letters: true, // all 29 letters
-            single: true, // single harakat
-            double: false, // tanween
+            lang: "ar",
+            svowels: false,
         },
-        answers: [`${svowel.DAMMA}`, "و", "ا", "ن"],
-        prompt: "What are the four signs of رفع?",
-        hint: "Select while holding ctrl to multiselect!"
-    },
-    {
-        type: "arabic-keyboard-single",
-        input: {
-            letters: true, // all 29 letters
-            single: true, // single harakat
-            double: false, // tanween
-        },
-        answers: [`${svowel.FATHA}`, `${svowel.KASRA}`, "ي", "ا"],
-        prompt: "What are the four signs of نصب (ignore the omitted sign)?",
-    },
-    {
-        type: "arabic-keyboard-single",
-        input: {
+        keyboard: {
             letters: true,
+            space: true,
             single: false,
             double: false,
         },
-        answers: ["ن"],
-        prompt: "Which letter is omitted as the fifth sign of نصب?",
+        prompt: "ما هذا؟",
+        image: "img/house.png",
+        hint: "Translate 'this is a house' to Arabic",
+        answer: "هذا بيت",
+    },
+
+    {
+        type: "svowels",
+        prompt: "هذا بيت",
+        answers: [svowel.FATHA, svowel.FATHA, svowel.SUKOON, svowel.FATHA, svowel.SUKOON, svowel.DAMMATAN],
+        spoiler: true,
     },
     {
         type: "arabic-keyboard-single",
-        input: {
+        keyboard: {
             letters: true, // all 29 letters
             single: true, // single harakat
             double: false, // tanween
         },
-        answers: [`${svowel.KASRA}`, "ي", `${svowel.FATHA}`],
-        prompt: "What are the three signs of خفض?",
+        prompt: "What are the four signs of رفع?",
+        answers: [`${svowel.DAMMA}`, "و", "ا", "ن"],
+        hint: "Select while holding ctrl to multiselect!"
     },
 ];

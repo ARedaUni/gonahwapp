@@ -71,6 +71,7 @@ p {
 
 .feedback {
     margin-left: 5px;
+    margin-right: 5px;
 }
 
 .hint {
@@ -89,20 +90,43 @@ p {
     color: var(--regular);
 }
 
+.short-answer {
+    display: flex;
+    justify-content: center;
+}
+
 input[type="text"] {
     border-radius: .6em 0 0 .6em;
     border: 2px white solid;
     font-size: inherit;
+    margin-bottom: 15px;
+    caret-color: var(--orange);
+    text-indent: 5px;
+    height: 1.4em;
 }
+
+input[rtl] {
+    border-radius: 0 .6em .6em 0;
+    order: 1;
+}
+
+input:focus {
+    outline: none;
+    border: 2px var(--orange) solid;
+}
+
 
 button[disabled] {
     background-color: gray;
     border-color: gray;
 }
 
-input:focus {
-    outline: none;
-    border: 2px var(--orange) solid;
+button[rtl] {
+    border-top-left-radius: 50%;
+    border-bottom-left-radius: 50%;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    order: 0;
 }
 
 button {
@@ -112,8 +136,9 @@ button {
     background-color: var(--orange);
     border: 2px var(--orange) solid;
     color: var(--main-text-color);
-    height: 100%;
+    height: 1.4em;
     font-size: inherit;
+    cursor: pointer;
 }
 
 .arabic-keyboard div {
@@ -159,6 +184,24 @@ button {
 .submit-btn {
     background: var(--regular);
     width: 2.1em;
+}
+
+.space-btn {
+    width: 35%;
+    height: 1.2em;
+}
+
+.space-btn[active]:hover {
+    background: var(--regular) !important;
+}
+
+.backspace-btn {
+    width: 2.1em;
+    font-weight: bold;
+}
+
+*[rtl] {
+    direction: rtl;
 }
 
 @media only screen and (max-device-width: 800px) {
