@@ -158,7 +158,7 @@ button {
     transition: opacity .2s, background .2s;
 }
 
-.arabic-keyboard-btn:not([disabled]):not([wrong]):not(correct):hover {
+.arabic-keyboard-btn:not([disabled]):not([wrong]):not([correct]):hover {
     background: var(--orange);
     cursor: pointer;
 }
