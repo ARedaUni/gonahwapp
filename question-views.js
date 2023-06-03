@@ -54,7 +54,7 @@ class SAQuestionView {
             return this.HTML.root;
         }
 
-        if (this.data.answer === this.input.getValue()) {
+        if (this.data.hasAnswered()) {
             this.complete();
         }
         return this.HTML.root;

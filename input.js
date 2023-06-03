@@ -24,7 +24,7 @@ class Input {
             // Button
             this.HTML.button = document.createElement("button");
             this.HTML.button.innerText = ">";
-            this.HTML.button.addEventListener("click", e => this.view.update());
+            this.HTML.button.addEventListener("click", Input._onSubmit);
             this.HTML.root.appendChild(this.HTML.button);
 
             // RTL
@@ -50,6 +50,10 @@ class Input {
         this.HTML.button.setAttribute("hidden", "");
     }
 
+
+    static _onSubmit(e) {
+        // call view's update
+    }
 
     static _lastIsSpace(e) {
         const value = e.target.input.getValue();
