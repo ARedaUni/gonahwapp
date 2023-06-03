@@ -13,14 +13,8 @@ const svowel = {
 
 const questionData = [
      new SAQuestionState("ما هذا؟", "هذا بيت",
-        "img/house.png", "Translate 'this is a house' to Arabic",
-        {lang: "ar", svowels: false},
-        {
-            letters: true,
-            space: true,
-            single: false,
-            double: false,
-        }),
+        "./img/house.png", "Translate 'this is a house' to Arabic",
+        {lang: "ar", svowels: false}),
     new SVQuestionState("What are the four signs of رفع?",
         [`${svowel.DAMMA}`, "و", "ا", "ن"],
         "Select while holding ctrl to multiselect!",

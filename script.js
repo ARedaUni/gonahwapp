@@ -7,7 +7,11 @@ function loadQuestions() {
         if (q instanceof SVQuestionState) {
             let qv = new SVQuestionView(q);
             questionViews.push(qv);
-            root = qv.render(true);
+            root = qv.update(true);
+        } else if (q instanceof SAQuestionState) {
+            let qv = new SAQuestionView(q);
+            questionViews.push(qv);
+            root = qv.update(true);
         } else {
             let errorMsg = `Type ${q.constructor.name} is not supported!`;
             console.error(errorMsg);
