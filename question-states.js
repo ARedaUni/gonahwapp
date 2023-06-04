@@ -13,8 +13,9 @@ class SAQuestionState {
 
     try(value) {
         let correct = this.verify(value);
-        this.attempts.push({correct, value});
-        return correct;
+        let trial = {correct, value};
+        this.attempts.push(trial);
+        return trial;
     }
 
     verify(value) {
