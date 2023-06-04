@@ -184,6 +184,12 @@ class SVowelsQuestionView {
                 letter.innerText = skeleton_letters[i];
                 this.HTML.skeleton.appendChild(letter);
             }
+
+            this.HTML.hint = document.createElement("p");
+            this.HTML.hint.className = "hint";
+            this.HTML.hint.innerText = "You can select a letter by clicking on it!";
+            this.HTML.root.appendChild(this.HTML.hint);
+
             this.HTML.root.appendChild(this.HTML.skeleton);
 
             this.keyboard = new Keyboard();
