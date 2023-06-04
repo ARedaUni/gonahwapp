@@ -24,6 +24,7 @@ class Input {
             // Button
             this.HTML.button = document.createElement("button");
             this.HTML.button.innerText = ">";
+            this.HTML.button.input = this;
             this.HTML.button.addEventListener("click", Input._onSubmit);
             this.HTML.root.appendChild(this.HTML.button);
 
@@ -52,7 +53,12 @@ class Input {
 
 
     static _onSubmit(e) {
-        // call view's update
+        const input = e.target.input;
+        const view = input.view;
+        if (input.getValue() === input.data.answer) {
+            view.complete();
+            return;
+        }
     }
 
     static _lastIsSpace(e) {
