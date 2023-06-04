@@ -8,11 +8,15 @@ const QuestionViewHelper = {
     },
 
     defaultPrompt(view) {
-        // Create prompt
         view.HTML.prompt = document.createElement("p");
         let promptNode = document.createTextNode(view.data.prompt);
         view.HTML.prompt.appendChild(promptNode);
         view.HTML.root.appendChild(view.HTML.prompt);
+    },
+
+    defaultQuestion(view) {
+        this.init(view);
+        this.defaultPrompt(view);
 
         // Create feedback
         view.HTML.feedback = document.createElement("span");
@@ -38,8 +42,7 @@ class SAQuestionView {
 
     update(init=false) {
         if (init) {
-            QuestionViewHelper.init(this);
-            QuestionViewHelper.defaultPrompt(this);
+            QuestionViewHelper.defaultQuestion(this);
             if (this.data.image) {
                 this.HTML.img = document.createElement("img");
                 this.HTML.img.src = this.data.image;                
@@ -96,14 +99,31 @@ class SVQuestionView {
 
     update(init=false) {
         if (init) {
-            QuestionViewHelper.init(this);
-            QuestionViewHelper.defaultPrompt(this);            
+            QuestionViewHelper.defaultQuestion(this);            
             this.keyboard = Keyboard.setupForSV(this);
             this.HTML.root.appendChild(this.keyboard.HTML.root);
             return this.HTML.root;
         }
 
-        this.keyboard.update();
+        for (let key of this.keyboard.HTML.characterKeys) {
+            key.removeAttribute("active");
+        }
+        for (let key of this.keyboard.HTML.activeKeys) {
+            key.setAttribute("active", "");
+        }
+        for (let key of this.keyboard.HTML.greenKeys) {
+            key.setAttribute("correct", "");
+        }
+        for (let key of this.keyboard.HTML.redKeys) {
+            key.setAttribute("wrong", "");
+        }
+
+        if (this.keyboard.HTML.activeKeys.length > 0) {
+            this.keyboard.HTML.submitBtn.removeAttribute("disabled");
+        } else {
+            this.keyboard.HTML.submitBtn.setAttribute("disabled", "");
+        }
+    
         this.HTML.hint.innerText = this.keyboard.hint || this.data.hint;
         this._updateFeedback();                
 
@@ -129,7 +149,7 @@ class SVQuestionView {
                 fKey.className = "regular";
                 fKey.innerText =  OVERRIDE_LTR + key.innerText + " ";
                 this.HTML.feedback.appendChild(fKey);
-            }            
+            }
         } else if (this.data.lastAttempt) {
             for (let key of this.data.lastAttempt) {
                 let fKey = document.createElement("span");
@@ -138,5 +158,46 @@ class SVQuestionView {
                 this.HTML.feedback.appendChild(fKey);
             }
         }
+    }
+}
+
+class SVowelsQuestionView {
+    static flag = {
+        CORRECT: 0,
+        WRONG_PLACE: 1,
+        NOT_FOUND: 2
+    }
+
+    constructor(data) {
+        this.data = data;
+    }
+
+    update(init=false) {
+        if (init) {
+            QuestionViewHelper.init(this);
+            QuestionViewHelper.defaultPrompt(this);
+            this.HTML.skeleton = document.createElement("div");
+            this.HTML.skeleton.className = "svowel-skeleton";
+            const skeleton_letters = this.data.skeleton.split("");
+            for (let i = 0; i < skeleton_letters.length; i++) {
+                let letter = document.createElement("span");
+                letter.innerText = skeleton_letters[i];
+                this.HTML.skeleton.appendChild(letter);
+            }
+            this.HTML.root.appendChild(this.HTML.skeleton);
+
+            this.keyboard = new Keyboard();
+            this.keyboard.selected = 0;
+            this.keyboard.addShortVowels(() => {}, true, true);
+            this.keyboard.addSubmitButton(() => {}, this.keyboard.HTML.svowelRow);
+            this.HTML.root.append(this.keyboard.HTML.root);
+        }
+
+        for (let letter of this.HTML.skeleton.children) {
+            // Feedback goes here
+        }
+        this.HTML.skeleton.children[this.keyboard.selected].className = "regular";
+
+        return this.HTML.root;
     }
 }

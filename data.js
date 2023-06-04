@@ -23,5 +23,5 @@ const questionData = [
             single: true, // single harakat
             double: false, // tanween
         }),
-    new SVowelsQuestionState("هَذَا بَيتٌ"),
+    new SVowelsQuestionState("هَذَاْ بَيْتٌ"),
 ];

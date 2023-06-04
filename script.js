@@ -12,6 +12,10 @@ function loadQuestions() {
             let qv = new SAQuestionView(q);
             questionViews.push(qv);
             root = qv.update(true);
+        } else if (q instanceof SVowelsQuestionState) {
+            let qv = new SVowelsQuestionView(q);
+            questionViews.push(qv);
+            root = qv.update(true);
         } else {
             let errorMsg = `Type ${q.constructor.name} is not supported!`;
             console.error(errorMsg);

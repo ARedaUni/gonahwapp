@@ -67,12 +67,14 @@ class SVowelsQuestionState {
     // Assume sukoon if no harakah
     constructor(answer) {
         this.answer = answer;
-        this.prompt = SVowelsQuestionState.getSkeleton(this.answer);
+        this.prompt = "Insert the correct vowels";
+        this.skeleton = SVowelsQuestionState.getSkeleton(this.answer);
         this.attempts = [];
     }
 
     static getSkeleton(text) {
-        // TODO: Remove svwoels then return
+        const vowels = Object.values(svowel).map(v => v[0]);
+        return text.split("").filter(x => vowels.indexOf(x) === -1).join("");
     }
 
     try(value) {
