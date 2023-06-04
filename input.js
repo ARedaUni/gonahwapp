@@ -73,7 +73,7 @@ class Input {
         const nextChar = t.value[t.selectionStart];
         const isSpecial = e.key === "Backspace" ||
             e.key.indexOf("Arrow") !== -1 ||
-            e.key === " " || e.key.ctrlKey;
+            e.key === " " || e.ctrlKey;
         if (e.key === "Enter") {
             input.HTML.button.click();
             return;
