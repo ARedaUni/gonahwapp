@@ -25,7 +25,6 @@ class SAQuestionState {
     hasAnswered() {
         return this.attempts.some(x => x.value === this.answer);
     }
-
 }
 
 class SVQuestionState {
@@ -61,5 +60,29 @@ class SVQuestionState {
 
     get lastAttempt() {
         return this.attempts[this.attempts.length - 1];
+    }
+}
+
+class SVowelsQuestionState {
+    // Assume sukoon if no harakah
+    constructor(answer) {
+        this.answer = answer;
+        this.prompt = SVowelsQuestionState.getSkeleton(this.answer);
+        this.attempts = [];
+    }
+
+    static getSkeleton(text) {
+        // TODO: Remove svwoels then return
+    }
+
+    try(value) {
+        let correct = this.verify(value);
+        let trial = {correct, value};
+        this.attempts.push(trial);
+        return trial;
+    }
+
+    verify(value) {
+        return value === this.answer;
     }
 }

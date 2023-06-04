@@ -23,10 +23,5 @@ const questionData = [
             single: true, // single harakat
             double: false, // tanween
         }),
-    // {
-    //     type: "svowels",
-    //     prompt: "هذا بيت",
-    //     answers: [svowel.FATHA, svowel.FATHA, svowel.SUKOON, svowel.FATHA, svowel.SUKOON, svowel.DAMMATAN],
-    //     spoiler: true,
-    // },
+    new SVowelsQuestionState("هَذَا بَيتٌ"),
 ];
