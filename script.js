@@ -33,4 +33,4 @@ window.addEventListener("resize", setVW);
 
 let questionViews = [];
 loadQuestions();
-setVW();
+window.onload = setVW;
