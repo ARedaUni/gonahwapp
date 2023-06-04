@@ -56,6 +56,26 @@ class SAQuestionView {
 
         if (this.data.hasAnswered()) {
             this.complete();
+        } else {
+            this.HTML.feedback.innerHTML = "";
+            for (let {flag, value} of this.input.valueFlags) {
+                let fValue = document.createElement("span");
+                fValue.innerText = value + " ";
+                switch (flag) {
+                    case Input.flag.CORRECT:
+                        fValue.className = "correct";
+                        break;
+                    case Input.flag.WRONG_PLACE:
+                        fValue.className = "close";
+                        break;
+                    case Input.flag.NOT_FOUND:
+                        fValue.className = "wrong";
+                        break;
+                    default:
+                        console.error(`Flag ${flag} is not recognized`);
+                }
+                this.HTML.feedback.appendChild(fValue);
+            }
         }
         return this.HTML.root;
     }

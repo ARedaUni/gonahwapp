@@ -1,6 +1,7 @@
 /* Reset CSS (basically) */
 :root {
     --orange: #e86420;
+    --yellow: #e8d920;
     --banner-color: #252525;
     --bg-color: #292929;
     --regular: #4ba8da;
@@ -80,6 +81,10 @@ img {
 
 .hint {
     color: var(--orange);
+}
+
+.close {
+    color: var(--yellow);
 }
 
 .correct {

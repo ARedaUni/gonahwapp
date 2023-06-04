@@ -1,6 +1,12 @@
 "use strict";
 
 class Input {
+    static flag = {
+        CORRECT: 0,
+        WRONG_PLACE: 1,
+        NOT_FOUND: 2
+    }
+
     constructor(view) {
         this.view = view;
         this.data = view.data;
@@ -55,10 +61,26 @@ class Input {
     static _onSubmit(e) {
         const input = e.target.input;
         const view = input.view;
-        if (input.getValue() === input.data.answer) {
-            view.complete();
+        const value = input.getValue();
+        if (input.data.try(value).correct) {
+            view.update();
             return;
         }
+
+        // Basically Wordle
+        input.valueFlags = value.split(" ").map(value => {return {flag: null, value};});
+        const answerWords = input.data.answer.split(" ");
+        for (let x = 0; x < input.valueFlags.length; ++x) {
+            const vw = input.valueFlags[x].value;
+            if (vw === answerWords[x]) {
+                input.valueFlags[x].flag = Input.flag.CORRECT;
+            } else if (answerWords.some(aw => aw === vw)) {
+                input.valueFlags[x].flag = Input.flag.WRONG_PLACE;
+            } else {
+                input.valueFlags[x].flag = Input.flag.NOT_FOUND;
+            }
+        }
+        view.update();
     }
 
     static _lastIsSpace(e) {
