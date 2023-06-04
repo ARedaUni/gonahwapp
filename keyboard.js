@@ -66,9 +66,7 @@ class Keyboard {
     static _onSVClick(e) {
         const kb = e.target.keyboard;
         kb.hint = null;
-        if (!e.ctrlKey) {
-            kb.HTML.activeKeys = [e.target];
-        } else {
+        if (e.ctrlKey || e.metaKey) {
             let index = kb.HTML.activeKeys.indexOf(e.target);
             if (index === -1) {
                 let answersLeft = kb.data.answersLeft();
@@ -81,6 +79,8 @@ class Keyboard {
             else {
                 kb.HTML.activeKeys.splice(index, 1);
             }
+        } else {
+            kb.HTML.activeKeys = [e.target];
         }
 
         kb.view.update();
