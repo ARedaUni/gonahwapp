@@ -61,7 +61,7 @@ class Input {
     static _onSubmit(e) {
         const input = e.target.input;
         const view = input.view;
-        const value = input.getValue();
+        const value = input.getValue().trim();
         if (input.data.try(value).correct) {
             view.update();
             return;
