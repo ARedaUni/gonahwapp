@@ -176,6 +176,13 @@ class SVowelsQuestionView {
         if (init) {
             QuestionViewHelper.init(this);
             QuestionViewHelper.defaultPrompt(this);
+
+            this.keyboard = new Keyboard();
+            this.keyboard.view = this;
+            this.keyboard.selectedIndex = 0;
+            this.keyboard.addShortVowels(() => {}, true, true);
+            this.keyboard.addSubmitButton(() => {}, this.keyboard.HTML.svowelRow);
+
             this.HTML.skeleton = document.createElement("div");
             this.HTML.skeleton.className = "svowel-skeleton";
             const skeleton_letters = this.data.skeleton.split("");
@@ -183,26 +190,30 @@ class SVowelsQuestionView {
                 let letter = document.createElement("span");
                 letter.innerText = skeleton_letters[i];
                 this.HTML.skeleton.appendChild(letter);
+                if (letter.innerText === " ") continue;
+                letter.classList.add("svowel-skeleton-letter");
+                letter.index = i;
+                letter.view = this;
+                letter.addEventListener("click", (e) => {
+                    e.target.view.keyboard.selectedIndex = e.target.index;
+                    e.target.view.update();
+                });
             }
 
             this.HTML.hint = document.createElement("p");
             this.HTML.hint.className = "hint";
             this.HTML.hint.innerText = "You can select a letter by clicking on it!";
+
+
             this.HTML.root.appendChild(this.HTML.hint);
-
             this.HTML.root.appendChild(this.HTML.skeleton);
-
-            this.keyboard = new Keyboard();
-            this.keyboard.selected = 0;
-            this.keyboard.addShortVowels(() => {}, true, true);
-            this.keyboard.addSubmitButton(() => {}, this.keyboard.HTML.svowelRow);
-            this.HTML.root.append(this.keyboard.HTML.root);
+            this.HTML.root.appendChild(this.keyboard.HTML.root);
         }
 
         for (let letter of this.HTML.skeleton.children) {
-            // Feedback goes here
+            letter.classList.remove("regular");
         }
-        this.HTML.skeleton.children[this.keyboard.selected].className = "regular";
+        this.HTML.skeleton.children[this.keyboard.selectedIndex].classList.add("regular");
 
         return this.HTML.root;
     }
