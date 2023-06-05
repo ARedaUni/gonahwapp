@@ -113,6 +113,7 @@ img {
 }
 
 .svowel-skeleton-letter {
+    cursor: pointer;
     transition: color .2s;
 }
 
