@@ -158,12 +158,13 @@ button {
     border-top-right-radius: 50%;
     border-bottom-right-radius: 50%;
     width: 1.5em;
-    background-color: var(--orange);
-    border: 2px var(--orange) solid;
+    background-color: var(--regular);
+    border: 2px var(--regular) solid;
     color: var(--main-text-color);
     height: 1.4em;
     font-size: inherit;
     cursor: pointer;
+    font-weight: bold;
 }
 
 .arabic-keyboard div {
