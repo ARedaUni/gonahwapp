@@ -180,7 +180,13 @@ class SVowelsQuestionView {
             this.keyboard = new Keyboard();
             this.keyboard.view = this;
             this.keyboard.selectedIndex = 0;
-            this.keyboard.addShortVowels(() => {}, true, true);
+            this.keyboard.HTML.activeKeys = {};
+            this.keyboard.addShortVowels((e) => {
+                const kb = e.target.keyboard;
+                const button = e.target;
+                kb.HTML.activeKeys[kb.selectedIndex++] = button;
+                kb.view.update();
+            }, true, true);
             this.keyboard.addSubmitButton(() => {}, this.keyboard.HTML.svowelRow);
 
             this.HTML.skeleton = document.createElement("div");
@@ -210,11 +216,37 @@ class SVowelsQuestionView {
             this.HTML.root.appendChild(this.keyboard.HTML.root);
         }
 
-        for (let letter of this.HTML.skeleton.children) {
+        if (!init) {
+            this._resetToSkeleton();
+        }
+
+        for (let i = 0; i < this.HTML.skeleton.children.length; ++i) {
+            const letter = this.HTML.skeleton.children[i];
+            let svowel;
+            if (svowel = this.keyboard.HTML.activeKeys[i]) {
+                letter.innerText += svowel.innerText[0];
+            }
             letter.classList.remove("regular");
         }
+
+        for (let key of this.keyboard.HTML.characterKeys) {
+            key.removeAttribute("active");
+        }
+
         this.HTML.skeleton.children[this.keyboard.selectedIndex].classList.add("regular");
+        let activeKey;
+        if (activeKey = this.keyboard.HTML.activeKeys[this.keyboard.selectedIndex]) {
+            activeKey.setAttribute("active", "");
+        }
 
         return this.HTML.root;
+    }
+
+    _resetToSkeleton() {
+        let skeleton_letters = this.data.skeleton.split("");
+        for (let i = 0; i < this.HTML.skeleton.children.length; ++i) {
+            const letter = this.HTML.skeleton.children[i];
+            letter.innerText = skeleton_letters[i];
+        }
     }
 }
