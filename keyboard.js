@@ -63,6 +63,23 @@ class Keyboard {
         input.setValue(value + " ");
     }
 
+    static _onSABackspaceClick(e) {
+        const kb = e.target.keyboard;
+        const input = kb.input;
+        let value = input.getValue();
+        if (value.length === 0) return;
+
+        if (value[value.length - 1] === " ") {
+            kb.HTML.spaceRow.space.removeAttribute("active");
+        }
+
+        input.setValue(value.slice(0, value.length - 1));
+        value = input.getValue();
+        if (value[value.length - 1] === " ") {
+            kb.HTML.spaceRow.space.setAttribute("active", "");
+        }
+    }
+
     static _onSVClick(e) {
         const kb = e.target.keyboard;
         kb.hint = null;
