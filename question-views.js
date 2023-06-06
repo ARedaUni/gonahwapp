@@ -89,6 +89,7 @@ class SAQuestionView {
         this.HTML.feedback.className = "feedback correct";
         this.keyboard.hide();
         this.input.hide();
+        this.HTML.hint.setAttribute("hidden", "");
     }
 }
 
@@ -137,7 +138,7 @@ class SVQuestionView {
     complete() {
         this.keyboard.hide();
         this.HTML.hint.className = "correct";
-        this.HTML.hint.innerText = this.data.answers.join(" ");
+        this.HTML.hint.innerText = this.data.answers.join(" ") + " ✅";
     }
 
     _updateFeedback() {
@@ -162,12 +163,6 @@ class SVQuestionView {
 }
 
 class SVowelsQuestionView {
-    static flag = {
-        CORRECT: 0,
-        WRONG_PLACE: 1,
-        NOT_FOUND: 2
-    }
-
     constructor(data) {
         this.data = data;
     }
@@ -183,11 +178,38 @@ class SVowelsQuestionView {
             this.keyboard.HTML.activeKeys = {};
             this.keyboard.addShortVowels((e) => {
                 const kb = e.target.keyboard;
+                const view = kb.view;
                 const button = e.target;
-                kb.HTML.activeKeys[kb.selectedIndex++] = button;
+                if (kb.HTML.activeKeys[kb.selectedIndex] === button) return;
+                kb.view.HTML.skeleton.children[kb.selectedIndex].flag = null;
+                kb.HTML.activeKeys[kb.selectedIndex] = button;
+                kb.view.next();
                 kb.view.update();
             }, true, true);
-            this.keyboard.addSubmitButton(() => {}, this.keyboard.HTML.svowelRow);
+            this.keyboard.addSubmitButton((e) => {
+                const kb = e.target.keyboard;
+                const view = kb.view;
+                let spacesSkipped = 0;
+                for (let i = 0; i < view.HTML.skeleton.children.length; ++i) {
+                    const el = view.HTML.skeleton.children[i];
+                    const ans = el.innerText;
+                    el.className = "svowel-skeleton-letter";
+                    if (ans.length > 1) {
+                        const correspondingSV = view.data.getShortVowel(i - spacesSkipped);
+                        if (ans[1] === correspondingSV) {
+                            el.flag = "correct";
+                        } else if (svowel.toggleTanween(ans[1]) === correspondingSV) {
+                            el.flag = "close";
+                        } else {
+                            el.flag = "wrong";
+                        }
+                    } else {
+                        spacesSkipped++;
+                    }
+                }
+                view.data.try(Array.from(view.HTML.skeleton.children).map(x => x.innerText).join(""));
+                view.update();
+            }, this.keyboard.HTML.svowelRow);
 
             this.HTML.skeleton = document.createElement("div");
             this.HTML.skeleton.className = "svowel-skeleton";
@@ -200,10 +222,7 @@ class SVowelsQuestionView {
                 letter.classList.add("svowel-skeleton-letter");
                 letter.index = i;
                 letter.view = this;
-                letter.addEventListener("click", (e) => {
-                    e.target.view.keyboard.selectedIndex = e.target.index;
-                    e.target.view.update();
-                });
+                letter.addEventListener("click", SVowelsQuestionView._onLetterClick);
             }
 
             this.HTML.hint = document.createElement("p");
@@ -216,10 +235,21 @@ class SVowelsQuestionView {
             this.HTML.root.appendChild(this.keyboard.HTML.root);
         }
 
+        if (this.HTML.skeleton.children[this.keyboard.selectedIndex].flag === "correct") {
+            if (this.data.lastAttempt.correct) {
+                this.complete();
+                return;
+            } else {
+                this.next();
+                this.update();
+            }
+        }
+
         if (!init) {
             this._resetToSkeleton();
         }
-
+        this.keyboard.HTML.submitBtn.setAttribute("hidden", "");
+        this.keyboard.HTML.submitBtn.setAttribute("disabled", "");
         for (let i = 0; i < this.HTML.skeleton.children.length; ++i) {
             const letter = this.HTML.skeleton.children[i];
             let svowel;
@@ -227,6 +257,17 @@ class SVowelsQuestionView {
                 letter.innerText += svowel.innerText[0];
             }
             letter.classList.remove("regular");
+
+            if (letter.flag === "correct") {
+                letter.classList.add("correct");
+                letter.removeEventListener("click", SVowelsQuestionView._onLetterClick);
+            } else if (letter.flag === "close") {
+                letter.classList.add("close");
+            } else if (letter.flag === "wrong") {
+                letter.classList.add("wrong");
+            } else {
+                letter.className = "svowel-skeleton-letter";
+            }
         }
 
         for (let key of this.keyboard.HTML.characterKeys) {
@@ -239,7 +280,43 @@ class SVowelsQuestionView {
             activeKey.setAttribute("active", "");
         }
 
+        if (this.canSubmit()) {
+            this.keyboard.HTML.submitBtn.removeAttribute("hidden");
+            this.keyboard.HTML.submitBtn.removeAttribute("disabled");
+        }
+
         return this.HTML.root;
+    }
+
+    next() {
+        this.keyboard.selectedIndex++;
+        if (this.keyboard.selectedIndex >= this.HTML.skeleton.children.length) {
+            this.keyboard.selectedIndex = 0;
+        }
+        if (this.HTML.skeleton.children[this.keyboard.selectedIndex].innerText === " ") {
+            this.keyboard.selectedIndex++;
+        }
+    }
+
+    canSubmit() {
+        for (let letterSpan of this.HTML.skeleton.children) {
+            const text = letterSpan.innerText;
+            if (text.length === 1 && text !== " ") return false;
+        }
+        return true;
+    }
+
+    complete() {
+        let check = document.createElement("span");
+        check.innerText = `${this.data.answer} ✅`;
+        check.className = "correct";
+        this.HTML.skeleton.innerHTML = "";
+        this.HTML.skeleton.appendChild(check);
+        this.keyboard.hide();
+        this.HTML.hint.setAttribute("hidden", "");
+        for (let letter of this.HTML.skeleton.children) {
+            letter.removeEventListener("click", SVowelsQuestionView._onLetterClick);
+        }
     }
 
     _resetToSkeleton() {
@@ -248,5 +325,10 @@ class SVowelsQuestionView {
             const letter = this.HTML.skeleton.children[i];
             letter.innerText = skeleton_letters[i];
         }
+    }
+
+    static _onLetterClick(e) {
+        e.target.view.keyboard.selectedIndex = e.target.index;
+        e.target.view.update();
     }
 }

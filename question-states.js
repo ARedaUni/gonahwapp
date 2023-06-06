@@ -73,7 +73,7 @@ class SVowelsQuestionState {
     }
 
     static getSkeleton(text) {
-        const vowels = Object.values(svowel).map(v => v[0]);
+        const vowels = svowel.getVowels();
         return text.split("").filter(x => vowels.indexOf(x) === -1).join("");
     }
 
@@ -86,5 +86,23 @@ class SVowelsQuestionState {
 
     verify(value) {
         return value === this.answer;
+    }
+
+    getShortVowel(index) {
+        const vowels = svowel.getVowels();
+        let curr = -1;
+        for (let i = 0; i < this.answer.length; ++i) {
+            if (vowels.some(x => x === this.answer[i])) {
+                curr++;
+                if (curr === index) {
+                    return this.answer[i];
+                }
+            }
+        }
+        return curr;
+    }
+
+    get lastAttempt() {
+        return this.attempts[this.attempts.length - 1];
     }
 }

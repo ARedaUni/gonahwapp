@@ -87,6 +87,21 @@ img {
     color: var(--yellow);
 }
 
+.svowel-skeleton-letter.close {
+    outline: 1px solid var(--yellow);
+    color: var(--yellow) !important;
+}
+
+.svowel-skeleton-letter.wrong {
+    outline: 1px solid var(--wrong);
+    color: var(--wrong) !important;
+}
+
+.svowel-skeleton-letter.correct {
+    color: var(--correct) !important;
+    cursor: default;
+}
+
 .correct {
     color: var(--correct);
 }
