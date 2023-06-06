@@ -57,7 +57,7 @@ class SAQuestionView {
             return this.HTML.root;
         }
 
-        if (this.data.hasAnswered()) {
+        if (this.data.hasAnsweredSkeleton()) {
             this.complete();
         } else {
             this.HTML.feedback.innerHTML = "";
@@ -84,12 +84,25 @@ class SAQuestionView {
     }
 
     complete() {
-        const answer = this.data.answer;
+        const answer = this.data.skeletonAnswer;
         this.HTML.feedback.innerText = `✅ ${answer}`;
         this.HTML.feedback.className = "feedback correct";
         this.keyboard.hide();
         this.input.hide();
         this.HTML.hint.setAttribute("hidden", "");
+
+        if (this.data.input.svowels) {
+            const parent = this.HTML.root.parentElement;
+            let qs = new SVowelsQuestionState(this.data.answer);
+            let qv = new SVowelsQuestionView(qs);
+            questionViews.push(qv);
+            let ref;
+            if (ref = this.HTML.root.nextElementSibling) {
+                parent.insertBefore(qv.update(true), ref);
+            } else {
+                parent.appendChild(qv.update(true));
+            }
+        }
     }
 }
 

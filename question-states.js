@@ -8,6 +8,7 @@ class SAQuestionState {
         this.image = image;
         this.hint = hint;
         this.answer = answer;
+        this.skeletonAnswer = Util.getSkeleton(answer);
         this.attempts = [];
     }
 
@@ -22,8 +23,8 @@ class SAQuestionState {
         return value === this.answer;
     }
 
-    hasAnswered() {
-        return this.attempts.some(x => x.value === this.answer);
+    hasAnsweredSkeleton() {
+        return this.attempts.some(x => x.value === this.skeletonAnswer);
     }
 }
 
@@ -68,13 +69,8 @@ class SVowelsQuestionState {
     constructor(answer) {
         this.answer = answer;
         this.prompt = "Insert the correct vowels";
-        this.skeleton = SVowelsQuestionState.getSkeleton(this.answer);
+        this.skeleton = Util.getSkeleton(this.answer);
         this.attempts = [];
-    }
-
-    static getSkeleton(text) {
-        const vowels = svowel.getVowels();
-        return text.split("").filter(x => vowels.indexOf(x) === -1).join("");
     }
 
     try(value) {
@@ -104,5 +100,12 @@ class SVowelsQuestionState {
 
     get lastAttempt() {
         return this.attempts[this.attempts.length - 1];
+    }
+}
+
+class Util {
+    static getSkeleton(text) {
+        const vowels = svowel.getVowels();
+        return text.split("").filter(x => vowels.indexOf(x) === -1).join("");
     }
 }

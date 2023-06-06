@@ -31,9 +31,6 @@ class Keyboard {
         kb.view = view;
         kb.data = view.data;
         kb.input = view.input;
-        kb.addShortVowels(
-            Keyboard._SAClick,
-            view.data.input.svowels, view.data.input.svowels);
         kb.addLetters(Keyboard._onSAClick);
         kb.addSpaceButton(Keyboard._onSASpaceClick);
         kb.addBackspaceButton(Keyboard._onSABackspaceClick);

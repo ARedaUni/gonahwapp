@@ -69,7 +69,7 @@ class Input {
 
         // Basically Wordle
         input.valueFlags = value.split(" ").map(value => {return {flag: null, value};});
-        const answerWords = input.data.answer.split(" ");
+        const answerWords = input.data.skeletonAnswer.split(" ");
         for (let x = 0; x < input.valueFlags.length; ++x) {
             const vw = input.valueFlags[x].value;
             if (vw === answerWords[x]) {
@@ -108,11 +108,7 @@ class Input {
         }
 
         if (input.data.input.lang === "ar" && !isSpecial) {
-            if (input.data.input.svowels) {
-                if (!(e.key >= "ء" && e.key <= svowel.SUKOON[0])) {
-                    e.preventDefault();
-                }
-            } else if (!(e.key >= "ء" && e.key <= "ي")) {
+            if (!(e.key >= "ء" && e.key <= "ي")) {
                 e.preventDefault();
             }
         }
