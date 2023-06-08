@@ -35,6 +35,10 @@ body {
     height: 10vh;
 }
 
+h1 {
+    font-weight: 400;
+}
+
 #questions {
     text-align: center;
     width: calc(50 * var(--vw));

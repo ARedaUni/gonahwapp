@@ -94,6 +94,7 @@ class SAQuestionView {
         if (this.data.input.svowels) {
             const parent = this.HTML.root.parentElement;
             let qs = new SVowelsQuestionState(this.data.answer);
+            questionData.push(qs);
             let qv = new SVowelsQuestionView(qs);
             questionViews.push(qv);
             let ref;
@@ -189,35 +190,53 @@ class SVowelsQuestionView {
             this.keyboard.view = this;
             this.keyboard.selectedIndex = 0;
             this.keyboard.HTML.activeKeys = {};
+            this.keyboard.HTML.shadda = {};
             this.keyboard.addShortVowels((e) => {
                 const kb = e.target.keyboard;
                 const view = kb.view;
                 const button = e.target;
                 if (kb.HTML.activeKeys[kb.selectedIndex] === button) return;
                 kb.view.HTML.skeleton.children[kb.selectedIndex].flag = null;
-                kb.HTML.activeKeys[kb.selectedIndex] = button;
-                kb.view.next();
+                if (button.innerText !== svowel.SHADDA) {
+                    kb.HTML.activeKeys[kb.selectedIndex] = button;
+                    kb.view.next();
+                } else {
+                    if (kb.HTML.shadda[kb.selectedIndex] === button) {
+                        kb.HTML.shadda[kb.selectedIndex] = null;
+                    } else {
+                        kb.HTML.shadda[kb.selectedIndex] = button;
+                    }
+                }
                 kb.view.update();
             }, true, true);
             this.keyboard.addSubmitButton((e) => {
                 const kb = e.target.keyboard;
                 const view = kb.view;
-                let spacesSkipped = 0;
+                const answerLetterPacks = Util.getLetterPacks(kb.view.data.answer);
                 for (let i = 0; i < view.HTML.skeleton.children.length; ++i) {
                     const el = view.HTML.skeleton.children[i];
-                    const ans = el.innerText;
-                    el.className = "svowel-skeleton-letter";
-                    if (ans.length > 1) {
-                        const correspondingSV = view.data.getShortVowel(i - spacesSkipped);
-                        if (ans[1] === correspondingSV) {
+                    let value = el.innerText.slice(1);
+                    let ans = answerLetterPacks[i].slice(1);
+                    if (value.length === 2) {
+                        let vShaddaIndex = value.indexOf(svowel.SHADDA[0]);
+                        let aShaddaIndex = ans.indexOf(svowel.SHADDA[0]);
+                        if (aShaddaIndex === -1) {
+                            el.flag = "wrong";
+                            continue;
+                        }
+                        // Remove shadda
+                        value = vShaddaIndex === 0 ? value[1] : value[0];
+                        ans = aShaddaIndex === 0 ? ans[1] : ans[0];
+                    }
+
+                    if (value.length === 1) {
+                        if (value === ans) {
                             el.flag = "correct";
-                        } else if (svowel.toggleTanween(ans[1]) === correspondingSV) {
+                        } else if (svowel.toggleTanween(value) === ans) {
                             el.flag = "close";
                         } else {
                             el.flag = "wrong";
                         }
-                    } else {
-                        spacesSkipped++;
                     }
                 }
                 view.data.try(Array.from(view.HTML.skeleton.children).map(x => x.innerText).join(""));
@@ -269,6 +288,10 @@ class SVowelsQuestionView {
             if (svowel = this.keyboard.HTML.activeKeys[i]) {
                 letter.innerText += svowel.innerText[0];
             }
+            let shadda;
+            if (shadda = this.keyboard.HTML.shadda[i]) {
+                letter.innerText += shadda.innerText[0];
+            }
             letter.classList.remove("regular");
 
             if (letter.flag === "correct") {
@@ -293,6 +316,11 @@ class SVowelsQuestionView {
             activeKey.setAttribute("active", "");
         }
 
+        let shadda;
+        if (shadda = this.keyboard.HTML.shadda[this.keyboard.selectedIndex]) {
+            shadda.setAttribute("active" ,"");
+        }
+
         if (this.canSubmit()) {
             this.keyboard.HTML.submitBtn.removeAttribute("hidden");
             this.keyboard.HTML.submitBtn.removeAttribute("disabled");
@@ -312,9 +340,10 @@ class SVowelsQuestionView {
     }
 
     canSubmit() {
-        for (let letterSpan of this.HTML.skeleton.children) {
-            const text = letterSpan.innerText;
-            if (text.length === 1 && text !== " ") return false;
+        for (let i = 0; i < this.HTML.skeleton.children.length; ++i) {
+            const text = this.HTML.skeleton.children[i].innerText;
+            if (text === " ") continue;
+            if (this.keyboard.HTML.activeKeys[i] == undefined) return false;
         }
         return true;
     }

@@ -123,7 +123,7 @@ class Keyboard {
         this.HTML.svowelRow = document.createElement("div");
         let svowelRowChars = [];
         if (single)
-            svowelRowChars.push(svowel.DAMMA, svowel.FATHA, svowel.KASRA, svowel.SUKOON);
+            svowelRowChars.push(svowel.SHADDA, svowel.DAMMA, svowel.FATHA, svowel.KASRA, svowel.SUKOON);
         if (double)
             svowelRowChars.push(svowel.DAMMATAN, svowel.FATHATAN, svowel.KASRATAN);
         this._createButtons(onClick, svowelRowChars, this.HTML.svowelRow);

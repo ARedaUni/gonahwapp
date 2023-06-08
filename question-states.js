@@ -9,8 +9,9 @@ const svowel = {
     "KASRA": "\u0650\u25cc",
     "KASRATAN": "\u064d\u25cc",
     "SUKOON": "\u0652\u25cc",
+    "SHADDA": "\u0651\u25cc",
 
-    getVowels: () => Object.values(svowel).map(v => v[0]).slice(0,7),
+    getVowels: () => Object.values(svowel).map(v => v[0]).slice(0,8),
     toggleTanween: (x) => {
         const code = x.codePointAt(0);
         switch (code) {
@@ -18,8 +19,12 @@ const svowel = {
             case svowel.FATHATAN.codePointAt(0):
             case svowel.KASRATAN.codePointAt(0):
                 return String.fromCodePoint(code + 3);
-            default:
+            case svowel.DAMMA.codePointAt(0):
+            case svowel.FATHA.codePointAt(0):
+            case svowel.KASRA.codePointAt(0):
                 return String.fromCodePoint(code - 3);
+            default:
+                return x;
         }
     },
 };
@@ -105,21 +110,18 @@ class SVowelsQuestionState {
     }
 
     verify(value) {
-        return value === this.answer;
-    }
+        let vPacks = Util.getLetterPacks(value);
+        let aPacks = Util.getLetterPacks(this.answer);
+        for (let i = 0; i < vPacks.length; ++i) {
+            const vPack = vPacks[i];
+            const aPack = aPacks[i];
 
-    getShortVowel(index) {
-        const vowels = svowel.getVowels();
-        let curr = -1;
-        for (let i = 0; i < this.answer.length; ++i) {
-            if (vowels.some(x => x === this.answer[i])) {
-                curr++;
-                if (curr === index) {
-                    return this.answer[i];
-                }
-            }
+            if (!aPack) return false;
+            if (vPack[0] !== aPack[0]) return false;
+            if (vPack[1] !== aPack[1] && vPack[1] !== aPack[2]) return false;
+            if (vPack[2] !== aPack[1] && vPack[2] !== aPack[2]) return false;
         }
-        return curr;
+        return true;
     }
 
     get lastAttempt() {
@@ -131,5 +133,18 @@ class Util {
     static getSkeleton(text) {
         const vowels = svowel.getVowels();
         return text.split("").filter(x => vowels.indexOf(x) === -1).join("");
+    }
+
+    static getLetterPacks(text) {
+        let letters = [];
+        for (let i = 0; i < text.length; ++i) {
+            const c = text[i];
+            if (c === " " || (c >= "ء" && c <= "ي")) {
+                letters.push(c);
+            } else {
+                letters[letters.length - 1] += c;
+            }
+        }
+        return letters;
     }
 }

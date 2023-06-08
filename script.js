@@ -38,3 +38,9 @@ window.addEventListener("resize", setVW);
 let questionViews = [];
 loadQuestions();
 window.onload = setVW;
+
+const titleEl = document.getElementById("title");
+titleEl.innerText = title;;
+if (titleRtl) {
+    titleEl.setAttribute("rtl", "");
+}
