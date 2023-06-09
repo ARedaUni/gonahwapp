@@ -7,35 +7,14 @@ Why not use Anki?
 3. I like to review questions when I want to and at my own pace. I personally found that spaced repition becomes too long, tedious, annoying, and yielding little benefit when it eventually just throws random questions out of random decks without any context. Memory requires context!
 4. I don't have to learn how to write plugins. Just Javascript all my problems away! (That's an oxymoron but it works.)
 
-I hope to update my engine as I begin to ask different questions, but that may eventually lead to old quizzes breaking, and thus I plan to start a new repo for every quiz. However, I may merge quizzes every now and then. Below is the quiz engine version in case you'd like to make your own quiz and you want to use the latest version.
-
 **Amr's Quiz Engine: v0.0.5 (MASTER).**
 
 # Arabic
 
-I found a [free course on SeekersGuidance](https://academy.seekersguidance.org/enrol/index.php?id=126), and I'll be writing my quizzes as I progress through the course inshallah. Feel free to follow along!
+I found a [free pathway](https://arabic.naveeraashraf.com/), and I'll be writing my quizzes as I progress through the pathway inshallah. Feel free to follow along!
 
-- [ ] Lesson 1
-- [ ] Lesson 2
-- [ ] Lesson 3
-- [ ] Lesson 4
-- [ ] Lesson 5
-- [ ] Lesson 6
-- [ ] Lesson 7
-- [ ] Lesson 8
-- [ ] Lesson 9
-- [ ] Lesson 10
-- [ ] Lesson 11
-- [ ] Lesson 12
-
-# Planned Quiz features
-
-- [ ] Multiple choice
-- [ ] Short answer
-- [ ] I'rab questions (given a sentence, mark the endings of each word)
-- [ ] Refactor `Question` into `QuestionState` and `QuestionGenerator`
-- [ ] Refactor to include `PageState` and `PageGenerator` (the State types should be persistent)
-- [ ] Ability to generate + navigate different lessons
-- [ ] Button to display original hint
-- [ ] Button to expand previous attempts once a question is complete
-- [ ] Cache?
+- [ ] Beginner
+    - [ ] Course 1
+    - [ ] Course 2
+    - [ ] Course 3
+    - [ ] Course 4
