@@ -1,19 +1,139 @@
 "use strict";
 
-class Keyboard {
+const svowel = {
+    "DAMMA": "\u064f\u25cc",
+    "DAMMATAN": "\u064c\u25cc",
+    "FATHA": "\u064e\u25cc",
+    "FATHATAN": "\u064b\u25cc",
+    "KASRA": "\u0650\u25cc",
+    "KASRATAN": "\u064d\u25cc",
+    "SUKOON": "\u0652\u25cc",
+    "SHADDA": "\u0651\u25cc",
 
+    getVowels: () => Object.values(svowel).map(v => v[0]).slice(0,8),
+    toggleTanween: (x) => {
+        const code = x.codePointAt(0);
+        switch (code) {
+            case svowel.DAMMATAN.codePointAt(0):
+            case svowel.FATHATAN.codePointAt(0):
+            case svowel.KASRATAN.codePointAt(0):
+                return String.fromCodePoint(code + 3);
+            case svowel.DAMMA.codePointAt(0):
+            case svowel.FATHA.codePointAt(0):
+            case svowel.KASRA.codePointAt(0):
+                return String.fromCodePoint(code - 3);
+            default:
+                return x;
+        }
+    },
+};
+
+class Util {
+    static getSkeleton(text) {
+        const vowels = svowel.getVowels();
+        return text.split("").filter(x => vowels.indexOf(x) === -1).join("");
+    }
+
+    static getLetterPacks(text) {
+        let letters = [];
+        for (let i = 0; i < text.length; ++i) {
+            const c = text[i];
+            if (c === " " || (c >= "ء" && c <= "ي")) {
+                letters.push(c);
+            } else {
+                letters[letters.length - 1] += c;
+            }
+        }
+        return letters.map(x => Util._letterPackToObject(x));
+    }
+
+    static _letterPackToObject(letterPack) {
+        let packObject = {};
+        packObject.letter = letterPack[0];
+        if (letterPack[1] && letterPack[1] !== svowel.SHADDA[0]) {
+            packObject.svowel = letterPack[1];
+            if (letterPack[2] === svowel.SHADDA[0]) {
+                packObject.shadda = true;
+            } else {
+                packObject.shadda = false;
+            }
+        } else if (letterPack[2]) {
+            packObject.svowel = letterPack[2];
+            packObject.shadda = true;
+        }
+        return packObject;
+    }
+}
+
+
+const QuestionViewHelper = {
+    init(view) {
+        view.HTML = {};
+        view.HTML.root = document.createElement("div");
+        view.HTML.root.className = "question";
+    },
+
+    defaultPrompt(view) {
+        view.HTML.prompt = document.createElement("p");
+        let promptNode = document.createTextNode(view.data.prompt);
+        view.HTML.prompt.appendChild(promptNode);
+        view.HTML.root.appendChild(view.HTML.prompt);
+    },
+
+    defaultQuestion(view) {
+        this.init(view);
+        this.defaultPrompt(view);
+
+        // Create feedback
+        view.HTML.feedback = document.createElement("span");
+        view.HTML.feedback.className = "feedback";
+        view.HTML.prompt.appendChild(view.HTML.feedback);
+
+        // Create hint
+        view.HTML.hint = document.createElement("p");
+        view.HTML.hint.className = "hint";
+        view.hint = {};
+        view.HTML.root.appendChild(view.HTML.hint);
+
+        if (view.data.hint) {
+            view.HTML.hint.innerText = view.data.hint;
+        }
+    }
+}
+
+class Keyboard {
     constructor() {
         this.HTML = {};
         this.HTML.root = document.createElement("div");
         this.HTML.root.className = "arabic-keyboard";
         this.HTML.characterKeys = [];
+        this.HTML.activeKeys = [];
+        this.HTML.redKeys = [];
+        this.HTML.greenKeys = [];
+    }
+
+    update() {
+        for (let k of this.HTML.characterKeys) {
+            k.removeAttribute("active");
+            k.removeAttribute("wrong");
+            k.removeAttribute("correct");
+        }
+
+        for (let k of this.HTML.activeKeys) {
+            k.setAttribute("active", "");
+        }
+
+        for (let k of this.HTML.redKeys) {
+            k.setAttribute("wrong", "");
+        }
+
+        for (let k of this.HTML.greenKeys) {
+            k.setAttribute("correct", "");
+        }
     }
 
     static setupForSV(view) {
         let kb = new Keyboard();
-        kb.HTML.activeKeys = [];
-        kb.HTML.redKeys = [];
-        kb.HTML.greenKeys = [];
         kb.view = view;
         kb.data = view.data;
         kb.addShortVowels(
@@ -24,57 +144,6 @@ class Keyboard {
         }
         kb.addSubmitButton(Keyboard._onSVSubmit, kb.HTML.bottomRow);
         return kb;
-    }
-
-    static setupForSA(view) {
-        let kb = new Keyboard();
-        kb.view = view;
-        kb.data = view.data;
-        kb.input = view.input;
-        kb.addLetters(Keyboard._onSAClick);
-        kb.addSpaceButton(Keyboard._onSASpaceClick);
-        kb.addBackspaceButton(Keyboard._onSABackspaceClick);
-        return kb;
-    }
-
-    static _onSAClick(e) {
-        const text = e.target.innerText;
-        const kb = e.target.keyboard;
-        const input = kb.view.input;
-        // check if harakah or letter
-        input.setValue(input.getValue() + text);
-        kb.HTML.spaceRow.space.removeAttribute("active");
-    }
-
-    static _onSASpaceClick(e) {
-        const kb = e.target.keyboard;
-        const input = kb.input;
-        let value = input.getValue();
-
-        if (value[value.length - 1] === " ") {
-            kb.HTML.spaceRow.space.removeAttribute("active");
-            input.setValue(value.slice(0, value.length - 1));
-            return;
-        }
-        kb.HTML.spaceRow.space.setAttribute("active", "");
-        input.setValue(value + " ");
-    }
-
-    static _onSABackspaceClick(e) {
-        const kb = e.target.keyboard;
-        const input = kb.input;
-        let value = input.getValue();
-        if (value.length === 0) return;
-
-        if (value[value.length - 1] === " ") {
-            kb.HTML.spaceRow.space.removeAttribute("active");
-        }
-
-        input.setValue(value.slice(0, value.length - 1));
-        value = input.getValue();
-        if (value[value.length - 1] === " ") {
-            kb.HTML.spaceRow.space.setAttribute("active", "");
-        }
     }
 
     static _onSVClick(e) {

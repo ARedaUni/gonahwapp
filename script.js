@@ -2,27 +2,10 @@
 
 function loadQuestions() {
     let questionsDiv = document.querySelector("#questions");
-    for (let q of questionData) {
-        let root;
-        if (q instanceof SVQuestionState) {
-            let qv = new SVQuestionView(q);
-            questionViews.push(qv);
-            root = qv.update(true);
-        } else if (q instanceof SAQuestionState) {
-            let qv = new SAQuestionView(q);
-            questionViews.push(qv);
-            root = qv.update(true);
-        } else if (q instanceof SVowelsQuestionState) {
-            let qv = new SVowelsQuestionView(q);
-            questionViews.push(qv);
-            root = qv.update(true);
-        } else {
-            let errorMsg = `Type ${q.constructor.name} is not supported!`;
-            console.error(errorMsg);
-            root = document.createElement("div");
-            root.className = "question";
-            root.appendChild(document.createTextNode(errorMsg));
-        }
+    for (let q of questionStates) {
+        let view = q.getView();
+        let root = view.update(true);
+        questionViews.push(root);
         questionsDiv.appendChild(root);
     }
 }
