@@ -4,7 +4,7 @@ function loadQuestions() {
     let questionsDiv = document.querySelector("#questions");
     for (let q of questionStates) {
         let view = q.getView();
-        let root = view.update(true);
+        let root = view.init();
         questionViews.push(root);
         questionsDiv.appendChild(root);
     }

@@ -120,68 +120,22 @@ class Keyboard {
         }
 
         for (let k of this.HTML.activeKeys) {
-            k.setAttribute("active", "");
+            if (k) {
+                k.setAttribute("active", "");
+            }
         }
 
         for (let k of this.HTML.redKeys) {
-            k.setAttribute("wrong", "");
+            if (k) {
+                k.setAttribute("wrong", "");
+            }
         }
 
         for (let k of this.HTML.greenKeys) {
-            k.setAttribute("correct", "");
-        }
-    }
-
-    static setupForSV(view) {
-        let kb = new Keyboard();
-        kb.view = view;
-        kb.data = view.data;
-        kb.addShortVowels(
-            Keyboard._onSVClick,
-            view.data.keyboard.single, view.data.keyboard.double);
-        if (view.data.keyboard.letters) {
-            kb.addLetters(Keyboard._onSVClick);
-        }
-        kb.addSubmitButton(Keyboard._onSVSubmit, kb.HTML.bottomRow);
-        return kb;
-    }
-
-    static _onSVClick(e) {
-        const kb = e.target.keyboard;
-        kb.hint = null;
-        if (e.ctrlKey || e.metaKey) {
-            let index = kb.HTML.activeKeys.indexOf(e.target);
-            if (index === -1) {
-                let answersLeft = kb.data.answersLeft();
-                if (kb.HTML.activeKeys.length === answersLeft) {
-                    kb.hint = `You can't select more than ${answersLeft}`;
-                } else {
-                    kb.HTML.activeKeys.push(e.target);
-                }
-            }
-            else {
-                kb.HTML.activeKeys.splice(index, 1);
-            }
-        } else {
-            kb.HTML.activeKeys = [e.target];
-        }
-
-        kb.view.update();
-    }
-
-    static _onSVSubmit(e) {
-        const kb = e.target.keyboard;
-        kb.data.try(...kb.HTML.activeKeys.map(k => k.innerText));
-        for (let entry of kb.HTML.activeKeys) {
-            entry.removeEventListener("click", Keyboard._onSVClick);
-            if (kb.data.verify(entry.innerText)) {
-                kb.HTML.greenKeys.push(entry);
-            } else {
-                kb.HTML.redKeys.push(entry);
+            if (k) {
+                k.setAttribute("correct", "");
             }
         }
-        kb.HTML.activeKeys = [];
-        kb.view.update();
     }
 
     hide() {

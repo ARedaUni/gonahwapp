@@ -58,30 +58,30 @@ class ShortAnswerQV {
         this.data = data;
     }
 
-    update(init=false) {
-        if (init) {
-            QuestionViewHelper.defaultQuestion(this);
-            if (this.data.image) {
-                this.HTML.img = document.createElement("img");
-                this.HTML.img.src = this.data.image;                
-                this.HTML.root.appendChild(this.HTML.img);
-            }
-            this.input = new Input(this);
-            this.HTML.root.appendChild(this.input.init());
-            if (this.data.input.lang === "ar") {
-                let kb = this.keyboard = new Keyboard();
-                kb.view = this;
-                kb.data = this.data;
-                kb.input = this.input;
-                kb.addLetters(ShortAnswerQV._onClick);
-                kb.addSpaceButton(ShortAnswerQV._onSpaceClick);
-                kb.addBackspaceButton(ShortAnswerQV._onBackspaceClick);
-
-                this.HTML.root.appendChild(this.keyboard.HTML.root);                
-            }
-            return this.HTML.root;
+    init() {
+        QuestionViewHelper.defaultQuestion(this);
+        if (this.data.image) {
+            this.HTML.img = document.createElement("img");
+            this.HTML.img.src = this.data.image;                
+            this.HTML.root.appendChild(this.HTML.img);
         }
+        this.input = new Input(this);
+        this.HTML.root.appendChild(this.input.init());
+        if (this.data.input.lang === "ar") {
+            let kb = this.keyboard = new Keyboard();
+            kb.view = this;
+            kb.data = this.data;
+            kb.input = this.input;
+            kb.addLetters(ShortAnswerQV._onButtonClick);
+            kb.addSpaceButton(ShortAnswerQV._onSpaceClick);
+            kb.addBackspaceButton(ShortAnswerQV._onBackspaceClick);
 
+            this.HTML.root.appendChild(this.keyboard.HTML.root);                
+        }
+        return this.HTML.root;
+    }
+
+    update() {
         if (this.data.lastAttempt.correct) {
             this.complete();
         } else {
@@ -105,7 +105,6 @@ class ShortAnswerQV {
                 this.HTML.feedback.appendChild(fValue);
             }
         }
-        return this.HTML.root;
     }
 
     complete() {
@@ -131,7 +130,7 @@ class ShortAnswerQV {
         }
     }
 
-    static _onClick(e) {
+    static _onButtonClick(e) {
         const text = e.target.innerText;
         const kb = e.target.keyboard;
         const input = kb.view.input;

@@ -1,12 +1,10 @@
 "use strict";
 
 class ShortVowelQS {
-    static flag = {
-        CORRECT: 0,
-        TOGGLE_TANWEEN: 1,
-        TOGGLE_SHADDA: 2,
-        WRONG: 3
-    }
+    static CORRECT = 0
+    static TOGGLE_TANWEEN = 1
+    static TOGGLE_SHADDA = 2
+    static WRONG = 3
 
     constructor(answer) {
         this.answer = answer;
@@ -24,15 +22,16 @@ class ShortVowelQS {
         for (let i = 0; i < valueLP.length; ++i) {
             if (valueLP[i].svowel === this.answerLP[i].svowel &&
                 valueLP[i].shadda === this.answerLP[i].shadda) {
-                flags.push({flag: ShortVowelQS.flag.CORRECT, value: valueLP[i]});
-            } else if (valueLP[i].svowel && svowel.toggleTanween(valueLP[i].svowel) === this.answerLP[i].svowel) {
-                flags.push({flag: ShortVowelQS.flag.TOGGLE_TANWEEN, value: valueLP[i]});
+                flags.push({flag: ShortVowelQS.CORRECT, value: valueLP[i]});
+            } else if (valueLP[i].svowel &&
+                svowel.toggleTanween(valueLP[i].svowel) === this.answerLP[i].svowel) {
+                flags.push({flag: ShortVowelQS.TOGGLE_TANWEEN, value: valueLP[i]});
                 correct = false;
-            } else if (valueLP[i].shadda === this.answerLP[i].shadda) {
-                flags.push({flag: ShortVowelQS.flag.TOGGLE_SHADDA, value: valueLP[i]});
+            } else if (valueLP[i].shadda !== this.answerLP[i].shadda) {
+                flags.push({flag: ShortVowelQS.TOGGLE_SHADDA, value: valueLP[i]});
                 correct = false;
             } else {
-                flags.push({flag: ShortVowelQS.flag.WRONG, value: valueLP[i]});
+                flags.push({flag: ShortVowelQS.WRONG, value: valueLP[i]});
                 correct = false;
             }
         }
@@ -57,102 +56,93 @@ class ShortVowelQS {
 class ShortVowelQV {
     constructor(data) {
         this.data = data;
-        this.selectedIndex = 0;
     }
 
-    update(init=false) {
-        if (init) {
-            QuestionViewHelper.init(this);
-            QuestionViewHelper.defaultPrompt(this);
+    init() {
+        QuestionViewHelper.init(this);
+        QuestionViewHelper.defaultPrompt(this);
 
-            this.keyboard = new Keyboard();
-            this.keyboard.view = this;
-            this.keyboard.HTML.shadda = {};
-            this.keyboard.addShortVowels(ShortVowelQV._onShortVowelClick, true, true);
-            this.keyboard.addSubmitButton(ShortVowelQV._onSubmitClick, this.keyboard.HTML.svowelRow);
+        this.keyboard = new Keyboard();
+        this.keyboard.view = this;
+        this.keyboard.HTML.shadda = {};
+        this.keyboard.addShortVowels(ShortVowelQV._onShortVowelClick,
+            true, true);
+        this.keyboard.addSubmitButton(ShortVowelQV._onSubmitClick,
+            this.keyboard.HTML.svowelRow);
 
-            this.HTML.skeleton = document.createElement("div");
-            this.HTML.skeleton.className = "svowel-skeleton";
-            const skeleton_letters = this.data.skeleton.split("");
-            for (let i = 0; i < skeleton_letters.length; i++) {
-                let letter = document.createElement("span");
-                letter.innerText = skeleton_letters[i];
-                this.HTML.skeleton.appendChild(letter);
-                if (letter.innerText === " ") continue;
-                letter.classList.add("svowel-skeleton-letter");
-                letter.index = i;
-                letter.view = this;
-                letter.addEventListener("click", ShortVowelQV._onLetterClick);
-            }
+        this.HTML.skeleton = document.createElement("div");
+        this.HTML.skeleton.className = "svowel-skeleton";
+        this.letters = [];
+        const skeleton_letters = this.data.skeleton.split("");
+        for (let sk_letter of skeleton_letters) {
+            let letter = new Letter(sk_letter, this);
+            this.letters.push(letter);
+            this.HTML.skeleton.appendChild(letter.init(ShortVowelQV._onLetterClick));
+        }
+        this.selectedLetter = this.letters[0];
+        this.selectedLetter.selected = true;
+        this.selectedLetter.update();
 
-            this.HTML.hint = document.createElement("p");
-            this.HTML.hint.className = "hint";
-            this.HTML.hint.innerText = "You can select a letter by clicking on it!";
+        this.HTML.hint = document.createElement("p");
+        this.HTML.hint.className = "hint";
+        this.HTML.hint.innerText = "You can select a letter by clicking on it!";
 
+        this.HTML.root.appendChild(this.HTML.hint);
+        this.HTML.root.appendChild(this.HTML.skeleton);
+        this.HTML.root.appendChild(this.keyboard.HTML.root);
+        return this.HTML.root;
+    }
 
-            this.HTML.root.appendChild(this.HTML.hint);
-            this.HTML.root.appendChild(this.HTML.skeleton);
-            this.HTML.root.appendChild(this.keyboard.HTML.root);
+    update() {
+        if (this.data.lastAttempt && this.data.lastAttempt.correct) {
+            this.complete();
+            return;
         }
 
-        if (this.HTML.skeleton.children[this.selectedIndex].flag === "correct") {
-            if (this.data.lastAttempt.correct) {
-                this.complete();
-                return;
-            } else {
-                this.next();
-                this.update();
-            }
-        }
-
-        if (!init) {
-            this._resetToSkeleton();
-        }
+        this._resetToSkeleton();
         this.keyboard.HTML.submitBtn.setAttribute("hidden", "");
         this.keyboard.HTML.submitBtn.setAttribute("disabled", "");
-        for (let i = 0; i < this.HTML.skeleton.children.length; ++i) {
-            const letter = this.HTML.skeleton.children[i];
-            let svowel;
-            if (svowel = this.keyboard.HTML.activeKeys[i]) {
-                letter.innerText += svowel.innerText[0];
-            }
-            let shadda;
-            if (shadda = this.keyboard.HTML.shadda[i]) {
-                letter.innerText += shadda.innerText[0];
-            }
-            letter.classList.remove("regular");
-
-            if (letter.flag === "correct") {
-                letter.classList.add("correct");
-                letter.removeEventListener("click", ShortVowelQV._onLetterClick);
-            } else if (letter.flag === "close") {
-                letter.classList.add("close");
-            } else if (letter.flag === "wrong") {
-                letter.classList.add("wrong");
-            } else {
-                letter.className = "svowel-skeleton-letter";
-            }
+        for (let letter of this.letters) {
+            letter.update();
         }
 
-        this.HTML.skeleton.children[this.selectedIndex].classList.add("regular");
         this.keyboard.update();
 
         if (this.canSubmit()) {
             this.keyboard.HTML.submitBtn.removeAttribute("hidden");
             this.keyboard.HTML.submitBtn.removeAttribute("disabled");
         }
-
-        return this.HTML.root;
     }
 
     next() {
-        this.keyboard.selectedIndex++;
-        if (this.keyboard.selectedIndex >= this.HTML.skeleton.children.length) {
-            this.keyboard.selectedIndex = 0;
+        let index = this.getIndexOfSelectedLetter();
+        if (index !== -1) {
+            this.selectedLetter.selected = false;
         }
-        if (this.HTML.skeleton.children[this.keyboard.selectedIndex].innerText === " ") {
-            this.keyboard.selectedIndex++;
+        let counter = 0;
+        index = (index + 1) % this.letters.length;
+
+        while (counter < this.letters.length && (this.letters[index].letter === " " ||
+               this.letters[index].flag === Letter.CORRECT)) {
+            index = (index + 1) % this.letters.length;
+            counter++;
         }
+
+        if (counter > this.letters.length) {
+            throw new RangeError("No letters are available to select");
+        }
+
+        this.selectedLetter = this.letters[index];
+        this.selectedLetter.selected = true;
+    }
+
+    getIndexOfSelectedLetter() {
+        for (let i = 0; i < this.letters.length; ++i) {
+            if (this.letters[i].selected) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     canSubmit() {
@@ -188,58 +178,100 @@ class ShortVowelQV {
     static _onSubmitClick(e) {
         const kb = e.target.keyboard;
         const view = kb.view;
-        const answerLetterPacks = Util.getLetterPacks(kb.view.data.answer);
+        let result = view.data.try(
+            Array.from(view.HTML.skeleton.children)
+            .map(x => x.innerText)
+            .join(""));
         for (let i = 0; i < view.HTML.skeleton.children.length; ++i) {
             const el = view.HTML.skeleton.children[i];
-            let value = el.innerText.slice(1);
-            let ans = answerLetterPacks[i].slice(1);
-            if (value.length === 2) {
-                let vShaddaIndex = value.indexOf(svowel.SHADDA[0]);
-                let aShaddaIndex = ans.indexOf(svowel.SHADDA[0]);
-                if (aShaddaIndex === -1) {
-                    el.flag = "wrong";
-                    continue;
-                }
-                // Remove shadda
-                value = vShaddaIndex === 0 ? value[1] : value[0];
-                ans = aShaddaIndex === 0 ? ans[1] : ans[0];
-            }
-
-            if (value.length === 1) {
-                if (value === ans) {
-                    el.flag = "correct";
-                } else if (svowel.toggleTanween(value) === ans) {
-                    el.flag = "close";
-                } else {
-                    el.flag = "wrong";
-                }
-            }
+            el.flag = result.flags[i].flag
         }
-        view.data.try(Array.from(view.HTML.skeleton.children).map(x => x.innerText).join(""));
+        view.selectedIndex = -1;
+        view.next();
         view.update();
     }
 
     static _onShortVowelClick(e) {
         const kb = e.target.keyboard;
         const view = kb.view;
-        const button = e.target;
-        if (kb.HTML.activeKeys[kb.selectedIndex] === button) return;
-        kb.view.HTML.skeleton.children[kb.selectedIndex].flag = null;
-        if (button.innerText !== svowel.SHADDA) {
-            kb.HTML.activeKeys[kb.selectedIndex] = button;
-            kb.view.next();
+        const text = e.target.innerText;
+        if (text === svowel.SHADDA) {
+            view.selectedLetter.shadda = !view.selectedLetter.shadda;
         } else {
-            if (kb.HTML.shadda[kb.selectedIndex] === button) {
-                kb.HTML.shadda[kb.selectedIndex] = null;
-            } else {
-                kb.HTML.shadda[kb.selectedIndex] = button;
-            }
+            view.selectedLetter.svowel = text;
+            view.next();
         }
-        kb.view.update();
+        view.selectedLetter.flag = null;
+        view.update();
     }
 
     static _onLetterClick(e) {
-        e.target.view.keyboard.selectedIndex = e.target.index;
-        e.target.view.update();
+        let letter = e.target.letter;
+        let view = e.target.letter.view;
+        view.selectedLetter.selected = false;
+        view.selectedLetter = letter;
+        letter.selected = true;
+        view.update();
+    }
+}
+
+class Letter {
+    static CORRECT = 0
+    static CLOSE = 1
+    static WRONG = 2
+    static RESET_CLASS = "svowel-skeleton-letter"
+
+    constructor(letter, view) {
+        this.letter = letter;
+        this.shadda = false;
+        this.svowel = "";
+        this.view = view;
+        this.flag = null;
+        this.HTML = {};
+        this.selected = false;
+    }
+
+    init(callback) {
+        this.HTML.root = document.createElement("span");
+        this.HTML.root.innerText = this.letter;
+        this.HTML.root.className = Letter.RESET_CLASS;
+        this.HTML.root.addEventListener("click", callback);
+        this.HTML.root.view = this.view;
+        this.HTML.root.letter = this;
+        return this.HTML.root;
+    }
+
+    update() {
+        let innerText = this.letter;
+        if (this.svowel) {
+            innerText += this.svowel[0]
+        }
+        if (this.shadda) {
+            innerText += svowel.SHADDA[0];
+        }
+        this.HTML.root.innerText = innerText;
+
+        switch(this.flag) {
+            case this.HTML.root.CORRECT:
+                this.HTML.root.classList.add("correct");
+                this.HTML.root.removeEventListener("click",
+                    ShortVowelQV._onLetterClick);
+                break;
+            case this.HTML.root.CLOSE:
+                this.HTML.root.classList.add("close");
+                break;
+            case this.HTML.root.WRONG:
+                this.HTML.root.classList.add("wrong");
+                break;
+            case null:
+                this.HTML.root.className = Letter.RESET_CLASS;
+                break;
+            default:
+                console.error("Flag not recognized!");
+        }
+
+        if (this.selected) {
+            this.HTML.root.classList.add("regular");
+        }
     }
 }
