@@ -5,7 +5,7 @@ function loadQuestions() {
     for (let q of questionStates) {
         let view = q.getView();
         let root = view.init();
-        questionViews.push(root);
+        questionHTMLs.push(root);
         questionsDiv.appendChild(root);
     }
 }
@@ -18,7 +18,7 @@ function setVW() {
 
 window.addEventListener("resize", setVW);
 
-let questionViews = [];
+let questionHTMLs = [];
 loadQuestions();
 window.onload = setVW;
 

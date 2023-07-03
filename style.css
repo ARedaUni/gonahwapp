@@ -91,6 +91,10 @@ img {
     color: var(--yellow);
 }
 
+.no-select {
+    user-select: none;
+}
+
 .svowel-skeleton-letter.close {
     outline: 1px solid var(--yellow);
     color: var(--yellow) !important;

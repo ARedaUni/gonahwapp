@@ -121,7 +121,7 @@ class ShortAnswerQV {
             questionStates.push(qs);
             let qv = new ShortVowelQV(qs);
             let node = qv.init();
-            questionViews.push(qv);
+            questionHTMLs.push(qv);
             let ref;
             if (ref = this.HTML.root.nextElementSibling) {
                 parent.insertBefore(node, ref);
