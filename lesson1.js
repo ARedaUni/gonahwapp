@@ -2,34 +2,34 @@
 const title = "(1) الدَّرْسُ الأَوَّلُ";
 const titleRtl = true;
 
-const questionData = [
+const questionStates = [
     // Exercise 1
-    new SAQuestionState("ما هذا؟", "هَذَاْ مِفْتَاْحٌ",
+    new ShortAnswerQS("ما هذا؟", "هَذَاْ مِفْتَاْحٌ",
      "./img/key.png", "Translate 'this is a key' to Arabic",
-     {lang: "ar", svowels: false}),
-    new SAQuestionState("ما هذا؟", "هَذَاْ كِتَاْبٌ",
+     {lang: "ar", svowels: true}),
+    new ShortAnswerQS("ما هذا؟", "هَذَاْ كِتَاْبٌ",
      "./img/book.png", "Translate 'this is a book' to Arabic",
      {lang: "ar", svowels: false}),
-    new SAQuestionState("ما هذا؟", "هَذَاْ قَلَمٌ",
+    new ShortAnswerQS("ما هذا؟", "هَذَاْ قَلَمٌ",
      "./img/pen.png", "Translate 'this is a pen' to Arabic",
      {lang: "ar", svowels: false}),
-    new SAQuestionState("ما هذا؟", "هَذَاْ بَاْبٌ",
+    new ShortAnswerQS("ما هذا؟", "هَذَاْ بَاْبٌ",
      "./img/door.png", "Translate 'this is a door' to Arabic",
      {lang: "ar", svowels: false}),
-    new SAQuestionState("ما هذا؟", "هَذَاْ بَيْتٌ",
+    new ShortAnswerQS("ما هذا؟", "هَذَاْ بَيْتٌ",
      "./img/house.png", "Translate 'this is a house' to Arabic",
      {lang: "ar", svowels: false}),
-    new SAQuestionState("ما هذا؟", "هَذَاْ كُرْسِيٌّ",
+    new ShortAnswerQS("ما هذا؟", "هَذَاْ كُرْسِيٌّ",
      "./img/chair.png", "Translate 'this is a chair' to Arabic",
      {lang: "ar", svowels: false}),
-    new SAQuestionState("ما هذا؟", "هَذَاْ مَكْتَبٌ",
+    new ShortAnswerQS("ما هذا؟", "هَذَاْ مَكْتَبٌ",
      "./img/table.png", "Translate 'this is a table' to Arabic",
      {lang: "ar", svowels: false}), // Not in the book but a good addition I believe
     // Exercise 2
-    new SAQuestionState("ما هذا؟", "هَذَاْ مَسْجِدٌ",
+    new ShortAnswerQS("ما هذا؟", "هَذَاْ مَسْجِدٌ",
      "./img/masjid.png", "Translate 'this is a masjid' to Arabic",
      {lang: "ar", svowels: false}),
-    new SAQuestionState("ما هذا؟", "هَذَاْ سَرِيْرٌ",
+    new ShortAnswerQS("ما هذا؟", "هَذَاْ سَرِيْرٌ",
      "./img/bed.png", "Translate 'this is a bed' to Arabic",
      {lang: "ar", svowels: false}),
     // new SVQuestionState("What are the four signs of رفع?",

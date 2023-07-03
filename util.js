@@ -199,7 +199,8 @@ class Keyboard {
         this.HTML.root.appendChild(this.HTML.spaceRow);
     }
 
-    addBackspaceButton(onBackspace) {
+    addBackspaceButton(onBackspace, row) {
+        if (row == undefined) row = this.HTML.topRow;
         let backspaceBtn = document.createElement("div");
         backspaceBtn.className = "arabic-keyboard-btn backspace-btn";
         backspaceBtn.innerText = "⌫";

@@ -117,15 +117,16 @@ class ShortAnswerQV {
 
         if (this.data.input.svowels) {
             const parent = this.HTML.root.parentElement;
-            let qs = new SVowelsQuestionState(this.data.answer);
-            questionData.push(qs);
-            let qv = new SVowelsQuestionView(qs);
+            let qs = new ShortVowelQS(this.data.answer);
+            questionStates.push(qs);
+            let qv = new ShortVowelQV(qs);
+            let node = qv.init();
             questionViews.push(qv);
             let ref;
             if (ref = this.HTML.root.nextElementSibling) {
-                parent.insertBefore(qv.update(true), ref);
+                parent.insertBefore(node, ref);
             } else {
-                parent.appendChild(qv.update(true));
+                parent.appendChild(node);
             }
         }
     }
