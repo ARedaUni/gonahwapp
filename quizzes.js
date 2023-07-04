@@ -114,7 +114,7 @@ let quizzes = [
 		},
 		{
 			"type": "short-answer",
-			"prompt": "أَهذَا مِفْتَاحٌ",
+			"prompt": "أَهذَا مِفْتَاحٌ؟",
 			"answer": "لا هذا قلم",
 			"image": "./img/pen.png",
 			"hint": "Translate 'No, this is a pen' to Arabic",
@@ -126,7 +126,7 @@ let quizzes = [
 		},
 		{
 			"type": "short-answer",
-			"prompt": "أَهذَا قَمِيصٌ",
+			"prompt": "أَهذَا قَمِيصٌ؟",
 			"answer": "نعم هذا قميص",
 			"image": "./img/shirt.png",
 			"hint": "Translate 'Yes, this is a shirt' to Arabic",
@@ -138,7 +138,7 @@ let quizzes = [
 		},
 		{
 			"type": "short-answer",
-			"prompt": "أَهذَا نَجْمٌ",
+			"prompt": "أَهذَا نَجْمٌ؟",
 			"answer": "نعم هذا نجم",
 			"image": "./img/star.png",
 			"hint": "Translate 'Yes, this is a star' to Arabic",
