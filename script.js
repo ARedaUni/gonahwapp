@@ -14,7 +14,7 @@ let questionHTMLs = [];
 loadQuestions();
 
 const titleEl = document.getElementById("title");
-titleEl.innerText = title;;
+titleEl.innerText = title;
 if (titleRtl) {
     titleEl.setAttribute("rtl", "");
 }
