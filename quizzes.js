@@ -87,6 +87,18 @@ let quizzes = [
 				"type": "short-vowel",
 				"answer": "هَذَا كُرْسِيٌّ",
 			},
+		},
+		{
+			"type": "short-answer",
+			"prompt": "ما هذا؟",
+			"answer": "هذا مكتب",
+			"image": "./img/table.png",
+			"hint": "Translate 'this is a table' to Arabic",
+			"lang": "ar",
+			"unlocks": {
+				"type": "short-vowel",
+				"answer": "هَذَا مَكْتَبٌ",
+			},
 		}],
 	}
 ];
