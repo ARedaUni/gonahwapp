@@ -4,10 +4,11 @@ const titleRtl = false;
 
 const questionStates = [
     // Exercise 1
-    new ShortAnswerQS("ما هذا؟", "هَذَاْ مِفْتَاْحٌ",
+    new ShortAnswerQS("ما هذا؟", "هذا مفتاح",
      "./img/key.png", "Translate 'this is a key' to Arabic",
-     {lang: "ar", svowels: false}),
-    new ShortVowelQS("هَذَا مِفْتَاحٌ"),
+     {lang: "ar"}, new ShortVowelQS("هَذَا مِفْتَاحٌ", new ShortAnswerQS("ما هذا؟", "هذا مفتاح",
+     "./img/key.png", "Translate 'this is a key' to Arabic",
+     {lang: "ar"}))),
     new SingleValueQS("What are the four signs of رفع?",
         [`${svowel.DAMMA}`, "و", "ا", "ن"],
         "Select while holding ctrl to multiselect!",

@@ -98,6 +98,21 @@ const QuestionViewHelper = {
         if (view.data.hint) {
             view.HTML.hint.innerText = view.data.hint;
         }
+    },
+
+    unlockQuestion(refView, questionState) {
+        const parent = refView.HTML.root.parentElement;
+        questionStates.push(questionState);
+        let questionView = questionState.getView();
+        let node = questionView.init();
+        questionHTMLs.push(node);
+        let ref;
+        if (ref = refView.HTML.root.nextElementSibling) {
+            parent.insertBefore(node, ref);
+        } else {
+            parent.appendChild(node);
+        }
+        setVW();
     }
 }
 

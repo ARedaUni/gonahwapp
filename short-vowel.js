@@ -6,12 +6,13 @@ class ShortVowelQS {
     static TOGGLE_SHADDA = 2
     static WRONG = 3
 
-    constructor(answer) {
+    constructor(answer, unlockQS) {
         this.answer = answer;
         this.prompt = "Insert the correct vowels";
         this.skeleton = Util.getSkeleton(this.answer);
         this.answerLP = Util.getLetterPacks(this.answer);
         this.attempts = [];
+        this.unlockQS = unlockQS;
     }
 
     // Assumes letters are the same
@@ -173,6 +174,9 @@ class ShortVowelQV {
         this.HTML.hint.setAttribute("hidden", "");
         for (let letter of this.HTML.skeleton.children) {
             letter.removeEventListener("click", ShortVowelQV._onLetterClick);
+        }
+        if (this.data.unlockQS) {
+            QuestionViewHelper.unlockQuestion(this, this.data.unlockQS);
         }
     }
 

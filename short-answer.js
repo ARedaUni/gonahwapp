@@ -1,6 +1,6 @@
 "use strict";
 
-// Ignores vowels.
+// Removes all vowels.
 class ShortAnswerQS {
     static flag = {
         CORRECT: 0,
@@ -8,21 +8,20 @@ class ShortAnswerQS {
         NOT_FOUND: 2
     }
 
-    constructor(prompt, answer, image, hint, input) {
+    constructor(prompt, answer, image, hint, input, unlocksQS) {
         this.prompt = prompt;
         this.input = input;
         this.image = image;
         this.hint = hint;
-        this.answer = answer;
-        this.skeletonAnswer = Util.getSkeleton(answer);
+        this.answer = Util.getSkeleton(answer);
         this.attempts = [];
+        this.unlocksQS = unlocksQS;
     }
 
     try(value, push=true) {
-        value = Util.getSkeleton(value);
         let valueWords = value.split(" ");
         let flags = [];
-        const answerWords = this.skeletonAnswer.split(" ");
+        const answerWords = this.answer.split(" ");
         for (let x = 0; x < valueWords.length; ++x) {
             const vw = valueWords[x];
             if (vw === answerWords[x]) {
@@ -108,26 +107,15 @@ class ShortAnswerQV {
     }
 
     complete() {
-        const answer = this.data.skeletonAnswer;
+        const answer = this.data.answer;
         this.HTML.feedback.innerText = `✅ ${answer}`;
         this.HTML.feedback.className = "feedback correct";
         this.keyboard.hide();
         this.input.hide();
         this.HTML.hint.setAttribute("hidden", "");
-
-        if (this.data.input.svowels) {
-            const parent = this.HTML.root.parentElement;
-            let qs = new ShortVowelQS(this.data.answer);
-            questionStates.push(qs);
-            let qv = new ShortVowelQV(qs);
-            let node = qv.init();
-            questionHTMLs.push(qv);
-            let ref;
-            if (ref = this.HTML.root.nextElementSibling) {
-                parent.insertBefore(node, ref);
-            } else {
-                parent.appendChild(node);
-            }
+        let qs = this.data.unlocksQS;
+        if (qs) {
+            QuestionViewHelper.unlockQuestion(this, qs);
         }
     }
 
