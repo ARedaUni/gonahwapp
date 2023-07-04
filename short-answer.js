@@ -8,9 +8,9 @@ class ShortAnswerQS {
         NOT_FOUND: 2
     }
 
-    constructor(prompt, answer, image, hint, input, unlocksQS) {
+    constructor(prompt, answer, image, hint, lang, unlocksQS) {
         this.prompt = prompt;
-        this.input = input;
+        this.lang = lang;
         this.image = image;
         this.hint = hint;
         this.answer = Util.getSkeleton(answer);
@@ -66,7 +66,7 @@ class ShortAnswerQV {
         }
         this.input = new Input(this);
         this.HTML.root.appendChild(this.input.init());
-        if (this.data.input.lang === "ar") {
+        if (this.data.lang === "ar") {
             let kb = this.keyboard = new Keyboard();
             kb.view = this;
             kb.data = this.data;
@@ -189,7 +189,7 @@ class Input {
         this.HTML.root.appendChild(this.HTML.button);
 
         // RTL
-        if (this.data.input.lang === "ar") {
+        if (this.data.lang === "ar") {
             this.HTML.inputField.setAttribute("rtl", "");
             this.HTML.button.setAttribute("rtl", "");
         }
@@ -244,7 +244,7 @@ class Input {
             return;
         }
 
-        if (input.data.input.lang === "ar" && !isSpecial) {
+        if (input.data.lang === "ar" && !isSpecial) {
             if (!(e.key >= "ء" && e.key <= "ي")) {
                 e.preventDefault();
             }
