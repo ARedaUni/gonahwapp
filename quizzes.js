@@ -194,7 +194,7 @@ let quizzes = [
 		},
 		{
 			"type": "short-vowel",
-			"answer": "مَنْ هَذَا؟ هَذَا طَبِيْبٌ"
+			"answer": "مَنْ هَذَا؟ هَذَا طَبِيبٌ"
 		},
 		{
 			"type": "short-vowel",
@@ -214,7 +214,7 @@ let quizzes = [
 		},
 		{
 			"type": "short-vowel",
-			"answer": "هَذَا مِنْدِيْلٌ"
+			"answer": "هَذَا مِنْدِيلٌ"
 		},
 		{
 			"type": "short-vowel",
