@@ -22,18 +22,20 @@ class ShortAnswerQS {
         let valueWords = value.split(" ");
         let flags = [];
         const answerWords = this.answer.split(" ");
+        let correct = valueWords.length === answerWords.length;
         for (let x = 0; x < valueWords.length; ++x) {
             const vw = valueWords[x];
             if (vw === answerWords[x]) {
                 flags.push({flag: ShortAnswerQS.flag.CORRECT, value: vw});
             } else if (answerWords.some(aw => aw === vw)) {
                 flags.push({flag: ShortAnswerQS.flag.WRONG_PLACE, value: vw});
+                correct = false;
             } else {
                 flags.push({flag: ShortAnswerQS.flag.NOT_FOUND, value: vw});
+                correct = false;
             }
         }
 
-        let correct = flags.length === answerWords.length && flags.every(x => x.flag === ShortAnswerQS.flag.CORRECT);
         let attempt = {correct, value, flags};
         if (push) {
             this.attempts.push(attempt);
