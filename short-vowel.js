@@ -13,7 +13,6 @@ class ShortVowelQS {
         this.answerLP = Util.getLetterPacks(this.answer);
         this.attempts = [];
         this.unlockQS = unlockQS;
-        console.log(this.answerLP);
     }
 
     // Assumes letters are the same
@@ -86,11 +85,7 @@ class ShortVowelQV {
                 this.HTML.skeleton.appendChild(letter.init(ShortVowelQV._onLetterClick));
             else
                 this.HTML.skeleton.appendChild(letter.init());
-
         }
-        this.selectedLetter = this.letters[0];
-        this.selectedLetter.select();
-        this.selectedLetter.update();
 
         this.HTML.hint = document.createElement("p");
         this.HTML.hint.className = "hint";
@@ -99,6 +94,8 @@ class ShortVowelQV {
         this.HTML.root.appendChild(this.HTML.hint);
         this.HTML.root.appendChild(this.HTML.skeleton);
         this.HTML.root.appendChild(this.keyboard.HTML.root);
+        this.next();
+        this.update();
         return this.HTML.root;
     }
 
