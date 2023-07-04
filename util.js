@@ -38,7 +38,7 @@ class Util {
         let letters = [];
         for (let i = 0; i < text.length; ++i) {
             const c = text[i];
-            if (c === " " || (c >= "ء" && c <= "ي")) {
+            if (c === "," || c === "?" || c === "؟" || c === " " || (c >= "ء" && c <= "ي")) {
                 letters.push(c);
             } else {
                 letters[letters.length - 1] += c;

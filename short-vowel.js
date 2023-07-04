@@ -13,6 +13,7 @@ class ShortVowelQS {
         this.answerLP = Util.getLetterPacks(this.answer);
         this.attempts = [];
         this.unlockQS = unlockQS;
+        console.log(this.answerLP);
     }
 
     // Assumes letters are the same

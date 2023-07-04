@@ -199,6 +199,7 @@ button {
 
 /* Individual keyboard buttons  */
 .arabic-keyboard-btn {
+    font-size: 1.3em;
     background: var(--keyboard-color);
     width: 1.6em;
     margin: 0 5px 5px 5px;
