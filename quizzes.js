@@ -109,7 +109,7 @@ let quizzes = [
 			"lang": "ar",
 			"unlocks": {
 				"type": "short-vowel",
-				"answer": "لَا, هذَا مَسْجِدٌ",
+				"answer": "لَا, هَذَا مَسْجِدٌ",
 			}
 		},
 		{
@@ -121,7 +121,7 @@ let quizzes = [
 			"lang": "ar",
 			"unlocks": {
 				"type": "short-vowel",
-				"answer": "لَا, هذَا قَلَمٌ",
+				"answer": "لَا, هَذَا قَلَمٌ",
 			}
 		},
 		{
@@ -133,7 +133,7 @@ let quizzes = [
 			"lang": "ar",
 			"unlocks": {
 				"type": "short-vowel",
-				"answer": "نَعَمْ, هذَا قَمِيصٌ",
+				"answer": "نَعَمْ, هَذَا قَمِيصٌ",
 			}
 		},
 		{
@@ -145,7 +145,7 @@ let quizzes = [
 			"lang": "ar",
 			"unlocks": {
 				"type": "short-vowel",
-				"answer": "نَعَمْ, هذَا نَجْمٌ",
+				"answer": "نَعَمْ, هَذَا نَجْمٌ",
 			}
 		},
 		{
@@ -162,7 +162,7 @@ let quizzes = [
 		},
 		{
 			"type": "short-vowel",
-			"answer": "هذا سَرِيْرٌ"
+			"answer": "هَذَا سَرِيرٌ"
 		},
 		{
 			"type": "short-vowel",
