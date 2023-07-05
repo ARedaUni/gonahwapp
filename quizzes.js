@@ -1,20 +1,16 @@
+// We're using id rather than index so that urls don't break if we change the order
 let quizzes = [
 	{
-		"title": "Test",
+		"id": 0,
+		"hidden": true,
+		"title": "Test Quiz",
 		"questions": [{
-			"type": "short-answer",
-			"prompt": "ما هذا؟",
-			"answer": "هذا مفتاح",
-			"image": "./img/key.png",
-			"hint": "Translate 'this is a key' to Arabic",
-			"lang": "ar",
-			"unlocks": {
-				"type": "short-vowel",
-				"answer": "هَذَا مِفْتَاحٌ",
-			},
+			"type": "short-vowel",
+			"answer": "هَذَا بَيْتٌ",
 		}],
 	},
 	{
+		"id": 1,
 		"title": "Medina Book 1 - Lesson 1",
 		"questions": [{
 			"type": "short-answer",

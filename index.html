@@ -7,26 +7,29 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic&display=swap" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="style.css">
-        <script>
-            function setVW() {
-                let r = document.querySelector(":root");
-                let vw = document.body.clientWidth / 100;
-                r.style.setProperty("--vw", `${vw}px`);
-            }
-
-            window.onload = setVW;
-            window.addEventListener("resize", setVW);
-        </script>
     </head>
     <body>
-        <div id="lesson-banner"><h1 id="title">Lesson 1: The Three States</h1></div>
+        <div id="lesson-banner"><h1 id="title">Quizzes</h1></div>
         <div id="questions">
+            <ul>
+            </ul>
         </div>
-        <script type="text/javascript" src="util.js"></script>
-        <script type="text/javascript" src="short-answer.js"></script>
-        <script type="text/javascript" src="short-vowel.js"></script>
-        <script type="text/javascript" src="single-value.js"></script>
         <script type="text/javascript" src="quizzes.js"></script>
-        <script type="text/javascript" src="script.js"></script>
+        <script>
+            const questionsList =
+                document.getElementById("questions").children[0];
+
+            questionsList.innerHTML = "";
+
+            function generateItem(id, title) {
+                return `<li><a href="./quiz.html?id=${id}">${title}</a></li>`
+            } 
+
+            quizzes.forEach( x => {
+                if (!x.hidden) {
+                    questionsList.innerHTML += generateItem(x.id, x.title);
+                }
+            });
+        </script>
     </body>
 </html>

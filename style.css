@@ -13,7 +13,6 @@
 
 * {
     box-sizing: border-box;
-    list-style: none;
     margin: 0;
     padding: 0;
 }
@@ -25,6 +24,17 @@ body {
 }
 
 /* Actual CSS (basically) */
+
+li {
+    text-align: left;
+}
+
+a {
+    font-weight: bold;
+    line-height: 150%;
+    margin-bottom: 5px;
+    color: var(--regular);
+}
 
 #lesson-banner {
     display: flex;
@@ -41,17 +51,17 @@ h1 {
 
 #questions {
     text-align: center;
-    width: calc(50 * var(--vw));
+    width: calc(70 * var(--vw));
     margin: 0 auto;
     background-color: var(--banner-color);
     padding-bottom: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    font-size: 1.5em;
 }
 
 .question {
-    font-size: 18px;
     width: calc(50 * var(--vw));
     padding-top: 30px;
     padding-bottom: 30px;
@@ -199,7 +209,6 @@ button {
 
 /* Individual keyboard buttons  */
 .arabic-keyboard-btn {
-    font-size: 1.3em;
     background: var(--keyboard-color);
     width: 1.6em;
     margin: 0 5px 5px 5px;
