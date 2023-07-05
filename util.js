@@ -121,6 +121,7 @@ class Keyboard {
         this.HTML = {};
         this.HTML.root = document.createElement("div");
         this.HTML.root.className = "arabic-keyboard";
+        this.rows = [];
         this.HTML.characterKeys = [];
         this.HTML.activeKeys = [];
         this.HTML.redKeys = [];
@@ -158,20 +159,19 @@ class Keyboard {
     }
     
     addShortVowels(onClick, single=true, double=true) {
-        this.HTML.svowelRow = document.createElement("div");
+        let row = this.addRow("svowelRow");
         let svowelRowChars = [];
         if (single)
             svowelRowChars.push(svowel.SHADDA, svowel.DAMMA, svowel.FATHA, svowel.KASRA, svowel.SUKOON);
         if (double)
             svowelRowChars.push(svowel.DAMMATAN, svowel.FATHATAN, svowel.KASRATAN);
-        this._createButtons(onClick, svowelRowChars, this.HTML.svowelRow);
-        this.HTML.root.appendChild(this.HTML.svowelRow);
+        this._createButtons(svowelRowChars, row, onClick);
     }
 
     addLetters(onClick) {
-        this.HTML.topRow = document.createElement("div");
-        this.HTML.middleRow = document.createElement("div");
-        this.HTML.bottomRow = document.createElement("div");
+        let topRow = this.addRow("topRow");
+        let middleRow = this.addRow("middleRow");
+        let bottomRow = this.addRow("bottomRow");
 
         const topRowChars = ["ض", "ص", "ث", "ق", "ف",
             "غ", "ع", "ه", "خ", "ح", "ج", "د"];
@@ -180,60 +180,58 @@ class Keyboard {
         const bottomRowChars = ["ئ", "ء", "ؤ", "ر", "ﻻ", "ى",
             "ة", "و", "ز", "ظ"];
 
-        this._createButtons(onClick, topRowChars, this.HTML.topRow);
-        this._createButtons(onClick, middleRowChars, this.HTML.middleRow);
-        this._createButtons(onClick, bottomRowChars, this.HTML.bottomRow);
-
-        this.HTML.root.appendChild(this.HTML.topRow);
-        this.HTML.root.appendChild(this.HTML.middleRow);
-        this.HTML.root.appendChild(this.HTML.bottomRow);
-
+        this._createButtons(topRowChars, topRow, onClick);
+        this._createButtons(middleRowChars, middleRow, onClick);
+        this._createButtons(bottomRowChars, bottomRow, onClick);
     }
 
     addSubmitButton(onSubmit, row) {
-        let submitNode = document.createTextNode("➡");
-        let submitDiv = document.createElement("div");
-        submitDiv.keyboard = this;
-        submitDiv.className = "arabic-keyboard-btn submit-btn";
-        submitDiv.appendChild(submitNode);
-        submitDiv.addEventListener("click", onSubmit);
-        submitDiv.setAttribute("disabled", "");
-        this.HTML.submitBtn = submitDiv;
-        row.appendChild(submitDiv);
+        let submitBtn = this.addButton("➡", row, onSubmit, true);
+        submitBtn.classList.add("submit-btn");
+        submitBtn.setAttribute("disabled", "");
+        this.HTML.submitBtn = submitBtn;
     }
 
     addSpaceButton(onSpace) {
-        let spaceBtn = document.createElement("div");
-        spaceBtn.className = "arabic-keyboard-btn space-btn";
-        spaceBtn.innerText = " ";
-        spaceBtn.keyboard = this;
-        spaceBtn.addEventListener("click", onSpace);
-        this.HTML.spaceRow = document.createElement("div");
-        this.HTML.spaceRow.appendChild(spaceBtn);
-        this.HTML.spaceRow.space = spaceBtn;
-        this.HTML.root.appendChild(this.HTML.spaceRow);
+        let spaceRow = this.addRow("spaceRow");
+        let spaceBtn = this.addButton(" ", spaceRow, onSpace, true);
+        spaceBtn.classList.add("space-btn");
+        spaceRow.space = spaceBtn;
     }
 
     addBackspaceButton(onBackspace, row) {
         if (row == undefined) row = this.HTML.topRow;
-        let backspaceBtn = document.createElement("div");
-        backspaceBtn.className = "arabic-keyboard-btn backspace-btn";
-        backspaceBtn.innerText = "⌫";
-        backspaceBtn.keyboard = this;
-        backspaceBtn.addEventListener("click", onBackspace);
-        this.HTML.topRow.appendChild(backspaceBtn);
+        let backspaceBtn = this.addButton("⌫", row, onBackspace, true);
     }
 
-    _createButtons(onClick, chars, row) {
-        for (let char of chars) {
-            const button = document.createElement("div");
-            button.className = "arabic-keyboard-btn";
-            button.keyboard = this;
-            const node = document.createTextNode(char);
-            button.appendChild(node);
-            row.appendChild(button);
+    addRow(rowName) {
+        this.HTML[rowName] = document.createElement("div");
+        this.HTML.root.appendChild(this.HTML[rowName]);
+        this.rows.push(rowName);
+        return this.HTML[rowName];
+    }
+
+    addButton(text, row, onClick, special=false) {
+        const button = document.createElement("div");
+        button.className = "arabic-keyboard-btn";
+        button.keyboard = this;
+        const node = document.createTextNode(text);
+        button.appendChild(node);
+        row.appendChild(button);
+        if (!special) {
             this.HTML.characterKeys.push(button);
-            button.addEventListener("click", onClick);
+        }
+        button.addEventListener("click", onClick);
+        return button;
+    }
+
+    get lastRow() {
+        return this.HTML[this.rows[this.rows.length - 1]];
+    }
+
+    _createButtons(chars, row, onClick) {
+        for (let char of chars) {
+            this.addButton(char, row, onClick);
         }
     }
 }

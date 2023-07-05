@@ -12,7 +12,6 @@
 }
 
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
@@ -210,12 +209,13 @@ button {
 /* Individual keyboard buttons  */
 .arabic-keyboard-btn {
     background: var(--keyboard-color);
-    width: 1.6em;
+    min-width: 1.6em;
     margin: 0 5px 5px 5px;
     user-select: none;
     align-items: center;
     opacity: 1;
     transition: opacity .2s, background .2s;
+    padding: 0 2px;
 }
 
 .arabic-keyboard-btn:not([disabled]):not([wrong]):not([correct]):hover {

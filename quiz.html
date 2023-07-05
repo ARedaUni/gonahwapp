@@ -26,7 +26,7 @@
         <script type="text/javascript" src="util.js"></script>
         <script type="text/javascript" src="short-answer.js"></script>
         <script type="text/javascript" src="short-vowel.js"></script>
-        <script type="text/javascript" src="single-value.js"></script>
+        <script type="text/javascript" src="multiple-choice.js"></script>
         <script type="text/javascript" src="quizzes.js"></script>
         <script>
             function loadQuestions() {
@@ -47,6 +47,11 @@
                         loadQuestionState(question.unlocks));
                 } else if (question.type === "short-vowel") {
                     return new ShortVowelQS(question.answer,
+                        loadQuestionState(question.unlocks));
+                } else if (question.type === "multiple-choice") {
+                    return new MultipleChoiceQS(question.prompt,
+                        question.answers, question.selectMany,
+                        question.hint, question.keyboard,
                         loadQuestionState(question.unlocks));
                 } else {
                     throw new TypeError(`Unsupported type ${question.type}`);        
