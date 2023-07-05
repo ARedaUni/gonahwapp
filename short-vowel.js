@@ -104,14 +104,32 @@ class ShortVowelQV {
             this.complete();
             return;
         }
+
         for (let letter of this.letters) {
             letter.update();
         }
 
+        this.updateKeyboard();
+    }
+
+    updateKeyboard() {
+        this.keyboard.HTML.activeKeys = [];
+        let svowelKeys = this.keyboard.HTML.svowelRow.children;
+        if (this.selectedLetter.svowel) {
+            let i = 1;
+            while (svowelKeys[i].innerText !== this.selectedLetter.svowel) {
+                i += 1;
+            }
+            this.keyboard.HTML.activeKeys[0] = svowelKeys[i];
+        }
+        if (this.selectedLetter.shadda) {
+            this.keyboard.HTML.activeKeys[1] = svowelKeys[0];
+        }
         if (this.canSubmit()) {
             this.keyboard.HTML.submitBtn.removeAttribute("hidden");
             this.keyboard.HTML.submitBtn.removeAttribute("disabled");
         }
+        this.keyboard.update();
     }
 
     next() {
@@ -203,7 +221,7 @@ class ShortVowelQV {
         view.selectedLetter.flag = null;
         if (text === svowel.SHADDA) {
             view.selectedLetter.shadda = !view.selectedLetter.shadda;
-        } else {
+        } else if (view.selectedLetter.svowel !== text) {
             view.selectedLetter.svowel = text;
             view.next();
         }
