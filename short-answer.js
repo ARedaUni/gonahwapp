@@ -86,7 +86,7 @@ class ShortAnswerQV {
         if (this.data.lastAttempt.correct) {
             this.complete();
         } else {
-            this.HTML.feedback.innerHTML = "";
+            this.HTML.feedback.innerHTML = "❌ ";
             for (let {flag, value} of this.data.lastAttempt.flags) {
                 let fValue = document.createElement("span");
                 fValue.innerText = value + " ";
