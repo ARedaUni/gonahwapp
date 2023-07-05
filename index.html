@@ -19,8 +19,20 @@
         <script>
             const questionsList =
                 document.getElementById("questions").children[0];
-
             questionsList.innerHTML = "";
+
+            let ids = [];
+            for (quiz of quizzes) {
+                if (ids.indexOf(quiz.id) !== -1) {
+                    const error = `The ID ${quiz.id} was used again in ${quiz.title}!`;
+                    console.error(error);
+                    questionsList.innerHTML += error;
+                    break;
+                }
+                ids.push(quiz.id);
+            }
+
+
 
             function generateItem(id, title) {
                 return `<li><a href="./quiz.html?id=${id}">${title}</a></li>`
