@@ -231,7 +231,7 @@ let quizzes = [
 	},
 	{
 		id: 2,
-		title: "Medina Book 1 - Lesson 2 (WIP)",
+		title: "Medina Book 1 - Lesson 2",
 		questions: [
 			{
 				type: "short-vowel",
@@ -253,7 +253,7 @@ let quizzes = [
 	},
 	{
 		id: 3,
-		title: "Medina Book 1 - Lesson 3",
+		title: "Medina Book 1 - Lesson 3 (WIP)",
 		questions: [
 			{
 				type: "short-vowel",
