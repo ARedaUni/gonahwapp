@@ -2,13 +2,16 @@
 
 // Removes all vowels.
 class ShortAnswerQS {
-    static flag = {
-        CORRECT: 0,
-        WRONG_PLACE: 1,
-        NOT_FOUND: 2
-    }
+    static FLAGS = ["wrong", "close", "correct"];
 
-    constructor(prompt, answer, image, hint, lang, unlocksQS) {
+    constructor(prompt, answer, image, hint, lang, unlocksQS=null) {
+        console.assert(typeof(prompt) === "string");
+        console.assert(typeof(answer) === "string");
+        console.assert(typeof(image) === "string");
+        console.assert(typeof(hint) === "string");
+        console.assert(typeof(lang) === "string");
+        console.assert(typeof(unlocksQS) === "object");
+        
         this.prompt = prompt;
         this.lang = lang;
         this.image = image;
@@ -19,6 +22,9 @@ class ShortAnswerQS {
     }
 
     try(value, push=true) {
+        console.assert(typeof(value) === "string");
+        console.assert(typeof(push) === "boolean");
+
         let valueWords = value.split(" ");
         let flags = [];
         const answerWords = this.answer.split(" ");
@@ -26,12 +32,12 @@ class ShortAnswerQS {
         for (let x = 0; x < valueWords.length; ++x) {
             const vw = valueWords[x];
             if (vw === answerWords[x]) {
-                flags.push({flag: ShortAnswerQS.flag.CORRECT, value: vw});
+                flags.push({flag: "correct", value: vw});
             } else if (answerWords.some(aw => aw === vw)) {
-                flags.push({flag: ShortAnswerQS.flag.WRONG_PLACE, value: vw});
+                flags.push({flag: "close", value: vw});
                 correct = false;
             } else {
-                flags.push({flag: ShortAnswerQS.flag.NOT_FOUND, value: vw});
+                flags.push({flag: "wrong", value: vw});
                 correct = false;
             }
         }
@@ -49,17 +55,15 @@ class ShortAnswerQS {
         return this.view = new ShortAnswerQV(this);
     }
 
-    get lastAttempt() {
+    getLastAttempt() {
         return this.attempts[this.attempts.length - 1];
     }
 }
 
 class ShortAnswerQV {
     constructor(data) {
+        console.assert(typeof(data) === "object");
         this.data = data;
-    }
-
-    init() {
         QuestionViewHelper.defaultQuestion(this);
         if (this.data.image) {
             this.HTML.img = document.createElement("img");
@@ -67,7 +71,7 @@ class ShortAnswerQV {
             this.HTML.root.appendChild(this.HTML.img);
         }
         this.input = new Input(this);
-        this.HTML.root.appendChild(this.input.init());
+        this.HTML.root.appendChild(this.input.getRootHTML());
         if (this.data.lang === "ar") {
             let kb = this.keyboard = new Keyboard();
             kb.view = this;
@@ -75,36 +79,32 @@ class ShortAnswerQV {
             kb.input = this.input;
             kb.addLetters(ShortAnswerQV._onButtonClick);
             kb.addSpaceButton(ShortAnswerQV._onSpaceClick);
-            kb.addBackspaceButton(ShortAnswerQV._onBackspaceClick);
+            kb.addBackspaceButton(kb.getRow("topRow"),
+                ShortAnswerQV._onBackspaceClick);
 
-            this.HTML.root.appendChild(this.keyboard.HTML.root);                
+            this.HTML.root.appendChild(this.keyboard.getRootHTML());                
         }
+        this.submitButton = new SubmitButton(ShortAnswerQV._onSubmit);
+        this.submitButton.view = this;
+        this.HTML.root.appendChild(this.submitButton.getRootHTML());
+    }
+
+    getRootHTML() {
         return this.HTML.root;
     }
 
-    update() {
-        if (this.data.lastAttempt.correct) {
+    render() {
+        if (!this.data.getLastAttempt()) return;
+        if (this.data.getLastAttempt().correct) {
             this.complete();
-        } else {
-            this.HTML.feedback.innerHTML = "❌ ";
-            for (let {flag, value} of this.data.lastAttempt.flags) {
-                let fValue = document.createElement("span");
-                fValue.innerText = value + " ";
-                switch (flag) {
-                    case ShortAnswerQS.flag.CORRECT:
-                        fValue.className = "correct";
-                        break;
-                    case ShortAnswerQS.flag.WRONG_PLACE:
-                        fValue.className = "close";
-                        break;
-                    case ShortAnswerQS.flag.NOT_FOUND:
-                        fValue.className = "wrong";
-                        break;
-                    default:
-                        console.error(`Flag ${flag} is not recognized`);
-                }
-                this.HTML.feedback.appendChild(fValue);
-            }
+            return;
+        }
+        this.HTML.feedback.innerHTML = "❌ ";
+        for (let {flag, value} of this.data.getLastAttempt().flags) {
+            let fValue = document.createElement("span");
+            fValue.innerText = value + " ";
+            fValue.className = flag;
+            this.HTML.feedback.appendChild(fValue);
         }
     }
 
@@ -112,6 +112,7 @@ class ShortAnswerQV {
         const answer = this.data.answer;
         this.HTML.feedback.innerText = `✅ ${answer}`;
         this.HTML.feedback.className = "feedback correct";
+        this.submitButton.hide();
         this.keyboard.hide();
         this.input.hide();
         this.HTML.hint.setAttribute("hidden", "");
@@ -121,55 +122,77 @@ class ShortAnswerQV {
         }
     }
 
+    static _onSubmit(e) {
+        const view = e.target.button.view;
+        const input = view.input;
+        const value = input.getValue().trim();
+        input.data.try(value)
+        view.render();
+    }
+
     static _onButtonClick(e) {
         const text = e.target.innerText;
-        const kb = e.target.keyboard;
+        const kb = e.target.button.keyboard;
+        const spaceBtn = kb.getSpaceButton();
         const input = kb.view.input;
         // check if harakah or letter
-        input.setValue(input.getValue() + text);
-        kb.HTML.spaceRow.space.removeAttribute("active");
+        input.appendValue(text);
+        spaceBtn.setFlag("normal");
+        spaceBtn.render();
+        kb.view.submitButton.enable();
     }
 
     static _onSpaceClick(e) {
-        const kb = e.target.keyboard;
+        const kb = e.target.button.keyboard;
+        const spaceBtn = kb.getSpaceButton();
         const input = kb.input;
         let value = input.getValue();
 
+        if (value.length === 0) return;
+
         if (value[value.length - 1] === " ") {
-            kb.HTML.spaceRow.space.removeAttribute("active");
+            spaceBtn.setFlag("normal");
             input.setValue(value.slice(0, value.length - 1));
+            spaceBtn.render();
             return;
         }
-        kb.HTML.spaceRow.space.setAttribute("active", "");
-        input.setValue(value + " ");
+        spaceBtn.setFlag("active");
+        input.appendValue(" ");
+        spaceBtn.render();
     }
 
     static _onBackspaceClick(e) {
-        const kb = e.target.keyboard;
+        const kb = e.target.button.keyboard;
+        const spaceBtn = kb.getSpaceButton();
         const input = kb.input;
         let value = input.getValue();
         if (value.length === 0) return;
 
         if (value[value.length - 1] === " ") {
-            kb.HTML.spaceRow.space.removeAttribute("active");
+            spaceBtn.setFlag("normal");
+            spaceBtn.render();
         }
 
         input.setValue(value.slice(0, value.length - 1));
         value = input.getValue();
         if (value[value.length - 1] === " ") {
-            kb.HTML.spaceRow.space.setAttribute("active", "");
+            spaceBtn.setFlag("active");
+            spaceBtn.render();
+        }
+
+        if (value.length > 0) {
+            kb.view.submitButton.enable();
+        } else {
+            kb.view.submitButton.disable();
         }
     }
 }
 
-
 class Input {
     constructor(view) {
+        console.assert(typeof(view) === "object");
         this.view = view;
         this.data = view.data;
-    }
-
-    init() {
         // Root
         this.HTML = {};
         this.HTML.root = document.createElement("div");
@@ -178,24 +201,20 @@ class Input {
         // Input field
         this.HTML.inputField = document.createElement("input");
         this.HTML.inputField.setAttribute("type", "text");
+        this.HTML.inputField.setAttribute("placeholder", "هذا...");
         this.HTML.inputField.input = this;
+        this.HTML.inputField.view = view;
         this.HTML.inputField.addEventListener("keydown", Input._filter);
-        this.HTML.inputField.addEventListener("input", Input._lastIsSpace);
+        this.HTML.inputField.addEventListener("input", Input._onInput);
         this.HTML.root.appendChild(this.HTML.inputField);
-
-        // Button
-        this.HTML.button = document.createElement("button");
-        this.HTML.button.innerText = ">";
-        this.HTML.button.input = this;
-        this.HTML.button.addEventListener("click", Input._onSubmit);
-        this.HTML.root.appendChild(this.HTML.button);
 
         // RTL
         if (this.data.lang === "ar") {
             this.HTML.inputField.setAttribute("rtl", "");
-            this.HTML.button.setAttribute("rtl", "");
         }
+    }
 
+    getRootHTML() {
         return this.HTML.root;
     }
 
@@ -204,32 +223,43 @@ class Input {
     }
 
     setValue(value) {
+        console.assert(typeof(value) === "string");
         this.HTML.inputField.value = value;
+    }
+
+    appendValue(value) {
+        console.assert(typeof(value) === "string");
+        this.setValue(this.getValue() + value);
     }
 
     hide() {
         this.HTML.root.setAttribute("hidden", "");
         this.HTML.inputField.setAttribute("hidden", "");
-        this.HTML.button.setAttribute("hidden", "");
     }
 
-
-    static _onSubmit(e) {
-        const input = e.target.input;
-        const view = input.view;
-        const value = input.getValue().trim();
-        input.data.try(value)
-        view.update();
+    show() {
+        this.HTML.root.removeAttribute("hidden");
+        this.HTML.inputField.removeAttribute("hidden");
+        this.HTML.button.removeAttribute("hidden");
     }
 
-    static _lastIsSpace(e) {
+    static _onInput(e) {
         const value = e.target.input.getValue();
-        const kb = e.target.input.view.keyboard;
+        const view = e.target.view;
+        const kb = view.keyboard;
+        const space = kb.getSpaceButton();
         if (!kb) return;
         if (value[value.length - 1] === " ") {
-            kb.HTML.spaceRow.space.setAttribute("active", "");
+            space.setFlag("active");
         } else {
-            kb.HTML.spaceRow.space.removeAttribute("active");
+            space.setFlag("normal");
+        }
+        space.render();
+
+        if (value.length > 0) {
+            view.submitButton.enable();
+        } else {
+            view.submitButton.disable();
         }
     }
 
@@ -242,7 +272,7 @@ class Input {
             e.key.indexOf("Arrow") !== -1 ||
             e.key === " " || e.ctrlKey;
         if (e.key === "Enter") {
-            input.HTML.button.click();
+            input.view.submitButton.click();
             return;
         }
 

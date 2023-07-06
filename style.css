@@ -1,14 +1,15 @@
 /* Reset CSS (basically) */
 :root {
-    --orange: #e86420;
-    --yellow: #e8d920;
+    --hover: #e86420;
+    --close: #e8d920;
     --banner-color: #252525;
     --bg-color: #292929;
-    --regular: #4ba8da;
+    --active: #4ba8da;
     --correct: green;
     --wrong: red;
-    --main-text-color: white;
+    --regular: white;
     --keyboard-color: #303030;
+    --disabled: gray;
 }
 
 * {
@@ -19,10 +20,31 @@
 body {
     background-color: var(--bg-color);
     color: white;
-    font-family: Arial, Helvetica, "Noto Sans Arabic", sans-serif;
+    font-family: Roboto, Helvetica, "Noto Sans Arabic", sans-serif;
+}
+
+*[hidden] {
+    display: none !important;
 }
 
 /* Actual CSS (basically) */
+
+.correct-fg {
+    color: var(--correct);
+}
+
+.wrong-fg {
+    color: var(--wrong);
+}
+
+.active-fg {
+    color: var(--active);
+}
+
+.close-fg {
+    color: var(--close);
+}
+
 
 li {
     text-align: left;
@@ -32,7 +54,12 @@ a {
     font-weight: bold;
     line-height: 150%;
     margin-bottom: 5px;
-    color: var(--regular);
+    color: var(--active);
+    transition: color .2s;
+}
+
+a:hover {
+    color: var(--hover);
 }
 
 #lesson-banner {
@@ -87,17 +114,40 @@ img {
     width: 250px;
 }
 
+.submit {
+    width: 20%;
+    background-color: var(--active);
+    color: var(--regular);
+    height: 1.4em;
+    text-align: center;
+    transition: background-color .2s;
+    user-select: none;
+    cursor: pointer;
+    margin: auto;
+    margin-top: .5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+}
+
+.submit:hover {
+    background-color: var(--hover);
+}
+
+.submit[disabled] {
+    background-color: var(--disabled);
+    border-color: var(--disabled);
+    cursor: auto;
+}
+
 .feedback {
     margin-left: 5px;
     margin-right: 5px;
 }
 
 .hint {
-    color: var(--orange);
-}
-
-.close {
-    color: var(--yellow);
+    color: var(--hover);
 }
 
 .no-select {
@@ -105,8 +155,8 @@ img {
 }
 
 .svowel-skeleton-letter.close {
-    outline: 1px solid var(--yellow);
-    color: var(--yellow) !important;
+    outline: 1px solid var(--close);
+    color: var(--close) !important;
 }
 
 .svowel-skeleton-letter.wrong {
@@ -119,18 +169,6 @@ img {
     cursor: default;
 }
 
-.correct {
-    color: var(--correct);
-}
-
-.wrong {
-    color: var(--wrong);
-}
-
-.regular {
-    color: var(--regular);
-}
-
 .short-answer {
     display: flex;
     justify-content: center;
@@ -140,8 +178,13 @@ img {
     font-size: 2em;
 }
 
-.svowel-skeleton-letter.regular {
-    color: var(--regular) !important;
+.svowel-skeleton > .correct {
+    color: var(--correct);
+}
+
+
+.svowel-skeleton-letter.active {
+    color: var(--active) !important;
 }
 
 .svowel-skeleton-letter {
@@ -149,55 +192,27 @@ img {
     transition: color .2s;
 }
 
-.svowel-skeleton-letter:hover {
-    color: var(--orange);
+.svowel-skeleton-letter.disabled {
+    cursor: auto;
+}
+
+.svowel-skeleton-letter.normal:hover {
+    color: var(--hover);
 }
 
 input[type="text"] {
-    border-radius: .6em 0 0 .6em;
+    border-radius: 5px;
     border: 2px white solid;
     font-size: inherit;
     margin-bottom: 15px;
-    caret-color: var(--orange);
+    caret-color: var(--hover);
     text-indent: 5px;
-    height: 1.4em;
-}
-
-input[rtl] {
-    border-radius: 0 .6em .6em 0;
-    order: 1;
+    height: 100%;
 }
 
 input:focus {
     outline: none;
-    border: 2px var(--orange) solid;
-}
-
-
-button[disabled] {
-    background-color: gray;
-    border-color: gray;
-}
-
-button[rtl] {
-    border-top-left-radius: 50%;
-    border-bottom-left-radius: 50%;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    order: 0;
-}
-
-button {
-    border-top-right-radius: 50%;
-    border-bottom-right-radius: 50%;
-    width: 1.5em;
-    background-color: var(--regular);
-    border: 2px var(--regular) solid;
-    color: var(--main-text-color);
-    height: 1.4em;
-    font-size: inherit;
-    cursor: pointer;
-    font-weight: bold;
+    border: 2px var(--hover) solid;
 }
 
 .arabic-keyboard div {
@@ -208,7 +223,6 @@ button {
 
 /* Individual keyboard buttons  */
 .arabic-keyboard-btn {
-    background: var(--keyboard-color);
     min-width: 1.6em;
     margin: 0 5px 5px 5px;
     user-select: none;
@@ -216,34 +230,40 @@ button {
     opacity: 1;
     transition: opacity .2s, background .2s;
     padding: 0 2px;
-}
-
-.arabic-keyboard-btn:not([disabled]):not([wrong]):not([correct]):hover {
-    background: var(--orange);
     cursor: pointer;
 }
 
-.arabic-keyboard-btn[disabled] {
-    opacity: 0;
+.arabic-keyboard-btn.normal {
+    background: var(--keyboard-color);
 }
 
-.arabic-keyboard-btn[active] {
-    background: var(--regular);
+.arabic-keyboard-btn.normal:hover {
+    background: var(--hover);
 }
 
-.arabic-keyboard-btn[wrong] {
+.arabic-keyboard-btn.disabled {
+    opacity: .2;
+    cursor: auto;
+}
+
+.arabic-keyboard-btn.active {
+    background: var(--active);
+    cursor: auto;
+}
+
+.arabic-keyboard-btn.wrong {
     background: var(--wrong);
+    cursor: auto;
     opacity: .2;
 }
 
-.arabic-keyboard-btn[correct] {
+.arabic-keyboard-btn.correct {
     background: var(--correct);
+    cursor: auto;
 }
 
-
-.submit-btn {
-    background: var(--regular);
-    width: 2.1em;
+.arabic-keyboard-btn.close {
+    background: var(--close);
 }
 
 .space-btn {
@@ -251,14 +271,27 @@ button {
     height: 1.2em;
 }
 
-.space-btn[active]:hover {
-    background: var(--regular) !important;
+.space-btn.active:hover {
+    background: var(--active) !important;
 }
 
 .backspace-btn {
     width: 2.1em;
     font-weight: bold;
 }
+
+.fill.correct {
+    color: var(--correct);
+}
+
+.fill.wrong {
+    color: var(--wrong);
+}
+
+.fill.active {
+    color: var(--active);
+}
+
 
 *[rtl] {
     direction: rtl;

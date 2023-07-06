@@ -6,6 +6,8 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="style.css">
         <link rel="icon" type="image/x-icon" href="./img/favicon.ico">
         <script>
@@ -33,7 +35,8 @@
                 const questionsDiv = document.querySelector("#questions");
                 for (let q of questionStates) {
                     let view = q.getView();
-                    let root = view.init();
+                    let root = view.getRootHTML();
+                    view.render();
                     questionHTMLs.push(root);
                     questionsDiv.appendChild(root);
                 }
@@ -50,8 +53,8 @@
                         loadQuestionState(question.unlocks));
                 } else if (question.type === "multiple-choice") {
                     return new MultipleChoiceQS(question.prompt,
-                        question.answers, question.selectMany,
-                        question.hint, question.keyboard,
+                        question.answers, question.hint,
+                        question.keyboard, question.selectMany,
                         loadQuestionState(question.unlocks));
                 } else {
                     throw new TypeError(`Unsupported type ${question.type}`);        

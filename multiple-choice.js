@@ -1,7 +1,14 @@
 "use strict";
 
 class MultipleChoiceQS {
-    constructor(prompt, answers, selectMany, hint, kb, unlocksQS) {
+    constructor(prompt, answers, hint, kb, selectMany=false, unlocksQS=null) {
+        console.assert(typeof(prompt) === "string");
+        console.assert(typeof(answers) === "object");
+        console.assert(typeof(selectMany) === "boolean");
+        console.assert(typeof(hint) === "string");
+        console.assert(typeof(kb) === "object");
+        console.assert(typeof(unlocksQS) === "object");
+
         this.prompt = prompt;
         this.keyboard = {
             single: kb.single || false,
@@ -43,7 +50,7 @@ class MultipleChoiceQS {
         return this.answers.length - this.correctAnswers.length;
     }
 
-    get lastAttempt() {
+    getLastAttempt() {
         return this.attempts[this.attempts.length - 1];
     }
 }
@@ -51,9 +58,6 @@ class MultipleChoiceQS {
 class MultipleChoiceQV {
     constructor(data) {
         this.data = data;
-    }
-
-    init() {
         QuestionViewHelper.defaultQuestion(this);
 
         let prompText = this.data.prompt;
@@ -89,7 +93,7 @@ class MultipleChoiceQV {
         }
         if (this.data.keyboard.custom) {
             for (let i = 0; i < this.data.keyboard.custom.length; ++i) {
-                let row = this.keyboard.addRow(i);
+                let row = this.keyboard.addRow(`${i}`);
                 let buttons = this.data.keyboard.custom[i];
                 for (let button of buttons) {
                     this.keyboard.addButton(button, row,
@@ -97,23 +101,23 @@ class MultipleChoiceQV {
                 }
             }
         }
-        this.keyboard.addSubmitButton(MultipleChoiceQV._onSubmit,
-            this.keyboard.lastRow);
-        this.HTML.root.appendChild(this.keyboard.HTML.root);
+
+        this.submitButton = new SubmitButton(MultipleChoiceQV._onSubmit);
+        this.submitButton.view = this;
+
+        this.activeKeys = [];
+
+        this.HTML.root.appendChild(this.keyboard.getRootHTML());
+        this.HTML.root.appendChild(this.submitButton.getRootHTML());
+    }
+
+    getRootHTML() {
         return this.HTML.root;
     }
 
-    update() {
-        this.keyboard.update();
+    render() {
+        this.keyboard.render();
 
-        if (this.keyboard.HTML.activeKeys.length > 0) {
-            this.keyboard.HTML.submitBtn.removeAttribute("disabled");
-            this.keyboard.HTML.submitBtn.removeAttribute("hidden");
-        } else {
-            this.keyboard.HTML.submitBtn.setAttribute("disabled", "");
-            this.keyboard.HTML.submitBtn.setAttribute("hidden", "");
-        }
-    
         this.HTML.hint.innerText = this.hint || this.data.hint;
         this._updateFeedback();
 
@@ -126,8 +130,9 @@ class MultipleChoiceQV {
 
     complete() {
         this.keyboard.hide();
-        this.HTML.hint.className = "correct";
+        this.HTML.hint.className = "correct-fg";
         this.HTML.hint.innerText = this.data.answers.join(", ") + " ✅";
+        this.submitButton.hide();
         if (this.unlocksQS) {
             QuestionViewHelper.unlockQuestion(this, this.unlocksQS);
         }
@@ -135,14 +140,14 @@ class MultipleChoiceQV {
 
     _updateFeedback() {
         if (this.HTML.prompt.fill) {
-            if (this.keyboard.HTML.activeKeys[0]) {
+            if (this.activeKeys[0]) {
                 this.HTML.prompt.fill.innerText =
-                    this.keyboard.HTML.activeKeys[0].innerText;
-                this.HTML.prompt.fill.className = "regular";
-            } else if (this.data.lastAttempt) {
-                let key = this.data.lastAttempt[0];
+                    this.activeKeys[0].getText();
+                this.HTML.prompt.fill.className = "active-fg";
+            } else if (this.data.getLastAttempt()) {
+                let key = this.data.getLastAttempt()[0];
                 this.HTML.prompt.fill.innerText = key.value;
-                this.HTML.prompt.fill.className = key.correct ? "correct" : "wrong";
+                this.HTML.prompt.fill.className = key.correct ? "correct-fg" : "wrong-fg";
             }
             return;
         }
@@ -157,8 +162,8 @@ class MultipleChoiceQV {
                 fKey.innerText += key.innerText + " ";
                 this.HTML.feedback.appendChild(fKey);
             }
-        } else if (this.data.lastAttempt) {
-            for (let key of this.data.lastAttempt) {
+        } else if (this.data.getLastAttempt()) {
+            for (let key of this.data.getLastAttempt()) {
                 let fKey = document.createElement("span");
                 fKey.className = key.correct ? "correct" : "wrong";
                 if (this.HTML.feedback.innerHTML.length > 0) {
@@ -171,43 +176,57 @@ class MultipleChoiceQV {
     }
 
     static _onButtonClick(e) {
-        const kb = e.target.keyboard;
+        const btn = e.target.button;
+        const kb = btn.keyboard;
         const view = kb.view;
+        for (let key of view.activeKeys) {
+            key.setFlag("normal");
+        }
         view.hint = null;
         if (e.ctrlKey || e.metaKey) {
-            let index = kb.HTML.activeKeys.indexOf(e.target);
+            let index = view.activeKeys.indexOf(btn);
             if (index === -1) {
                 let answersLeft = kb.data.answersLeft();
-                if (kb.HTML.activeKeys.length === answersLeft) {
+                if (view.activeKeys.length === answersLeft) {
                     view.hint = `You can't select more than ${answersLeft}`;
-                } else if (!kb.data.selectMany && kb.HTML.activeKeys.length > 0) {
+                } else if (!kb.data.selectMany && view.activeKeys.length > 0) {
                     view.hint = `You can't select more than 1`;                    
                 } else {
-                    kb.HTML.activeKeys.push(e.target);
+                    view.activeKeys.push(btn);
                 }
             }
             else {
-                kb.HTML.activeKeys.splice(index, 1);
+                view.activeKeys.splice(index, 1);
             }
         } else {
-            kb.HTML.activeKeys = [e.target];
+            view.activeKeys = [btn];
         }
 
-        kb.view.update();
+        if (view.activeKeys.length > 0) {
+            view.submitButton.enable();
+            for (let key of view.activeKeys) {
+                key.setFlag("active");
+            }
+        } else {
+            view.submitButton.disable();
+        }
+
+        kb.view.render();
     }
 
     static _onSubmit(e) {
-        const kb = e.target.keyboard;
-        kb.data.try(...kb.HTML.activeKeys.map(k => k.innerText));
-        for (let entry of kb.HTML.activeKeys) {
-            entry.removeEventListener("click", Keyboard._onSVClick);
-            if (kb.data.verify(entry.innerText)) {
-                kb.HTML.greenKeys.push(entry);
+        const view = e.target.button.view;
+        const kb = view.keyboard;
+        const trials = kb.data.try(...view.activeKeys.map(k => k.getText()));
+        for (let i = 0; i < trials.length; ++i) {
+            let t = trials[i];
+            if (t.correct) {
+                view.activeKeys[i].setFlag("correct");
             } else {
-                kb.HTML.redKeys.push(entry);
+                view.activeKeys[i].setFlag("wrong");
             }
         }
-        kb.HTML.activeKeys = [];
-        kb.view.update();
+        view.activeKeys = [];
+        view.render();
     }
 }
