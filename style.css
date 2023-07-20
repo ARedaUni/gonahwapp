@@ -123,14 +123,97 @@ body {
     font-size: 2rem;
     margin: 1rem;
     direction: rtl;
+    user-select: none;
 }
 
 .nahw-full-text-sentence {
     color: var(--text);
-    transition: color .2s;
+    transition: color .2s, background-color .2s;
+    padding-right: .2em;
+    padding-left: .2em;
+    display: inline-block;
 }
 
 .nahw-full-text-sentence:hover {
-    color: var(--primary);
+    color: var(--background);
+    background-color: var(--text);
     cursor: pointer;
 }
+
+.nahw-top-bar {
+    display: flex;
+    margin-top: 1rem;
+    justify-content: center;
+}
+
+.nahw-top-bar-page {
+    height: 2rem;
+    width: 2rem;
+    cursor: pointer;
+    display: block;
+    margin-left: .5rem;
+    margin-right: .5rem;
+    background-color: var(--background);
+    transition: background-color .2s;
+}
+
+.nahw-top-bar-page:hover {
+    background-color: var(--primary);
+}
+
+.nahw-top-bar-square {
+    border: 1px solid var(--text);
+}
+
+.nahw-top-bar-circle {
+    border: 1px solid var(--text);
+    border-radius: 10px;
+}
+
+.nahw-top-bar-fill {
+    background-color: var(--text);
+}
+
+.nahw-actions-container {
+    display: flex;
+    margin: 0 auto;
+    width: 15%;
+    justify-content: space-between;
+}
+
+.nahw-next {
+    width: 7rem;
+    height: 6rem;
+    background-color: var(--secondary);
+    color: var(--background);
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.nahw-submit {
+    width: 7rem;
+    height: 6rem;
+    background-color: var(--secondary);
+    color: var(--background);
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.nahw-back {
+    width: 7rem;
+    height: 6rem;
+    background-color: var(--secondary);
+    color: var(--background);
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+

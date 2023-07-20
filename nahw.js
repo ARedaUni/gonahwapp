@@ -87,31 +87,65 @@ class NahwQV {
 
         this.HTML.root = document.createElement("div");
         this.HTML.root.classList.add("question");
-
+        this.topBar();
         this.mainPage();
     }
 
 
     topBar() {
         // Create progress bar
+        if (this.HTML.topBar) {
+            this.HTML.topBar.innerHTML = "";
+        }
+        const topBarEl = this.HTML.topBar = document.createElement("div");
+        topBarEl.classList.add("nahw-top-bar");
+
+        const mainPageEl = document.createElement("div");
+        mainPageEl.classList.add("nahw-top-bar-page");
+        mainPageEl.classList.add("nahw-top-bar-square");
+        mainPageEl.classList.add("nahw-top-bar-fill");
+        topBarEl.appendChild(mainPageEl);
+
+        for (let sentence in this.data.getSkeletons()) {
+            const sentencePageEl = document.createElement("div");
+            sentencePageEl.classList.add("nahw-top-bar-page");
+            sentencePageEl.classList.add("nahw-top-bar-circle");
+            topBarEl.appendChild(sentencePageEl);
+        }
+
+        this.HTML.root.appendChild(topBarEl);
     }
 
     mainPage() {
-        // TODO: Reset root node (except the top bar)
-        this.topBar();
         // Create text (TODO: Make sentence clickable)
         const textEl = this.HTML.text = document.createElement("p");
         textEl.classList.add("nahw-full-text");
         for (let sentence of this.data.getSkeletons()) {
             const span = document.createElement("span");
-            span.innerText = sentence + " ";
+            span.innerText = sentence;
             span.classList.add("nahw-full-text-sentence");
             textEl.appendChild(span);
         }
         // TODO: Create next button
+        const actionButtonsEl = document.createElement("div");
+        actionButtonsEl.classList.add("nahw-actions-container");
+
+        const nextEl = document.createElement("div");
+        nextEl.innerText = "Next";
+        nextEl.classList.add("nahw-next");
+
+        const submitEl = document.createElement("div");
+        submitEl.innerText = "Submit";
+        submitEl.classList.add("nahw-submit");
+
+        actionButtonsEl.appendChild(submitEl);
+        actionButtonsEl.appendChild(nextEl);
+
         // TODO: Create back-to-question or back-to-text
+        // TODO: Add submit
         // Append all elements
         this.HTML.root.appendChild(textEl);
+        this.HTML.root.appendChild(actionButtonsEl)
     }
 
     getRootHTML() {
