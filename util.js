@@ -1,3 +1,4 @@
+
 "use strict";
 
 const svowel = {
@@ -8,9 +9,8 @@ const svowel = {
     "KASRA": "\u0650\u25cc",
     "KASRATAN": "\u064d\u25cc",
     "SUKOON": "\u0652\u25cc",
-    "SHADDA": "\u0651\u25cc",
 
-    getShortVowels: () => Object.values(svowel).slice(0,8),
+    getShortVowels: () => Object.values(svowel).slice(0,7),
     isShortVowel: (value) => svowel.getShortVowels().some(x => x === value),
     toggleTanween: (x) => {
         const code = x.codePointAt(0);

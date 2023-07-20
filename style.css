@@ -18,55 +18,23 @@ body {
     font-family: Roboto, Helvetica, "Noto Sans Arabic", sans-serif;
 }
 
-*[hidden] {
-    display: none !important;
-}
-
 /* Actual CSS (basically) */
 
-.correct-fg {
-    color: var(--correct);
-}
-
-.wrong-fg {
-    color: var(--wrong);
-}
-
-.active-fg {
-    color: var(--active);
-}
-
-.close-fg {
-    color: var(--close);
+#error {
+    color: red;
+    font-weight: 800;
+    font-size: 2rem;
 }
 
 #lesson-banner {
     padding-left: 1rem;
     padding-right: 1rem;
     display: flex;
-    width: calc(100 * var(--vw));
     align-items: center;
     justify-content: space-between;
     height: 10vh;
     background-color: var(--accent);
     color: var(--background);
-}
-
-.question {
-    width: calc(50 * var(--vw));
-    padding-top: 30px;
-    padding-bottom: 30px;
-}
-
-.question:after {
-    content: "";
-    display: block;
-    border-bottom: 1px solid white;
-    opacity: .5;
-    width: 50%;
-    position: relative;
-    top: 25px;
-    left: 25%;
 }
 
 .primary-bg {
@@ -141,187 +109,4 @@ body {
 
 .small h1 {
     margin-left: 1rem;
-}
-
-.submit {
-    width: 20%;
-    background-color: var(--active);
-    color: var(--regular);
-    height: 1.4em;
-    text-align: center;
-    transition: background-color .2s;
-    user-select: none;
-    cursor: pointer;
-    margin: auto;
-    margin-top: .5em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 5px;
-}
-
-.submit:hover {
-    background-color: var(--hover);
-}
-
-.submit[disabled] {
-    background-color: var(--disabled);
-    border-color: var(--disabled);
-    cursor: auto;
-}
-
-.feedback {
-    margin-left: 5px;
-    margin-right: 5px;
-}
-
-.hint {
-    color: var(--hover);
-}
-
-.no-select {
-    user-select: none;
-}
-
-.svowel-skeleton-letter.close {
-    outline: 1px solid var(--close);
-    color: var(--close) !important;
-}
-
-.svowel-skeleton-letter.wrong {
-    outline: 1px solid var(--wrong);
-    color: var(--wrong) !important;
-}
-
-.svowel-skeleton-letter.correct {
-    color: var(--correct) !important;
-    cursor: default;
-}
-
-.short-answer {
-    display: flex;
-    justify-content: center;
-}
-
-.svowel-skeleton {
-    font-size: 2em;
-}
-
-.svowel-skeleton > .correct {
-    color: var(--correct);
-}
-
-
-.svowel-skeleton-letter.active {
-    color: var(--active) !important;
-}
-
-.svowel-skeleton-letter {
-    cursor: pointer;
-    transition: color .2s;
-}
-
-.svowel-skeleton-letter.disabled {
-    cursor: auto;
-}
-
-.svowel-skeleton-letter.normal:hover {
-    color: var(--hover);
-}
-
-input[type="text"] {
-    border-radius: 5px;
-    border: 2px white solid;
-    font-size: inherit;
-    margin-bottom: 15px;
-    caret-color: var(--hover);
-    text-indent: 5px;
-    height: 100%;
-}
-
-input:focus {
-    outline: none;
-    border: 2px var(--hover) solid;
-}
-
-.arabic-keyboard div {
-    display: flex;
-    justify-content: center;
-    flex-direction: row;
-}
-
-/* Individual keyboard buttons  */
-.arabic-keyboard-btn {
-    min-width: 1.6em;
-    margin: 0 5px 5px 5px;
-    user-select: none;
-    align-items: center;
-    opacity: 1;
-    transition: opacity .2s, background .2s;
-    padding: 0 2px;
-    cursor: pointer;
-}
-
-.arabic-keyboard-btn.normal {
-    background: var(--keyboard-color);
-}
-
-.arabic-keyboard-btn.normal:hover {
-    background: var(--hover);
-}
-
-.arabic-keyboard-btn.disabled {
-    opacity: .2;
-    cursor: auto;
-}
-
-.arabic-keyboard-btn.active {
-    background: var(--active);
-    cursor: auto;
-}
-
-.arabic-keyboard-btn.wrong {
-    background: var(--wrong);
-    cursor: auto;
-    opacity: .2;
-}
-
-.arabic-keyboard-btn.correct {
-    background: var(--correct);
-    cursor: auto;
-}
-
-.arabic-keyboard-btn.close {
-    background: var(--close);
-}
-
-.space-btn {
-    width: 35%;
-    height: 1.2em;
-}
-
-.space-btn.active:hover {
-    background: var(--active) !important;
-}
-
-.backspace-btn {
-    width: 2.1em;
-    font-weight: bold;
-}
-
-.fill.correct {
-    color: var(--correct);
-}
-
-.fill.wrong {
-    color: var(--wrong);
-}
-
-.fill.active {
-    color: var(--active);
-}
-
-
-*[rtl] {
-    direction: rtl;
 }

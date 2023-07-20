@@ -9,22 +9,41 @@
         <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="style.css">
         <link rel="icon" type="image/x-icon" href="./img/favicon.ico">
-
     </head>
     <body>
         <div id="lesson-banner">
             <div id="back">
             </div>
             <h1 id="title">Learn Arabic</h1>
-            <div></div>
-        </div>
-        <div class="cards">
+            <div id="error"></div>
         </div>
         <script type="text/javascript" src="cards.js"></script>
+        <script type="text/javascript" src="util.js"></script>
         <script>
+            function checkCardDuplicates(parentCard=null) {
+                if (!parentCard) parentCard = cards;
+                let queue = [];
+                let ids = [];
+                for (card of parentCard) {
+                    if (ids.indexOf(card.id) !== -1) {
+                        error(`The ID ${card.id} was used again in ${card.title}!`);
+                        break;
+                    }
+
+                    if (card.display === "cards") {
+                        queue.push(card);
+                    }
+
+                    ids.push(card.id);
+                }
+                while (queue.length !== 0) {
+                    checkCardDuplicates(queue.shift());
+                }
+            }
+
             function error(msg) {
                 console.error(msg);
-                cardsElement.innerHTML = msg;
+                document.getElementById("error").innerHTML = msg;
             }
 
             function setTitle(title) {
@@ -35,46 +54,48 @@
                 document.getElementById("back").innerHTML = `<a href="index.html"><svg fill="var(--background)" height="2rem" width="2rem" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 26.676 26.676" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path d="M26.105,21.891c-0.229,0-0.439-0.131-0.529-0.346l0,0c-0.066-0.156-1.716-3.857-7.885-4.59 c-1.285-0.156-2.824-0.236-4.693-0.25v4.613c0,0.213-0.115,0.406-0.304,0.508c-0.188,0.098-0.413,0.084-0.588-0.033L0.254,13.815 C0.094,13.708,0,13.528,0,13.339c0-0.191,0.094-0.365,0.254-0.477l11.857-7.979c0.175-0.121,0.398-0.129,0.588-0.029 c0.19,0.102,0.303,0.295,0.303,0.502v4.293c2.578,0.336,13.674,2.33,13.674,11.674c0,0.271-0.191,0.508-0.459,0.562 C26.18,21.891,26.141,21.891,26.105,21.891z"></path> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </g> </g></svg></a>`;
             }
 
-            const cardsElement =
-                document.getElementsByClassName("cards")[0];
-            cardsElement.innerHTML = "";
-
-            let id = new URL(document.location).searchParams.get("id");
-            let rootCard = null;
-
-            if (id) {
-                addBackButton();
-                let found = false;
-                for (card of cards) {
-                    if (card.id == id) {
-                        rootCard = card;
-                        setTitle(card.title);
-                        cards = card.content;
-                        found = true;
-                        break;
-                    }
+            function getIds() {
+                const idStr = new URL(document.location).searchParams.get("id");
+                if (idStr) {
+                    return idStr.split("-");
                 }
-                if (!found) {
-                    error("Id does not exist!");
-                }
+                return [];
             }
 
-            let ids = [];
-            for (card of cards) {
-                const id = rootCard ? card.subid : card.id;
-                if (ids.indexOf(id) !== -1) {
-                    error(`The ID ${id} was used again in ${card.title}!`);
-                    break;
+            function getCard(ids) {
+                if (ids.length === 0) return null;
+                let parentCard = {};
+                parentCard.cards = cards;
+                for (let id of ids) {
+                    let found = false;
+                    for (let card of parentCard.cards) {
+                        if (card.id == id) {
+                            parentCard = card;
+                            found = true;
+                        }
+                    }
+
+                    if (!found) {
+                        error(`The ID ${ids.join("-")} does not exist!`);
+                    }
                 }
-                ids.push(id);
+                return parentCard;
+            }
+
+            function cardsView() {
+                const cardsDiv = document.createElement("div");
+                cardsDiv.classList.add("cards")
+                document.body.appendChild(cardsDiv);
+                return cardsDiv;
             }
 
             // TODO: Change cover image based on content type
             // There are four content types: Nahw, qa'ida nahw, sarf, and qa'ida sarf
-            function generateItem(card) {
-                if (card.type === "نحو") {
-                    return `\
-<a class="card big primary-bg" href="index.html?id=${card.id}">
+            function generateCardHTML(card) {
+                let node;
+                if (card.display === "cards") {
+                    node = new DOMParser().parseFromString(`\
+<a class="card big primary-bg" href="index.html?id=${ids.concat(card.id).join("-")}">
     <img src="img/nahw.jpg" alt="Nahw Image">
     <div class="card-container">
         <div class="card-title-type-container">
@@ -83,22 +104,46 @@
         </div>
         <p class="card-description">${card.description}</p>
     </div>
-</a>`;
-                } else if (rootCard) {
-                    return `\
-<a class="card small secondary-bg" href="quiz.html?id=${rootCard.id}-${card.subid}">
+</a>`, "text/html").body.firstElementChild;
+                } else if (card.display === "question") {
+                    node = new DOMParser().parseFromString(`\
+<a class="card small secondary-bg" href="index.html?id=${ids.concat(card.id).join("-")}">
     <h1 class="card-title">${card.title}</h1>
-</a>`;                    
+</a>`, "text/html").body.firstElementChild;                    
                 } else {
-                    error("Unsupported type!");
+                    error(`Card ${card.id}'s display is not supported!`);
+                    return;
                 }
+
+                node.card = card;
+                return node;
             }
 
-            cards.forEach( x => {
-                if (!x.hidden) {
-                    cardsElement.innerHTML += generateItem(x);
-                }
-            });
+            let ids = getIds();
+            let parentCard = getCard(ids);
+
+            if (ids.length === 0) {
+                const cardsElement = cardsView();
+                cards.forEach( x => {
+                    if (!x.hidden) {
+                        cardsElement.appendChild(generateCardHTML(x));
+                    }
+                });
+            } else if (parentCard && parentCard.display == "cards") {
+                const cardsElement = cardsView();
+                addBackButton();
+                setTitle(parentCard.title);
+                parentCard.cards.forEach( x => {
+                    if (!x.hidden) {
+                        cardsElement.appendChild(generateCardHTML(x));
+                    }
+                });
+            } else if (card.display === "question") {
+
+            } else {
+                error(`ID ${ids.join("-")} is not currently supported!`)
+                addBackButton();
+            }
         </script>
     </body>
 </html>
