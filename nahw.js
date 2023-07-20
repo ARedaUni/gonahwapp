@@ -5,11 +5,11 @@ class NahwQS {
 
     constructor(answers) {
         console.assert(answers != undefined);
-        this.answers = answers;
-        this.skeletons = answers.map(x => Util.getSkeleton(x, [svowel.SHADDA]));
-        this.answerLPs = answers.map(x => Util.getLetterPacks(this.answers));
-        this.fullSkeletonText = this.skeletons.join(" ");
-        this.attempts = [];
+        this._answers = answers;
+        this._skeletons = answers.map(x => Util.getSkeleton(x, [svowel.SHADDA]));
+        this._answerLPs = answers.map(x => Util.getLetterPacks(this.getAnswers()));
+        this._fullSkeletonText = this.getSkeletons().join(" ");
+        this._attempts = [];
     }
 
     // Assumes letters are the same
@@ -55,6 +55,26 @@ class NahwQS {
         return this.view = new NahwQV(this);
     }
 
+    getAnswers() {
+        return this._answers;
+    }
+
+    getSkeletons() {
+        return this._skeletons;
+    }
+
+    getFullSkeletonText() {
+        return this._fullSkeletonText;
+    }
+
+    getAnswerLPs() {
+        return this._answersLPs;
+    }
+
+    getAttempts() {
+        return this._attempts;
+    }
+
     getLastAttempt() {
         return this.attempts[this.attempts.length - 1];
     }
@@ -72,8 +92,26 @@ class NahwQV {
     }
 
 
+    topBar() {
+        // Create progress bar
+    }
+
     mainPage() {
-        const text = this.data.skeletons
+        // TODO: Reset root node (except the top bar)
+        this.topBar();
+        // Create text (TODO: Make sentence clickable)
+        const textEl = this.HTML.text = document.createElement("p");
+        textEl.classList.add("nahw-full-text");
+        for (let sentence of this.data.getSkeletons()) {
+            const span = document.createElement("span");
+            span.innerText = sentence + " ";
+            span.classList.add("nahw-full-text-sentence");
+            textEl.appendChild(span);
+        }
+        // TODO: Create next button
+        // TODO: Create back-to-question or back-to-text
+        // Append all elements
+        this.HTML.root.appendChild(textEl);
     }
 
     getRootHTML() {

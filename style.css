@@ -18,13 +18,22 @@ body {
     font-family: Roboto, Helvetica, "Noto Sans Arabic", sans-serif;
 }
 
-/* Actual CSS (basically) */
-
 #error {
     color: red;
     font-weight: 800;
     font-size: 2rem;
 }
+
+.primary-bg {
+    background-color: var(--primary);
+    color: var(--background);
+}
+
+.secondary-bg {
+    background-color: var(--secondary);
+    color: var(--background);
+}
+
 
 #lesson-banner {
     padding-left: 1rem;
@@ -37,15 +46,9 @@ body {
     color: var(--background);
 }
 
-.primary-bg {
-    background-color: var(--primary);
-    color: var(--background);
-}
-
-.secondary-bg {
-    background-color: var(--secondary);
-    color: var(--background);
-}
+/* =============== */
+/*     CARDS       */
+/* =============== */
 
 .cards {
     display: flex;
@@ -109,4 +112,25 @@ body {
 
 .small h1 {
     margin-left: 1rem;
+}
+
+/* =============== */
+/*      NAHW       */
+/* =============== */
+
+.nahw-full-text {
+    text-align: center;
+    font-size: 2rem;
+    margin: 1rem;
+    direction: rtl;
+}
+
+.nahw-full-text-sentence {
+    color: var(--text);
+    transition: color .2s;
+}
+
+.nahw-full-text-sentence:hover {
+    color: var(--primary);
+    cursor: pointer;
 }

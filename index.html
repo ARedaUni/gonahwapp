@@ -122,6 +122,8 @@
 
             let ids = getIds();
             let parentCard = getCard(ids);
+            let qs = null;
+            let qv = null;
 
             if (ids.length === 0) {
                 const cardsElement = cardsView();
@@ -140,8 +142,8 @@
                     }
                 });
             } else if (parentCard.display === "question") {
-                let qs = new NahwQS(parentCard.sentences);
-                let qv = qs.getView();
+                qs = new NahwQS(parentCard.sentences);
+                qv = qs.getView();
                 setTitle(parentCard.title);
                 document.body.appendChild(qv.getRootHTML());
                 addBackButton(ids);
