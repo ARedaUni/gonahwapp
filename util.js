@@ -9,6 +9,7 @@ const svowel = {
     "KASRA": "\u0650\u25cc",
     "KASRATAN": "\u064d\u25cc",
     "SUKOON": "\u0652\u25cc",
+    "SHADDA": "\u0651\u25cc",
 
     getShortVowels: () => Object.values(svowel).slice(0,7),
     isShortVowel: (value) => svowel.getShortVowels().some(x => x === value),
@@ -30,9 +31,13 @@ const svowel = {
 };
 
 class Util {
-    static getSkeleton(text) {
+    static getSkeleton(text, except=[]) {
         const vowels = svowel.getShortVowels().join("");
-        return text.split("").filter(x => vowels.indexOf(x) === -1).join("");
+        except.map(x => x[0]);
+        return text.split("").filter(x => {
+            const index = vowels.indexOf(x);
+            return index === -1 || except.some(y => y === text[index]);
+        }).join("");
     }
 
     static getLetterPacks(text) {

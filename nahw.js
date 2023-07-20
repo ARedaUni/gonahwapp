@@ -1,13 +1,14 @@
 "use strict";
 
-class ShortVowelQS {
+class NahwQS {
     static FLAGS = ["wrong", "correct"]
 
-    constructor(answers, unlockQS) {
+    constructor(answers) {
+        console.assert(answers != undefined);
         this.answers = answers;
-        this.skeletons = answers.map(x => Util.getSkeleton(x));
-        this.answerLPs = answers.map(x => Util.getLetterPacks(this.answer));
-        this.fullSkeletonText = 
+        this.skeletons = answers.map(x => Util.getSkeleton(x, [svowel.SHADDA]));
+        this.answerLPs = answers.map(x => Util.getLetterPacks(this.answers));
+        this.fullSkeletonText = this.skeletons.join(" ");
         this.attempts = [];
     }
 
@@ -51,7 +52,7 @@ class ShortVowelQS {
     getView() {
         if (this.view)
             return this.view
-        return this.view = new ShortVowelQV(this);
+        return this.view = new NahwQV(this);
     }
 
     getLastAttempt() {
@@ -59,7 +60,7 @@ class ShortVowelQS {
     }
 }
 
-class ShortVowelQV {
+class NahwQV {
     constructor(data) {
         this.data = data;
         this.HTML = {};
