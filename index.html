@@ -5,8 +5,8 @@
         <meta charset="utf-8">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="style.css">
         <link rel="icon" type="image/x-icon" href="./img/favicon.ico">
     </head>
@@ -14,7 +14,7 @@
         <div id="lesson-banner">
             <div id="back">
             </div>
-            <h1 id="title">Learn Arabic</h1>
+            <h1 id="title" lang="ar">الصفحة الرئيسية</h1>
             <div id="error"></div>
         </div>
         <script type="text/javascript" src="cards.js"></script>
@@ -100,8 +100,8 @@
     <img src="img/nahw.jpg" alt="Nahw Image">
     <div class="card-container">
         <div class="card-title-type-container">
-            <h1 class="card-title">${card.title}</h1>
-            <p class="card-type">${card.type}</p>
+            <h1 class="card-title" lang="ar">${card.title}</h1>
+            <p class="card-type" lang="ar">${card.type}</p>
         </div>
         <p class="card-description">${card.description}</p>
     </div>
@@ -109,7 +109,7 @@
                 } else if (card.display === "question") {
                     node = new DOMParser().parseFromString(`\
 <a class="card small secondary-bg" href="index.html?id=${ids.concat(card.id).join("-")}">
-    <h1 class="card-title">${card.title}</h1>
+    <h1 class="card-title" lang="ar">${card.title}</h1>
 </a>`, "text/html").body.firstElementChild;                    
                 } else {
                     error(`Card ${card.id}'s display is not supported!`);

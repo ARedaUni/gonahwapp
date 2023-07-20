@@ -15,7 +15,11 @@
 body {
     background-color: var(--background);
     color: var(--text);
-    font-family: Roboto, Helvetica, "Noto Sans Arabic", sans-serif;
+    font-family: Roboto, Helvetica, "Amiri", sans-serif;
+}
+
+[lang="ar"] {
+    font-family: "Amiri";
 }
 
 #error {
@@ -107,7 +111,7 @@ body {
 
 .card-type {
     color: var(--accent);
-    font-size: 1.4rem;
+    font-size: 1.6rem;
 }
 
 .small h1 {

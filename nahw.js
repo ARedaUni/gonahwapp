@@ -124,6 +124,7 @@ class NahwQV {
             const span = document.createElement("span");
             span.innerText = sentence;
             span.classList.add("nahw-full-text-sentence");
+            span.setAttribute("lang", "ar");
             textEl.appendChild(span);
         }
         // TODO: Create next button
