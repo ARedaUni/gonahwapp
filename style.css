@@ -122,12 +122,20 @@ body {
 /*      NAHW       */
 /* =============== */
 
+.nahw-question {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .nahw-full-text {
-    text-align: center;
-    font-size: 2rem;
-    margin: 1rem;
+    font-size: 3rem;
+    width: 50%;
     direction: rtl;
     user-select: none;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    text-align: justify;
 }
 
 .nahw-full-text-sentence {
@@ -135,7 +143,6 @@ body {
     transition: color .2s, background-color .2s;
     padding-right: .2em;
     padding-left: .2em;
-    display: inline-block;
 }
 
 .nahw-full-text-sentence:hover {
@@ -161,7 +168,7 @@ body {
     transition: background-color .2s;
 }
 
-.nahw-top-bar-page:hover {
+.nahw-top-bar-page:hover:not(.nahw-top-bar-fill) {
     background-color: var(--primary);
 }
 
@@ -176,12 +183,13 @@ body {
 
 .nahw-top-bar-fill {
     background-color: var(--text);
+    cursor: default;
 }
 
 .nahw-actions-container {
     display: flex;
     margin: 0 auto;
-    width: 15%;
+    width: 50%;
     justify-content: space-between;
 }
 

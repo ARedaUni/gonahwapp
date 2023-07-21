@@ -216,7 +216,7 @@ class NahwQV {
         this.HTML = {};
 
         this.HTML.root = document.createElement("div");
-        this.HTML.root.classList.add("question");
+        this.HTML.root.classList.add("nahw-question");
         this.topBar();
         this.mainPage();
     }
@@ -252,7 +252,13 @@ class NahwQV {
         textEl.classList.add("nahw-full-text");
         for (let sentence of this.data.getSentences()) {
             const span = document.createElement("span");
-            span.innerText = sentence.getFacade();
+            // U+200C = Zero Width Non-Joiner
+            // It prevents adjacent letters from forming ligatures
+            // Perfect since:
+            // I want a margin between sentences (done with CSS)
+            // I don't want a space since that shows up when hovering
+            // I don't want letters connecting between sentences (i.e U+200C)
+            span.innerText = sentence.getFacade() + "\u200c";
             span.classList.add("nahw-full-text-sentence");
             span.setAttribute("lang", "ar");
             textEl.appendChild(span);
@@ -459,6 +465,11 @@ class NahwQV {
         letter.select();
         view.render();
     }
+}
+
+// TODO: Write
+class SubmitView {
+
 }
 
 // TODO: Write
