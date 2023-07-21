@@ -99,7 +99,7 @@ class WordState {
                 i++;
                 continue;
             }
-            if (c === ',' || c === ':' || c === ".") {
+            if (c === ',' || c === ':' || c === '.' || c === '،') {
                 let word = sentenceAnswer.substr(startingIndex, i - startingIndex);
                 words.push(new WordState(word, WordState.computeFlag(word)));
                 words.push(new WordState(c, "na"));
