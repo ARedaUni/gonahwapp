@@ -41,34 +41,81 @@ function removeWordEnding(word) {
     return word.split(word[index]).join("");
 }
 
+function getLastLetter(word) {
+    console.assert(typeof word === "string");
+    const vowelIndex = getWordEndingNameAndIndex(word).index;
+    if (vowelIndex === -1) {
+        if (getDiacriticName(word[word.length - 1]) === "SHADDA") {
+            return word.substr(word.length - 2, 2);
+        }
+        return word.substr(word.length - 1, 1);
+    }
+    if (word[vowelIndex + 1] && getDiacriticName(word[vowelIndex + 1]) === "SHADDA") {
+        return word.substr(vowelIndex - 1, 3);
+    }
+    if (getDiacriticName(word[vowelIndex - 1]) === "SHADDA") {
+        return word.substr(vowelIndex - 2, 3);
+    }
+    return word.substr(vowelIndex - 1, 2);
+}
+
+function getAllLettersButLast(word) {
+    const index = word.indexOf(getLastLetter(word));
+    return word.substr(0, index);
+}
+
 class WordState {
     static flags = ["correct", "incorrect", "unattempted", "na"]
     constructor(wordAnswer, flag="na") {
         this.setFlag(flag);
-        if (this.getFlag() === "na") {
-            this.setFacade(wordAnswer);
-        } else {
-            this.setFacade(removeWordEnding(wordAnswer));
-        }
-        this._answerWord = wordAnswer;
-        this._answerVowel = getWordEndingName(wordAnswer);
+        // TODO: I could optimize this
+        this._baseWord = getAllLettersButLast(wordAnswer);
+        this._answer = getLastLetter(wordAnswer);
+        this._answerVowelName = getWordEndingName(wordAnswer);
+        this._facade = removeWordEnding(this.getAnswer());
+        this._facadeVowelName = null;
     }
 
     getAnswer() {
-        return this._answerWord;
+        return this._answer;
     }
 
-    getAnswerVowelEndingName() {
-        return this._answerVowel;
+    getAnswerVowelName() {
+        return this._answerVowelName;
+    }
+
+    getBaseWord() {
+        return this._baseWord;
     }
 
     getFacade() {
         return this._facade;
     }
 
-    setFacade(value) {
-        console.assert(typeof value === "string");
-        this._facade = value;
+    getFacadeVowelName() {
+        return this._facadeVowelName;
+    }
+
+    attempt(vowelEnding="") {
+        console.assert(typeof vowelEnding === "string");
+        if (this.getFlag() === "na") return;
+        if (vowelEnding === "") {
+            this.setFlag("unattempted");
+            this._facade = removeWordEnding(this.getAnswer());
+            return;
+        }
+        console.assert(diacritic[vowelEnding], `${vowelEnding} is not a diacritic`);
+        this._facadeVowelName = vowelEnding;
+        if (this.getFlag() !== "unattempted") {
+            this._facade[this._facade.length - 1] = vowelEnding;
+        } else {
+            this._facade += diacritic[vowelEnding];
+        }
+        if (vowelEnding === this.getAnswerVowelName()) {
+            this.setFlag("correct");
+        } else {
+            this.setFlag("incorrect");
+        }
     }
 
     getFlag() {
@@ -144,6 +191,18 @@ class SentenceState {
         console.assert(SentenceState.flags.some(x => x === value));
         this._flag = value;
     }
+
+    getBigView() {
+        if (this._bigView)
+            return this._bigView;
+        return this._bigView = new SentenceBigView(this);
+    }
+
+    getSmallView() {
+        if (this._smallView)
+            return this._smallView;
+        return this._smallView = new SentenceSmallView(this);
+    }
 }
 
 class NahwQS {
@@ -155,9 +214,9 @@ class NahwQS {
     }
 
     getView() {
-        if (this.view)
-            return this.view
-        return this.view = new NahwQV(this);
+        if (this._view)
+            return this._view
+        return this._view = new NahwQV(this);
     }
 
     getSentences() {
@@ -176,7 +235,7 @@ class NahwQS {
 class NahwQV {
     constructor(data) {
         this.data = data;
-        this.HTML = {};
+        this.HTML = Object.create(null);
 
         this.HTML.root = document.createElement("div");
         this.HTML.root.classList.add("nahw-question");
@@ -247,20 +306,7 @@ class NahwQV {
         this.HTML.root.innerHTML = "";
         this.topBar();
 
-        const sentenceEl = document.createElement("p");
-        sentenceEl.classList.add("nahw-single-sentence");
-        sentenceEl.setAttribute("lang", "ar");
-        for (let word of sentenceState.getWords()) {
-            const wordEl = document.createElement("span");
-            wordEl.classList.add("nahw-single-sentence-word");
-            if (word.getFlag() !== "na") {
-                wordEl.classList.add("nahw-single-sentence-word-hoverable");
-            }
-            wordEl.setAttribute("lang", "ar");
-            wordEl.innerText = word.getFacade() + " ";
-            sentenceEl.appendChild(wordEl);
-        }
-        this.HTML.root.appendChild(sentenceEl);
+        this.HTML.root.appendChild(sentenceState.getBigView().getRootHTML());
 
         // TODO: Add input options
 
@@ -284,11 +330,114 @@ class ProgressView {
 }
 
 // TODO: Write
-class SentenceView {
+class SentenceBigView {
     constructor(sentenceState) {
         console.assert(sentenceState instanceof SentenceState);
         this._sentenceState = sentenceState;
+        this._words = []; // list of WordView
+
+        this.HTML = Object.create(null);
+        this.HTML.root = document.createElement("p");
+
+        this.HTML.root.classList.add("nahw-big-sentence");
+        this.HTML.root.setAttribute("lang", "ar");
+        for (let word of sentenceState.getWords()) {
+            const wordView = new WordView(word);
+            this._words.push(wordView);
+            this.HTML.root.appendChild(wordView.getRootHTML());
+            this.HTML.root.appendChild(document.createTextNode(" "));
+        }
+        this.getWords()[1].select();
+        this.getWords()[1].render();
     }
+
+    getRootHTML() {
+        return this.HTML.root;
+    }
+
+    getSentenceState() {
+        return this._sentenceState;
+    }
+
+    getWords() {
+        return this._words;
+    }
+}
+
+class WordView {
+    constructor(wordState) {
+        console.assert(wordState instanceof WordState);
+        this._wordState = wordState;
+        this.HTML = Object.create(null);
+        this.HTML.root = document.createElement("span");
+        this.HTML.root.classList.add("nahw-big-sentence-word");
+        this.HTML.root.setAttribute("lang", "ar");
+        const baseEl = this.HTML.base = document.createElement("span");
+        baseEl.innerText = wordState.getBaseWord();
+        const endingEl = this.HTML.ending = document.createElement("span");
+        endingEl.innerText = wordState.getFacade();
+
+        this.HTML.root.appendChild(baseEl);
+        this.HTML.root.appendChild(endingEl);
+        if (wordState.getFlag() !== "na") {
+            const highlightEl = this.HTML.highlight = document.createElement("div");
+            highlightEl.classList.add("nahw-big-sentence-word-highlight");
+            endingEl.classList.add("nahw-big-sentence-word-hoverable");
+            this.HTML.ending.appendChild(highlightEl);
+            this.unselect();
+        }
+        this.render();
+    }
+
+    getRootHTML() {
+        return this.HTML.root;
+    }
+
+    getWordState() {
+        return this._wordState;
+    }
+
+    select() {
+        if (this.getWordState().getFlag() === "na") {
+            console.error("Can't select a word that's not applicable");
+            return;
+        }
+        this._selected = true;
+    }
+
+    unselect() {
+        if (this.getWordState().getFlag() === "na") {
+            console.error("Can't unselect a word that's not applicable");
+            return;
+        }
+        this._selected = false;
+    }
+
+    isSelected() {
+        return this._selected;
+    }
+
+    render() {
+        if (this.getWordState().getFlag() === "na") {
+            return;
+        }
+        if (this.isSelected()) {
+            if (!this.HTML.highlight.classList.replace("nahw-highlight-inactive",
+                "nahw-highlight-active")) {
+                this.HTML.highlight.classList.add("nahw-highlight-active");
+            }
+        } else {
+            if (!this.HTML.highlight.classList.replace("nahw-highlight-active",
+                "nahw-highlight-inactive")) {
+                this.HTML.highlight.classList.add("nahw-highlight-inactive");
+            }
+        }
+    }
+}
+
+
+class SentenceSmallView {
+
 }
 
 // TODO: Write
@@ -299,8 +448,4 @@ class InputView {
 // TODO: Write
 class ErrorView {
 
-}
-
-// TODO: Write
-class WordView {
 }
