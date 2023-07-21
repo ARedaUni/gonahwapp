@@ -191,6 +191,7 @@ body {
     margin: 0 auto;
     width: 50%;
     justify-content: space-between;
+    user-select: none;
 }
 
 .nahw-next {
