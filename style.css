@@ -20,6 +20,7 @@ body {
 
 [lang="ar"] {
     font-family: "Amiri";
+    direction: rtl;
 }
 
 #error {
@@ -131,7 +132,6 @@ body {
 .nahw-full-text {
     font-size: 3rem;
     width: 50%;
-    direction: rtl;
     user-select: none;
     margin-top: 2rem;
     margin-bottom: 2rem;
@@ -230,3 +230,22 @@ body {
     cursor: pointer;
 }
 
+.nahw-single-sentence {
+    font-size: 5rem;
+    margin-top: 4rem;
+    user-select: none;
+}
+
+.nahw-single-sentence-word {
+
+}
+
+.nahw-single-sentence-word-hoverable {
+    cursor: pointer;
+    transition: color .2s, background-color .2s;
+}
+
+.nahw-single-sentence-word-hoverable:hover {
+    color: var(--background);
+    background-color: var(--text);
+}

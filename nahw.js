@@ -154,43 +154,6 @@ class NahwQS {
         this._sentences = answers.map(x => new SentenceState(x));
     }
 
-    // Assumes letters are the same
-    try(values, push=true) {
-        let valueLP = Util.getLetterPacks(value);
-        let flags = [];
-        let correct = true;
-        for (let i = 0; i < valueLP.length; ++i) {
-            if (!valueLP[i].svowel) {
-                flags.push({flag: "correct", value: valueLP[i]});
-                continue;
-            }
-
-            const vLP = valueLP[i];
-            const aLP = this.answerLP[i];
-            if (vLP.svowel === aLP.svowel &&
-                vLP.shadda === aLP.shadda) {
-                flags.push({flag: "correct", value: vLP});
-                continue;
-            }
-
-            correct = false;
-
-            if (svowel.toggleTanween(vLP.svowel) === aLP.svowel &&
-                vLP.shadda === aLP.shadda) {
-                flags.push({flag: "close_tanween", value: vLP});
-            } else if (vLP.svowel === aLP.svowel && vLP.shadda !== aLP.shadda) {
-                flags.push({flag: "close_shadda", value: vLP});
-            } else {
-                flags.push({flag: "wrong", value: vLP});
-            }
-        }
-        let attempt = {correct, value, flags};
-        if (push) {
-            this.attempts.push(attempt);
-        }
-        return attempt;
-    }
-
     getView() {
         if (this.view)
             return this.view
@@ -218,7 +181,7 @@ class NahwQV {
         this.HTML.root = document.createElement("div");
         this.HTML.root.classList.add("nahw-question");
         this.topBar();
-        this.mainPage();
+        this.sentencePage(this.data.getSentences()[0]);
     }
 
 
@@ -246,7 +209,14 @@ class NahwQV {
         this.HTML.root.appendChild(topBarEl);
     }
 
+    nextButton() {
+        const nextEl = document.createElement("div");
+        nextEl.innerText = "Next";
+        nextEl.classList.add("nahw-next");
+    }
+
     mainPage() {
+        this.HTML.root.innerHTML = "";
         // Create text (TODO: Make sentence clickable)
         const textEl = this.HTML.text = document.createElement("p");
         textEl.classList.add("nahw-full-text");
@@ -266,25 +236,35 @@ class NahwQV {
             textEl.appendChild(span);
         }
         // TODO: Create next button
-        const actionButtonsEl = document.createElement("div");
-        actionButtonsEl.classList.add("nahw-actions-container");
-
-        const nextEl = document.createElement("div");
-        nextEl.innerText = "Next";
-        nextEl.classList.add("nahw-next");
-
-        const submitEl = document.createElement("div");
-        submitEl.innerText = "Submit";
-        submitEl.classList.add("nahw-submit");
-
-        actionButtonsEl.appendChild(submitEl);
-        actionButtonsEl.appendChild(nextEl);
-
         // TODO: Create back-to-question or back-to-text
         // TODO: Add submit
         // Append all elements
         this.HTML.root.appendChild(textEl);
-        this.HTML.root.appendChild(actionButtonsEl)
+    }
+
+    sentencePage(sentenceState) {
+        console.assert(sentenceState instanceof SentenceState);
+        this.HTML.root.innerHTML = "";
+        this.topBar();
+
+        const sentenceEl = document.createElement("p");
+        sentenceEl.classList.add("nahw-single-sentence");
+        sentenceEl.setAttribute("lang", "ar");
+        for (let word of sentenceState.getWords()) {
+            const wordEl = document.createElement("span");
+            wordEl.classList.add("nahw-single-sentence-word");
+            if (word.getFlag() !== "na") {
+                wordEl.classList.add("nahw-single-sentence-word-hoverable");
+            }
+            wordEl.setAttribute("lang", "ar");
+            wordEl.innerText = word.getFacade() + " ";
+            sentenceEl.appendChild(wordEl);
+        }
+        this.HTML.root.appendChild(sentenceEl);
+
+        // TODO: Add input options
+
+
     }
 
     getRootHTML() {
@@ -305,9 +285,9 @@ class ProgressView {
 
 // TODO: Write
 class SentenceView {
-    constructor(sentenceText, answersText) {
-        console.assert(typeof sentenceText === "string");
-        this.sentenceText = sentenceText;
+    constructor(sentenceState) {
+        console.assert(sentenceState instanceof SentenceState);
+        this._sentenceState = sentenceState;
     }
 }
 
