@@ -220,6 +220,7 @@ body {
     width: 5rem;
     height: 5rem;
     background-color: var(--accent);
+    fill: var(--background);
     color: var(--background);
     display: flex;
     justify-content: center;
@@ -228,6 +229,10 @@ body {
     font-size: 3rem;
     cursor: pointer;
     border-radius: 100%;
+}
+
+.nahw-nav svg {
+    pointer-events: none;
 }
 
 .nahw-submit {
