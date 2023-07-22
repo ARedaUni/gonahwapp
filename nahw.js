@@ -281,7 +281,30 @@ class NahwQV {
             }
         });
 
-        this.nextPage();
+        window.view = this;
+        window.state = this.data;
+        window.addEventListener("hashchange", (e) => {
+            e.target.view.renderFromURL();
+        });
+
+        if (!this.renderFromURL()) {
+            this.nextPage();
+        }
+    }
+
+    renderFromURL() {
+        let success = true;
+        const pageNum = parseInt(window.location.hash.substr(1));
+        if (isNaN(pageNum)) success = false;
+        if (pageNum < 0) success = false;
+        if (pageNum > this.data.getSentences().length + 1) success = false;
+        if (!success) {
+            window.location.hash = "#0";
+            return false;
+        }
+        this.currentPage = pageNum;
+        this.renderPage();
+        return true;
     }
 
     pageActionButtons() {
@@ -349,12 +372,13 @@ class NahwQV {
     }
 
     renderPage() {
+        window.location.hash = this.currentPage;
         this.progressView.selectPage(this.currentPage);
         if (this.currentPage === 0) {
             this.mainPage();
         } else {
             this.sentencePage(this.data.getSentences()[this.currentPage - 1]);
-        }        
+        }
     }
 
     // TODO: Switch to SentenceSmallView
