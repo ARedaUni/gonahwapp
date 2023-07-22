@@ -409,7 +409,6 @@ class SubmitView {
 
 }
 
-// TODO: Write
 class ProgressView {
     constructor(view) {
         this._numOfQuestions = view.data.getSentences().length;
