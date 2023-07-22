@@ -261,15 +261,26 @@ class NahwQV {
         this.HTML.main.classList.add("nahw-question-main");
         this.HTML.root.appendChild(this.HTML.main);
 
+        this.lastPage = -1;
+
         document.body.addEventListener("keydown", (e) => {
             if (e.ctrlKey) {
                 if (e.key === "ArrowRight") {
                     this.nextPage();
                 } else if (e.key === "ArrowLeft") {
                     this.prevPage();
+                } else if (e.key === "ArrowUp") {
+                    if (this.currentPage === 0) return;
+                    this.lastPage = this.currentPage;
+                    this.selectPage(0);
+                } else if (e.key === "ArrowDown") {
+                    if (this.lastPage !== -1) {
+                        this.selectPage(this.lastPage);
+                    }
                 }
             }
         });
+
         this.nextPage();
     }
 
@@ -314,6 +325,7 @@ class NahwQV {
     }
 
     prevPage() {
+        this.lastPage = -1;
         if (this.currentPage == undefined) {
             this.currentPage = 0;
         } else {
@@ -326,6 +338,7 @@ class NahwQV {
     }
 
     nextPage() {
+        this.lastPage = -1;
         if (this.currentPage == undefined) {
             this.currentPage = 0;
         } else {
@@ -351,7 +364,8 @@ class NahwQV {
         const textEl = this.HTML.text = document.createElement("p");
         textEl.classList.add("nahw-full-text");
         textEl.setAttribute("lang", "ar");
-        for (let sentence of this.data.getSentences()) {
+        for (let i = 0; i < this.data.getSentences().length; ++i) {
+            let sentence = this.data.getSentences()[i];
             const span = document.createElement("span");
             // U+200C = Zero Width Non-Joiner
             // It prevents adjacent letters from forming ligatures
@@ -364,6 +378,9 @@ class NahwQV {
             span.innerText = sentence.getFacade() + "\u200c";
             span.classList.add("nahw-full-text-sentence");
             span.setAttribute("lang", "ar");
+            span.view = this; // TODO: Change to SentenceSmallView
+            span.state = sentence;
+            span.onclick = (e) => e.target.view.selectPage(i + 1);
             textEl.appendChild(span);
         }
         // TODO: Create back-to-question or back-to-text
@@ -457,11 +474,15 @@ class SentenceBigView {
 
         this.HTML.root.classList.add("nahw-big-sentence");
         this.HTML.root.setAttribute("lang", "ar");
+        let first = true;
         for (let word of sentenceState.getWords()) {
+            if (!first && !word.isPunctuation()) {
+                this.HTML.root.appendChild(document.createTextNode(" "));
+            }
             const wordView = new WordView(word);
             this._words.push(wordView);
             this.HTML.root.appendChild(wordView.getRootHTML());
-            this.HTML.root.appendChild(document.createTextNode(" "));
+            first = false;
         }
         this.getWords()[1].select();
         this.getWords()[1].render();
