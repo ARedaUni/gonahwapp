@@ -253,7 +253,7 @@ class NahwQV {
         this.HTML.root = document.createElement("div");
         this.HTML.root.classList.add("nahw-question");
 
-        this.progressView = new ProgressView(data.getSentences().length);
+        this.progressView = new ProgressView(this);
         this.HTML.root.appendChild(this.progressView.getRootHTML());
         this.pageActionButtons();
 
@@ -411,8 +411,8 @@ class SubmitView {
 
 // TODO: Write
 class ProgressView {
-    constructor(numOfQuestions) {
-        this._numOfQuestions = numOfQuestions;
+    constructor(view) {
+        this._numOfQuestions = view.data.getSentences().length;
         this.HTML = Object.create(null);
         const topBarEl = this.HTML.root = document.createElement("div");
         topBarEl.classList.add("nahw-top-bar");
@@ -420,13 +420,19 @@ class ProgressView {
         const mainPageEl = this.HTML.mainPage = document.createElement("div");
         mainPageEl.classList.add("nahw-top-bar-page");
         mainPageEl.classList.add("nahw-top-bar-square");
+        mainPageEl.view = view;
+        mainPageEl.state = view.data;
+        mainPageEl.onclick = (e) => e.target.view.selectPage(0);
         topBarEl.appendChild(mainPageEl);
 
         this.HTML.sentencePage = [];
-        for (let i = 0; i < numOfQuestions; ++i) {
+        for (let i = 0; i < this._numOfQuestions; ++i) {
             const sentencePageEl = document.createElement("div");
             sentencePageEl.classList.add("nahw-top-bar-page");
             sentencePageEl.classList.add("nahw-top-bar-circle");
+            sentencePageEl.view = view;
+            sentencePageEl.state = view.data;
+            sentencePageEl.onclick = (e) => e.target.view.selectPage(i + 1);
             this.HTML.sentencePage.push(sentencePageEl);
             topBarEl.appendChild(sentencePageEl);
         }
