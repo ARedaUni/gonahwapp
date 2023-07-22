@@ -137,10 +137,17 @@ body {
 /*      NAHW       */
 /* =============== */
 
+
 .nahw-question {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.nahw-question-main {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
 }
 
 .nahw-full-text {
@@ -200,48 +207,48 @@ body {
     cursor: default;
 }
 
-.nahw-actions-container {
+.nahw-action-container {
     display: flex;
     margin: 0 auto;
     width: 50%;
     justify-content: space-between;
     user-select: none;
+    margin-top: 2rem;
 }
 
-.nahw-next {
-    width: 7rem;
-    height: 6rem;
-    background-color: var(--secondary);
+.nahw-nav {
+    width: 5rem;
+    height: 5rem;
+    background-color: var(--accent);
     color: var(--background);
-    font-size: 2rem;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    user-select: none;
+    font-size: 3rem;
     cursor: pointer;
+    border-radius: 100%;
 }
 
 .nahw-submit {
-    width: 7rem;
-    height: 6rem;
-    background-color: var(--secondary);
-    color: var(--background);
+    width: 10rem;
+    height: 7rem;
+    border-radius: 20%;
     font-size: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    color: var(--background);
 }
 
-.nahw-back {
-    width: 7rem;
-    height: 6rem;
-    background-color: var(--secondary);
-    color: var(--background);
-    font-size: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+.nahw-submit-active {
+    background-color: var(--primary);
+}
+
+.nahw-submit-inactive {
+    background-color: var(--highlight-inactive);
+    cursor: not-allowed;
 }
 
 .nahw-big-sentence {

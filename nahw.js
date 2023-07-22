@@ -12,6 +12,13 @@ const diacritics = {
 
 }
 
+function isShortVowel(diacriticName) {
+    console.assert(typeof diacriticName === "string");
+    console.assert(diacritics[diacriticName],
+        `Diacritic ${diacriticName} is not a diacritic`);
+    return diacriticName !== "SHADDA";
+}
+
 function getDiacriticName(diacritic) {
     console.assert(typeof diacritic === "string");
     console.assert(diacritic.length === 1);
@@ -20,48 +27,55 @@ function getDiacriticName(diacritic) {
     return Object.keys(diacritics)[index];
 }
 
-function getWordEndingNameAndIndex(word) {
-    console.assert(typeof word === "string");
-    let index = word.length - 1;
-    let diacriticName = getDiacriticName(word[index]);
-    if (diacriticName === null) return {diacriticName: null, index: -1};
-    if (diacriticName === "SHADDA") {
-        index = word.length - 2;
-        diacriticName = getDiacriticName(word[index]);
-    }
-    return {diacriticName, index};
-}
-
-function getWordEndingName(word) {
-    return getWordEndingNameAndIndex(word).diacriticName;
-}
-
-function removeWordEnding(word) {
-    let index = getWordEndingNameAndIndex(word).index;
-    return word.split(word[index]).join("");
-}
-
-function getLastLetter(word) {
-    console.assert(typeof word === "string");
-    const vowelIndex = getWordEndingNameAndIndex(word).index;
-    if (vowelIndex === -1) {
-        if (getDiacriticName(word[word.length - 1]) === "SHADDA") {
-            return word.substr(word.length - 2, 2);
+function removeVowels(word) {
+    let result = "";
+    for (let i = 0; i < word.length; ++i) {
+        const c = word[i];
+        const diacriticName = getDiacriticName(c);
+        if (diacriticName === null) {
+            result += c;
+            continue;
         }
-        return word.substr(word.length - 1, 1);
+        if (!isShortVowel(diacriticName)) {
+            result += c;
+        }
     }
-    if (word[vowelIndex + 1] && getDiacriticName(word[vowelIndex + 1]) === "SHADDA") {
-        return word.substr(vowelIndex - 1, 3);
-    }
-    if (getDiacriticName(word[vowelIndex - 1]) === "SHADDA") {
-        return word.substr(vowelIndex - 2, 3);
-    }
-    return word.substr(vowelIndex - 1, 2);
+    return result;
 }
 
-function getAllLettersButLast(word) {
-    const index = word.indexOf(getLastLetter(word));
-    return word.substr(0, index);
+// A word ending is when the non-mabni tashkeel starts
+function getWordEnding(word) {
+    console.assert(typeof word === "string");
+    let lastLetter = -1;
+    for (let i = 0; i < word.length; ++i) {
+        const c = word[i];
+        const diacriticName = getDiacriticName(c);
+        if (diacriticName === null) {
+            lastLetter = i;
+            continue;
+        }
+        if (diacriticName !== "SHADDA") {
+            return word.substr(lastLetter, word.length - lastLetter);
+        }
+    }
+    return "";
+}
+
+function getWordBeginning(word) {
+    console.assert(typeof word === "string");
+    let lastLetter = -1;
+    for (let i = 0; i < word.length; ++i) {
+        const c = word[i];
+        const diacriticName = getDiacriticName(c);
+        if (diacriticName === null) {
+            lastLetter = i;
+            continue;
+        }
+        if (diacriticName !== "SHADDA") {
+            return word.substr(0, lastLetter);
+        }
+    }
+    return word;
 }
 
 class WordState {
@@ -69,22 +83,16 @@ class WordState {
     constructor(wordAnswer, flag="na") {
         this.setFlag(flag);
         // TODO: I could optimize this
-        this._baseWord = getAllLettersButLast(wordAnswer);
-        this._answer = getLastLetter(wordAnswer);
-        this._answerVowelName = getWordEndingName(wordAnswer);
-        this._facade = removeWordEnding(this.getAnswer());
-        this._facadeVowelName = null;
+        this._baseWord = getWordBeginning(wordAnswer);
+        this._answer = getWordEnding(wordAnswer);
+        this._facade = removeVowels(this.getAnswer());
     }
 
     getAnswer() {
         return this._answer;
     }
 
-    getAnswerVowelName() {
-        return this._answerVowelName;
-    }
-
-    getBaseWord() {
+    getWordBeginning() {
         return this._baseWord;
     }
 
@@ -92,26 +100,18 @@ class WordState {
         return this._facade;
     }
 
-    getFacadeVowelName() {
-        return this._facadeVowelName;
+    reset() {
+        this.setFlag("unattempted");
+        this._facade = removeVowels(this.getAnswer());
     }
 
-    attempt(vowelEnding="") {
-        console.assert(typeof vowelEnding === "string");
-        if (this.getFlag() === "na") return;
-        if (vowelEnding === "") {
-            this.setFlag("unattempted");
-            this._facade = removeWordEnding(this.getAnswer());
+    attempt(wordEnding="") {
+        console.assert(typeof wordEnding === "string");
+        if (this.getFlag() === "na") {
             return;
         }
-        console.assert(diacritic[vowelEnding], `${vowelEnding} is not a diacritic`);
-        this._facadeVowelName = vowelEnding;
-        if (this.getFlag() !== "unattempted") {
-            this._facade[this._facade.length - 1] = vowelEnding;
-        } else {
-            this._facade += diacritic[vowelEnding];
-        }
-        if (vowelEnding === this.getAnswerVowelName()) {
+        this._facade = wordEnding;
+        if (wordEnding === this.getAnswer()) {
             this.setFlag("correct");
         } else {
             this.setFlag("incorrect");
@@ -128,7 +128,7 @@ class WordState {
     }
 
     static computeFlag(wordAns) {
-        if (getWordEndingName(wordAns) == null) {
+        if (getWordEnding(wordAns) === "") {
             return "na";
         }
         return "unattempted";
@@ -180,7 +180,7 @@ class SentenceState {
     }
 
     getFacade() {
-        return this.getWords().map(x => x.getFacade()).join(" ");
+        return this.getWords().map(x => x.getWordBeginning() + x.getFacade()).join(" ");
     }
 
     getFlag() {
@@ -236,49 +236,107 @@ class NahwQV {
     constructor(data) {
         this.data = data;
         this.HTML = Object.create(null);
-
         this.HTML.root = document.createElement("div");
         this.HTML.root.classList.add("nahw-question");
-        this.topBar();
-        this.sentencePage(this.data.getSentences()[0]);
+
+        this.progressView = new ProgressView(data.getSentences().length);
+        this.HTML.root.appendChild(this.progressView.getRootHTML());
+        this.pageActionButtons();
+
+        this.HTML.main = document.createElement("div");
+        this.HTML.main.classList.add("nahw-question-main");
+        this.HTML.root.appendChild(this.HTML.main);
+
+        document.body.addEventListener("keydown", (e) => {
+            if (e.ctrlKey) {
+                if (e.key === "ArrowRight") {
+                    this.nextPage();
+                } else if (e.key === "ArrowLeft") {
+                    this.prevPage();
+                }
+            }
+        });
+        this.nextPage();
     }
 
+    pageActionButtons() {
+        const pageNavButtonsEl = this.HTML.pageNavButtons =
+            document.createElement("div");
+        pageNavButtonsEl.classList.add("nahw-action-container");
+        const nextEl = this.HTML.nextBtn = document.createElement("div");
+        nextEl.innerText = "🡺";
+        nextEl.classList.add("nahw-nav");
+        nextEl.view = this;
+        nextEl.state = this.data;
+        nextEl.onclick = (e) => e.target.view.nextPage();
 
-    topBar() {
-        // Create progress bar
-        if (this.HTML.topBar) {
-            this.HTML.topBar.innerHTML = "";
+        const prevEl = document.createElement("div");
+        prevEl.innerText = "🡸";
+        prevEl.classList.add("nahw-nav");
+        prevEl.view = this;
+        prevEl.state = this.data;
+        prevEl.onclick = (e) => e.target.view.prevPage();
+
+        const submitEl = document.createElement("div");
+        submitEl.innerText = "Submit";
+        submitEl.classList.add("nahw-submit");
+        submitEl.classList.add("nahw-submit-inactive");
+        submitEl.view = this;
+        submitEl.state = this.data;
+        // submitEl.onclick = (e) => e.target.view.prevPage();
+
+        pageNavButtonsEl.appendChild(prevEl);
+        pageNavButtonsEl.appendChild(submitEl);
+        pageNavButtonsEl.appendChild(nextEl);
+        this.HTML.root.appendChild(pageNavButtonsEl);
+    }
+
+    // TODO: Render error page if invalid (add when sentences can be loaded using URL)
+    selectPage(val) {
+        console.assert(val >= 0);
+        console.assert(val < this.data.getSentences().length + 1);
+        this.currentPage = val;
+        this.renderPage();
+    }
+
+    prevPage() {
+        if (this.currentPage == undefined) {
+            this.currentPage = 0;
+        } else {
+            this.currentPage -= 1;
+            if (this.currentPage === -1) {
+                this.currentPage = this.data.getSentences().length;
+            }
         }
-        const topBarEl = this.HTML.topBar = document.createElement("div");
-        topBarEl.classList.add("nahw-top-bar");
+        this.renderPage();
+    }
 
-        const mainPageEl = document.createElement("div");
-        mainPageEl.classList.add("nahw-top-bar-page");
-        mainPageEl.classList.add("nahw-top-bar-square");
-        mainPageEl.classList.add("nahw-top-bar-fill");
-        topBarEl.appendChild(mainPageEl);
-
-        for (let sentence in this.data.getSentences()) {
-            const sentencePageEl = document.createElement("div");
-            sentencePageEl.classList.add("nahw-top-bar-page");
-            sentencePageEl.classList.add("nahw-top-bar-circle");
-            topBarEl.appendChild(sentencePageEl);
+    nextPage() {
+        if (this.currentPage == undefined) {
+            this.currentPage = 0;
+        } else {
+            this.currentPage = (this.currentPage + 1) % 
+                (this.data.getSentences().length + 1);
         }
-
-        this.HTML.root.appendChild(topBarEl);
+        this.renderPage();
     }
 
-    nextButton() {
-        const nextEl = document.createElement("div");
-        nextEl.innerText = "Next";
-        nextEl.classList.add("nahw-next");
+    renderPage() {
+        this.progressView.selectPage(this.currentPage);
+        if (this.currentPage === 0) {
+            this.mainPage();
+        } else {
+            this.sentencePage(this.data.getSentences()[this.currentPage - 1]);
+        }        
     }
 
+    // TODO: Switch to SentenceSmallView
     mainPage() {
-        this.HTML.root.innerHTML = "";
+        this.HTML.main.innerHTML = "";
         // Create text (TODO: Make sentence clickable)
         const textEl = this.HTML.text = document.createElement("p");
         textEl.classList.add("nahw-full-text");
+        textEl.setAttribute("lang", "ar");
         for (let sentence of this.data.getSentences()) {
             const span = document.createElement("span");
             // U+200C = Zero Width Non-Joiner
@@ -294,20 +352,16 @@ class NahwQV {
             span.setAttribute("lang", "ar");
             textEl.appendChild(span);
         }
-        // TODO: Create next button
         // TODO: Create back-to-question or back-to-text
         // TODO: Add submit
         // Append all elements
-        this.HTML.root.appendChild(textEl);
+        this.HTML.main.appendChild(textEl);
     }
 
     sentencePage(sentenceState) {
         console.assert(sentenceState instanceof SentenceState);
-        this.HTML.root.innerHTML = "";
-        this.topBar();
-
-        this.HTML.root.appendChild(sentenceState.getBigView().getRootHTML());
-
+        this.HTML.main.innerHTML = "";
+        this.HTML.main.appendChild(sentenceState.getBigView().getRootHTML());
         // TODO: Add input options
 
 
@@ -326,7 +380,55 @@ class SubmitView {
 
 // TODO: Write
 class ProgressView {
+    constructor(numOfQuestions) {
+        this._numOfQuestions = numOfQuestions;
+        this.HTML = Object.create(null);
+        const topBarEl = this.HTML.root = document.createElement("div");
+        topBarEl.classList.add("nahw-top-bar");
 
+        const mainPageEl = this.HTML.mainPage = document.createElement("div");
+        mainPageEl.classList.add("nahw-top-bar-page");
+        mainPageEl.classList.add("nahw-top-bar-square");
+        topBarEl.appendChild(mainPageEl);
+
+        this.HTML.sentencePage = [];
+        for (let i = 0; i < numOfQuestions; ++i) {
+            const sentencePageEl = document.createElement("div");
+            sentencePageEl.classList.add("nahw-top-bar-page");
+            sentencePageEl.classList.add("nahw-top-bar-circle");
+            this.HTML.sentencePage.push(sentencePageEl);
+            topBarEl.appendChild(sentencePageEl);
+        }
+    }
+
+    getRootHTML() {
+        return this.HTML.root;
+    }
+
+    // 0 = main page
+    selectPage(val) {
+        if (this._selected != undefined) {
+            this.unselectPage();
+        }
+        if (val === 0) {
+            this.HTML.mainPage.classList.add("nahw-top-bar-fill");
+            this._selected = 0;
+            return;
+        }
+        this.HTML.sentencePage[val - 1].classList.add("nahw-top-bar-fill");
+        this._selected = val;
+    }
+
+    unselectPage() {
+        if (this._selected == undefined) {
+            return;
+        }
+        if (this._selected === 0) {
+            this.HTML.mainPage.classList.remove("nahw-top-bar-fill");
+            return;
+        }
+        this.HTML.sentencePage[this._selected - 1].classList.remove("nahw-top-bar-fill");
+    }
 }
 
 // TODO: Write
@@ -373,7 +475,7 @@ class WordView {
         this.HTML.root.classList.add("nahw-big-sentence-word");
         this.HTML.root.setAttribute("lang", "ar");
         const baseEl = this.HTML.base = document.createElement("span");
-        baseEl.innerText = wordState.getBaseWord();
+        baseEl.innerText = wordState.getWordBeginning();
         const endingEl = this.HTML.ending = document.createElement("span");
         endingEl.innerText = wordState.getFacade();
 
