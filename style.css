@@ -190,7 +190,7 @@ body {
 }
 
 .nahw-top-bar-page:hover:not(.nahw-top-bar-fill) {
-    background-color: var(--primary);
+    background-color: var(--accent);
 }
 
 .nahw-top-bar-square {
@@ -203,7 +203,7 @@ body {
 }
 
 .nahw-top-bar-fill {
-    background-color: var(--text);
+    background-color: var(--highlight-active);
     cursor: default;
 }
 
