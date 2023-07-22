@@ -80,12 +80,17 @@ function getWordBeginning(word) {
 
 class WordState {
     static flags = ["correct", "incorrect", "unattempted", "na"]
-    constructor(wordAnswer, flag="na") {
+    constructor(wordAnswer, flag="na", isPunctuation=false) {
         this.setFlag(flag);
         // TODO: I could optimize this
         this._baseWord = getWordBeginning(wordAnswer);
         this._answer = getWordEnding(wordAnswer);
         this._facade = removeVowels(this.getAnswer());
+        this._isPunctuation = isPunctuation;
+    }
+
+    isPunctuation() {
+        return this._isPunctuation;
     }
 
     getAnswer() {
@@ -149,7 +154,7 @@ class WordState {
             if (c === ',' || c === ':' || c === '.' || c === '،') {
                 let word = sentenceAnswer.substr(startingIndex, i - startingIndex);
                 words.push(new WordState(word, WordState.computeFlag(word)));
-                words.push(new WordState(c, "na"));
+                words.push(new WordState(c, "na", true));
                 startingIndex = i + 1;
                 i++;
                 continue;
@@ -180,7 +185,16 @@ class SentenceState {
     }
 
     getFacade() {
-        return this.getWords().map(x => x.getWordBeginning() + x.getFacade()).join(" ");
+        let result = "";
+        let first = true;
+        for (let w of this.getWords()) {
+            if (!w.isPunctuation() && !first) {
+                result += " ";
+            }
+            result += w.getWordBeginning() + w.getFacade();
+            first = false;
+        }
+        return result;
     }
 
     getFlag() {
