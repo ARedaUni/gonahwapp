@@ -264,20 +264,21 @@ class NahwQV {
         this.lastPage = -1;
 
         document.body.addEventListener("keydown", (e) => {
-            if (e.ctrlKey) {
-                if (e.key === "ArrowRight") {
-                    this.nextPage();
-                } else if (e.key === "ArrowLeft") {
-                    this.prevPage();
-                } else if (e.key === "ArrowUp") {
-                    if (this.currentPage === 0) return;
-                    this.lastPage = this.currentPage;
-                    this.selectPage(0);
-                } else if (e.key === "ArrowDown") {
-                    if (this.lastPage !== -1) {
-                        this.selectPage(this.lastPage);
-                    }
+            if (e.ctrlKey && e.key === "ArrowRight") {
+                this.nextPage();
+            } else if (e.ctrlKey && e.key === "ArrowLeft") {
+                this.prevPage();
+            } else if ((e.ctrlKey && e.key === "ArrowUp") || e.key === "Home") {
+                if (this.currentPage === 0) return;
+                this.lastPage = this.currentPage;
+                this.selectPage(0);
+            } else if (e.ctrlKey && e.key === "ArrowDown") {
+                if (this.lastPage !== -1) {
+                    this.selectPage(this.lastPage);
                 }
+            } else if (e.key === "End") {
+                this.lastPage = -1;
+                this.selectPage(this.data.getSentences().length);
             }
         });
 
@@ -299,7 +300,7 @@ class NahwQV {
         if (pageNum < 0) success = false;
         if (pageNum > this.data.getSentences().length + 1) success = false;
         if (!success) {
-            window.location.hash = "#0";
+            history.replaceState(null, "", "#0");
             return false;
         }
         this.currentPage = pageNum;
@@ -372,7 +373,7 @@ class NahwQV {
     }
 
     renderPage() {
-        window.location.hash = this.currentPage;
+        history.replaceState(null, "", `#${this.currentPage}`);
         this.progressView.selectPage(this.currentPage);
         if (this.currentPage === 0) {
             this.mainPage();
