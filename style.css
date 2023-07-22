@@ -185,7 +185,7 @@ body {
     display: block;
     margin-left: .5rem;
     margin-right: .5rem;
-    background-color: var(--background);
+    background-color: var(--highlight-inactive);
     transition: background-color .2s;
 }
 
