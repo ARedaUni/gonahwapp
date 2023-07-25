@@ -349,16 +349,12 @@ class NahwQV {
         const nextEl = this.HTML.nextBtn = document.createElement("div");
         nextEl.innerHTML = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path clip-rule="evenodd" d="M12.2929 4.29289C12.6834 3.90237 13.3166 3.90237 13.7071 4.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L13.7071 19.7071C13.3166 20.0976 12.6834 20.0976 12.2929 19.7071C11.9024 19.3166 11.9024 18.6834 12.2929 18.2929L17.5858 13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H17.5858L12.2929 5.70711C11.9024 5.31658 11.9024 4.68342 12.2929 4.29289Z"></path> </g></svg>`;
         nextEl.classList.add("nahw-nav");
-        nextEl.view = this;
-        nextEl.state = this.data;
-        nextEl.addEventListener("click", (e) => e.target.view.nextPage());
+        nextEl.addEventListener("click", (e) => this.nextPage());
 
         const prevEl = document.createElement("div");
         prevEl.innerHTML = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" transform="matrix(-1, 0, 0, 1, 0, 0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M12.2929 4.29289C12.6834 3.90237 13.3166 3.90237 13.7071 4.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L13.7071 19.7071C13.3166 20.0976 12.6834 20.0976 12.2929 19.7071C11.9024 19.3166 11.9024 18.6834 12.2929 18.2929L17.5858 13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H17.5858L12.2929 5.70711C11.9024 5.31658 11.9024 4.68342 12.2929 4.29289Z"></path> </g></svg>`;
         prevEl.classList.add("nahw-nav");
-        prevEl.view = this;
-        prevEl.state = this.data;
-        prevEl.onclick = (e) => e.target.view.prevPage();
+        prevEl.onclick = (e) => this.prevPage();
 
         const submitEl = document.createElement("div");
         submitEl.innerText = "Submit";
@@ -454,9 +450,7 @@ class NahwQV {
             span.innerText = sentence.getFacade() + "\u200c";
             span.classList.add("nahw-full-text-sentence");
             span.setAttribute("lang", "ar");
-            span.view = this; // TODO: Change to SentenceSmallView
-            span.state = sentence;
-            span.onclick = (e) => e.target.view.selectPage(i + 1);
+            span.onclick = (e) => this.selectPage(i + 1);
             textEl.appendChild(span);
         }
         // TODO: Create back-to-question or back-to-text
@@ -496,9 +490,7 @@ class ProgressView {
         const mainPageEl = this.HTML.mainPage = document.createElement("div");
         mainPageEl.classList.add("nahw-top-bar-page");
         mainPageEl.classList.add("nahw-top-bar-square");
-        mainPageEl.view = view;
-        mainPageEl.state = view.data;
-        mainPageEl.onclick = (e) => e.target.view.selectPage(0);
+        mainPageEl.onclick = (e) => view.selectPage(0);
         topBarEl.appendChild(mainPageEl);
 
         this.HTML.sentencePage = [];
@@ -506,9 +498,7 @@ class ProgressView {
             const sentencePageEl = document.createElement("div");
             sentencePageEl.classList.add("nahw-top-bar-page");
             sentencePageEl.classList.add("nahw-top-bar-circle");
-            sentencePageEl.view = view;
-            sentencePageEl.state = view.data;
-            sentencePageEl.onclick = (e) => e.target.view.selectPage(i + 1);
+            sentencePageEl.onclick = (e) => view.selectPage(i + 1);
             this.HTML.sentencePage.push(sentencePageEl);
             topBarEl.appendChild(sentencePageEl);
         }
@@ -561,7 +551,7 @@ class SentenceBigView {
             if (!first && !word.isPunctuation()) {
                 this.HTML.root.appendChild(document.createTextNode(" "));
             }
-            const wordView = new WordView(word, this, SentenceBigView.onHighlightClick);
+            const wordView = new WordView(word, this);
             this._words.push(wordView);
             this.HTML.root.appendChild(wordView.getRootHTML());
             first = false;
@@ -667,17 +657,10 @@ class SentenceBigView {
     unsubscribe() {
         document.body.removeEventListener("keydown", this._listener);
     }
-
-    static onHighlightClick(e) {
-        const wordView = e.target.wordView;
-        const sentenceView = e.target.sentenceView;
-
-        sentenceView.selectWord(wordView);
-    }
 }
 
 class WordView {
-    constructor(wordState, sentenceView, onHighlightClick) {
+    constructor(wordState, sentenceView=undefined) {
         console.assert(wordState instanceof WordState);
         this._wordState = wordState;
         this.HTML = Object.create(null);
@@ -697,13 +680,13 @@ class WordView {
             endingEl.classList.add("nahw-big-sentence-word-hoverable");
             this.HTML.ending.appendChild(highlightEl);
             this.unselect();
-            if (onHighlightClick != undefined) {
+            if (sentenceView != undefined) {
 
                 highlightEl.wordView = this;
                 highlightEl.wordState = this.getWordState();
                 highlightEl.sentenceView = sentenceView;
                 highlightEl.sentenceState = sentenceView.getSentenceState();
-                this._onHighlightClick = onHighlightClick;
+                this._onHighlightClick = (function() {sentenceView.selectWord(this)}).bind(this);
                 this.subscribe();
             }
         }
