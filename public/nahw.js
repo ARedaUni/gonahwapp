@@ -292,14 +292,41 @@ class NahwQV {
 
         this.progressView = new ProgressView(this);
         this.HTML.root.appendChild(this.progressView.getRootHTML());
-        this.pageActionButtons();
 
         this.HTML.main = document.createElement("div");
         this.HTML.main.classList.add("nahw-question-main");
         this.HTML.root.appendChild(this.HTML.main);
-
+        
+        const prevEl = document.createElement("div");
+        prevEl.innerHTML = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" transform="matrix(-1, 0, 0, 1, 0, 0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M12.2929 4.29289C12.6834 3.90237 13.3166 3.90237 13.7071 4.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L13.7071 19.7071C13.3166 20.0976 12.6834 20.0976 12.2929 19.7071C11.9024 19.3166 11.9024 18.6834 12.2929 18.2929L17.5858 13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H17.5858L12.2929 5.70711C11.9024 5.31658 11.9024 4.68342 12.2929 4.29289Z"></path> </g></svg>`;
+        prevEl.classList.add("nahw-nav");
+        prevEl.classList.add("nahw-nav-right");
+        prevEl.addEventListener("click", (e) => this.prevPage());
+        
+        this.HTML.main.inner = document.createElement("div");
+        this.HTML.main.inner.classList.add("nahw-question-main-inner");
+        this.HTML.main.inner.text = document.createElement("div");
+        this.HTML.main.inner.appendChild(this.HTML.main.inner.text);
+        
         this.input = new InputView();
-        this.HTML.root.appendChild(this.input.getRootHTML())
+        this.HTML.main.inner.appendChild(this.input.getRootHTML());
+
+        const nextEl = this.HTML.nextBtn = document.createElement("div");
+        nextEl.innerHTML = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path clip-rule="evenodd" d="M12.2929 4.29289C12.6834 3.90237 13.3166 3.90237 13.7071 4.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L13.7071 19.7071C13.3166 20.0976 12.6834 20.0976 12.2929 19.7071C11.9024 19.3166 11.9024 18.6834 12.2929 18.2929L17.5858 13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H17.5858L12.2929 5.70711C11.9024 5.31658 11.9024 4.68342 12.2929 4.29289Z"></path> </g></svg>`;
+        nextEl.classList.add("nahw-nav");
+        nextEl.classList.add("nahw-nav-left");
+        nextEl.addEventListener("click", (e) => this.nextPage());
+        
+        this.HTML.main.appendChild(prevEl);
+        this.HTML.main.appendChild(this.HTML.main.inner);
+        this.HTML.main.appendChild(nextEl);
+
+        const submitEl = document.createElement("div");
+        submitEl.innerText = "Submit";
+        submitEl.classList.add("nahw-submit");
+        submitEl.classList.add("nahw-submit-inactive");
+
+        this.HTML.root.appendChild(submitEl);
 
         this.lastPage = -1;
 
@@ -343,34 +370,6 @@ class NahwQV {
         }
         this.selectPage(pageNum);
         return true;
-    }
-
-    pageActionButtons() {
-        const pageNavButtonsEl = this.HTML.pageNavButtons =
-            document.createElement("div");
-        pageNavButtonsEl.classList.add("nahw-action-container");
-        const nextEl = this.HTML.nextBtn = document.createElement("div");
-        nextEl.innerHTML = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path clip-rule="evenodd" d="M12.2929 4.29289C12.6834 3.90237 13.3166 3.90237 13.7071 4.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L13.7071 19.7071C13.3166 20.0976 12.6834 20.0976 12.2929 19.7071C11.9024 19.3166 11.9024 18.6834 12.2929 18.2929L17.5858 13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H17.5858L12.2929 5.70711C11.9024 5.31658 11.9024 4.68342 12.2929 4.29289Z"></path> </g></svg>`;
-        nextEl.classList.add("nahw-nav");
-        nextEl.addEventListener("click", (e) => this.nextPage());
-
-        const prevEl = document.createElement("div");
-        prevEl.innerHTML = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" transform="matrix(-1, 0, 0, 1, 0, 0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M12.2929 4.29289C12.6834 3.90237 13.3166 3.90237 13.7071 4.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L13.7071 19.7071C13.3166 20.0976 12.6834 20.0976 12.2929 19.7071C11.9024 19.3166 11.9024 18.6834 12.2929 18.2929L17.5858 13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H17.5858L12.2929 5.70711C11.9024 5.31658 11.9024 4.68342 12.2929 4.29289Z"></path> </g></svg>`;
-        prevEl.classList.add("nahw-nav");
-        prevEl.onclick = (e) => this.prevPage();
-
-        const submitEl = document.createElement("div");
-        submitEl.innerText = "Submit";
-        submitEl.classList.add("nahw-submit");
-        submitEl.classList.add("nahw-submit-inactive");
-        submitEl.view = this;
-        submitEl.state = this.data;
-        // submitEl.onclick = (e) => e.target.view.prevPage();
-
-        pageNavButtonsEl.appendChild(prevEl);
-        pageNavButtonsEl.appendChild(submitEl);
-        pageNavButtonsEl.appendChild(nextEl);
-        this.HTML.root.appendChild(pageNavButtonsEl);
     }
 
     getCurrentPageNumber() {
@@ -435,8 +434,8 @@ class NahwQV {
     // TODO: Switch to SentenceSmallView
     mainPage() {
         this.getInputView().hide();
-        this.HTML.main.innerHTML = "";
-        const textEl = this.HTML.text = document.createElement("p");
+        this.HTML.main.inner.text.innerHTML = "";
+        const textEl = document.createElement("p");
         textEl.classList.add("nahw-full-text");
         textEl.setAttribute("lang", "ar");
         for (let i = 0; i < this.data.getSentences().length; ++i) {
@@ -458,7 +457,7 @@ class NahwQV {
         }
         // TODO: Add submit
         // Append all elements
-        this.HTML.main.appendChild(textEl);
+        this.HTML.main.inner.text.appendChild(textEl);
     }
 
     sentencePage(sentenceState) {
@@ -470,8 +469,8 @@ class NahwQV {
         } else {
             this.getInputView().change(bigView.getSelectedWord());
         }
-        this.HTML.main.innerHTML = "";
-        this.HTML.main.appendChild(bigView.getRootHTML());
+        this.HTML.main.inner.text.innerHTML = "";
+        this.HTML.main.inner.text.appendChild(bigView.getRootHTML());
         bigView.subscribe();
     }
 

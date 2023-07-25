@@ -151,16 +151,28 @@ body {
 
 .nahw-question-main {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    justify-content: center;
+    width: 70%;
+}
+
+.nahw-question-main-inner {
+    text-align: center;
+    margin-left: 5rem;
+    margin-right: 5rem;
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+    min-width: 80%;
+    max-width: 80%;
+    max-height: 100%;
+    min-height: 100%;
+    height: 100%;
 }
 
 .nahw-full-text {
     font-size: 3rem;
-    width: 50%;
     user-select: none;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
     text-align: justify;
 }
 
@@ -212,15 +224,6 @@ body {
     cursor: default;
 }
 
-.nahw-action-container {
-    display: flex;
-    margin: 0 auto;
-    width: 50%;
-    justify-content: space-between;
-    user-select: none;
-    margin-top: 2rem;
-}
-
 .nahw-nav {
     width: 5rem;
     height: 5rem;
@@ -234,6 +237,16 @@ body {
     font-size: 3rem;
     cursor: pointer;
     border-radius: 100%;
+    position: absolute;
+    top: 50%;
+}
+
+.nahw-nav-right {
+    left: 10%;
+}
+
+.nahw-nav-left {
+    right: 10%;
 }
 
 .nahw-nav svg {
@@ -299,7 +312,7 @@ body {
 .nahw-input-container {
     display: flex;
     justify-content: space-between;
-    width: 50%;
+    width: 100%;
 }
 
 .nahw-input-button {
@@ -316,6 +329,8 @@ body {
     padding: .5rem;
     margin-top: 2rem;
     user-select: none;
+    line-height: 8rem;
+    
 }
 
 .nahw-input-button:hover:not(.nahw-input-button-active) {
