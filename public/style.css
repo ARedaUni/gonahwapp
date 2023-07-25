@@ -25,6 +25,11 @@ body {
     direction: rtl;
 }
 
+[hidden] {
+    visibility: none !important;
+    display: none !important;
+}
+
 #error {
     color: red;
     font-weight: 800;
@@ -146,8 +151,8 @@ body {
 
 .nahw-question-main {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
 }
 
 .nahw-full-text {
@@ -289,4 +294,39 @@ body {
 .nahw-highlight-inactive {
     background-color: var(--highlight-inactive);
     opacity: 30%;
+}
+
+.nahw-input-container {
+    display: flex;
+    justify-content: space-between;
+    width: 50%;
+}
+
+.nahw-input-button {
+    font-size: 4rem;
+    background-color: var(--background);
+    border: 5px solid var(--accent);
+    border-radius: 30%;
+    color: var(--text);
+    height: 8rem;
+    width: 8rem;
+    text-align: center;
+    transition: all .2s;
+    cursor: pointer;
+    padding: .5rem;
+    margin-top: 2rem;
+    user-select: none;
+}
+
+.nahw-input-button:hover:not(.nahw-input-button-active) {
+    color: var(--background);
+    background-color: var(--text);
+    border-color: var(--secondary);
+}
+
+.nahw-input-button-active {
+    opacity: 40%;
+    background-color: var(--text);
+    color: var(--background);
+    cursor: auto;
 }

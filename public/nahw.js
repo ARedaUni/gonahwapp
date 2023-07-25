@@ -96,7 +96,7 @@ function getFirstVowelName(word) {
 }
 
 class WordState {
-    static flags = ["correct", "incorrect", "unattempted", "na"]
+    static FLAGS = ["correct", "incorrect", "na"]
     constructor(wordAnswer, flag="na", isPunctuation=false) {
         this.setFlag(flag);
         // TODO: I could optimize this
@@ -123,7 +123,7 @@ class WordState {
     }
 
     reset() {
-        this.setFlag("unattempted");
+        this.setFlag("incorrect");
         this._facade = removeVowels(this.getAnswer());
     }
 
@@ -145,7 +145,7 @@ class WordState {
     }
 
     setFlag(value) {
-        console.assert(WordState.flags.indexOf(value) !== -1);
+        console.assert(WordState.FLAGS.indexOf(value) !== -1);
         this._flag = value;
     }
 
@@ -153,7 +153,7 @@ class WordState {
         if (getWordEnding(wordAns) === "") {
             return "na";
         }
-        return "unattempted";
+        return "incorrect";
     }
 
     static generateWords(sentenceAnswer) {
@@ -187,8 +187,8 @@ class WordState {
 
     generateEndings() {
         if (this.getFlag() === "na") return [];
-        const strippedEnding = removeVowels(this.getWordEnding());
-        const tanween = isTanween(getFirstVowelName(this.getWordEnding()));
+        const strippedEnding = removeVowels(this.getAnswer());
+        const tanween = isTanween(getFirstVowelName(this.getAnswer()));
         if (tanween) {
             return [
                 strippedEnding.substring(0, 1) + diacritics["DAMMATAN"] + strippedEnding.substring(1),
@@ -207,7 +207,7 @@ class WordState {
 }
 
 class SentenceState {
-    static flags = ["correct", "incorrect", "unattempted"];
+    static FLAGS = ["correct", "incorrect", "unattempted"];
 
     constructor(sentenceAnswer, flag="unattempted") {
         this._words = WordState.generateWords(sentenceAnswer);
@@ -239,14 +239,14 @@ class SentenceState {
     }
 
     setFlag(value) {
-        console.assert(SentenceState.flags.some(x => x === value));
+        console.assert(SentenceState.FLAGS.some(x => x === value));
         this._flag = value;
     }
 
-    getBigView() {
+    getBigView(inputContainer=undefined, nahwQv=undefined) {
         if (this._bigView)
             return this._bigView;
-        return this._bigView = new SentenceBigView(this);
+        return this._bigView = new SentenceBigView(this, inputContainer, nahwQv);
     }
 
     getSmallView() {
@@ -297,6 +297,9 @@ class NahwQV {
         this.HTML.main = document.createElement("div");
         this.HTML.main.classList.add("nahw-question-main");
         this.HTML.root.appendChild(this.HTML.main);
+
+        this.input = new InputView();
+        this.HTML.root.appendChild(this.input.getRootHTML())
 
         this.lastPage = -1;
 
@@ -431,8 +434,8 @@ class NahwQV {
 
     // TODO: Switch to SentenceSmallView
     mainPage() {
+        this.getInputView().hide();
         this.HTML.main.innerHTML = "";
-        // Create text (TODO: Make sentence clickable)
         const textEl = this.HTML.text = document.createElement("p");
         textEl.classList.add("nahw-full-text");
         textEl.setAttribute("lang", "ar");
@@ -453,7 +456,6 @@ class NahwQV {
             span.onclick = (e) => this.selectPage(i + 1);
             textEl.appendChild(span);
         }
-        // TODO: Create back-to-question or back-to-text
         // TODO: Add submit
         // Append all elements
         this.HTML.main.appendChild(textEl);
@@ -461,13 +463,20 @@ class NahwQV {
 
     sentencePage(sentenceState) {
         console.assert(sentenceState instanceof SentenceState);
-        const bigView = sentenceState.getBigView();
+        this.getInputView().show();
+        const bigView = sentenceState.getBigView(this.getInputView(), this);
+        if (bigView.empty()) {
+            this.getInputView().hide();
+        } else {
+            this.getInputView().change(bigView.getSelectedWord());
+        }
         this.HTML.main.innerHTML = "";
         this.HTML.main.appendChild(bigView.getRootHTML());
         bigView.subscribe();
-        // TODO: Add input options
+    }
 
-
+    getInputView() {
+        return this.input;
     }
 
     getRootHTML() {
@@ -534,9 +543,9 @@ class ProgressView {
     }
 }
 
-// TODO: Write
 class SentenceBigView {
-    constructor(sentenceState) {
+    
+    constructor(sentenceState, inputContainer, nahwQv) {
         console.assert(sentenceState instanceof SentenceState);
         this._sentenceState = sentenceState;
         this._words = []; // list of WordView
@@ -551,7 +560,7 @@ class SentenceBigView {
             if (!first && !word.isPunctuation()) {
                 this.HTML.root.appendChild(document.createTextNode(" "));
             }
-            const wordView = new WordView(word, this);
+            const wordView = new WordView(word, this, inputContainer);
             this._words.push(wordView);
             this.HTML.root.appendChild(wordView.getRootHTML());
             first = false;
@@ -564,6 +573,7 @@ class SentenceBigView {
                 this.nextWord();
             }
         }.bind(this);
+        this._nahwQv = nahwQv;
     }
 
     getRootHTML() {
@@ -576,6 +586,10 @@ class SentenceBigView {
 
     getWords() {
         return this._words;
+    }
+
+    getNahwQV() {
+        return this._nahwQv;
     }
 
     getSelectedWordNum() {
@@ -608,22 +622,33 @@ class SentenceBigView {
         console.error("Word not found!", word);
     }
 
-    nextWord() {
+    nextWord(goToPage=false) {
         let prevSelected = this.getSelectedWordNum();
         let selected;
         if (prevSelected == undefined) {
             selected = 0;
         } else {
-            selected = (prevSelected + 1) % this.getWords().length;
+            selected = (prevSelected + 1);
+            if (goToPage && selected >= this.getWords().length) {
+                this.getNahwQV().nextPage();
+                return;
+            }
+
+            selected %= this.getWords().length;
         }
 
         let tries = 0;
-        while (this.getWords()[selected].getWordState().getFlag() !== "unattempted") {
+        while (!this.getWords()[selected].isHighlighted()) {
             if (tries === this.getWords().length) {
                 console.error("Cannot find a valid word!");
                 return;
             }
-            selected = (selected + 1) % this.getWords().length;
+            selected += 1;
+            if (goToPage && selected >= this.getWords().length) {
+                this.getNahwQV().nextPage();
+                return;
+            }
+            selected %= this.getWords().length;
         }
         this.setSelectedWordNum(selected);
     }
@@ -639,7 +664,7 @@ class SentenceBigView {
         }
 
         let tries = 0;
-        while (this.getWords()[selected].getWordState().getFlag() !== "unattempted") {
+        while (!this.getWords()[selected].isHighlighted()) {
             if (tries == this.getWords().length) {
                 console.error("Cannot find a valid word!");
                 return;
@@ -648,6 +673,15 @@ class SentenceBigView {
             if (selected < 0) selected = this.getWords().length - 1;
         }
         this.setSelectedWordNum(selected);
+    }
+
+    empty() {
+        for (let word of this.getWords()) {
+            if (word.isHighlighted()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     subscribe() {
@@ -660,7 +694,8 @@ class SentenceBigView {
 }
 
 class WordView {
-    constructor(wordState, sentenceView=undefined) {
+
+    constructor(wordState, sentenceView=undefined, inputContainer=undefined) {
         console.assert(wordState instanceof WordState);
         this._wordState = wordState;
         this.HTML = Object.create(null);
@@ -670,7 +705,9 @@ class WordView {
         const baseEl = this.HTML.base = document.createElement("span");
         baseEl.innerText = wordState.getWordBeginning();
         const endingEl = this.HTML.ending = document.createElement("span");
-        endingEl.innerText = wordState.getFacade();
+        this.HTML.ending.text = document.createElement("span");
+        endingEl.appendChild(this.HTML.ending.text);
+        this.HTML.ending.text.innerText = wordState.getFacade();
 
         this.HTML.root.appendChild(baseEl);
         this.HTML.root.appendChild(endingEl);
@@ -681,15 +718,22 @@ class WordView {
             this.HTML.ending.appendChild(highlightEl);
             this.unselect();
             if (sentenceView != undefined) {
-
-                highlightEl.wordView = this;
-                highlightEl.wordState = this.getWordState();
-                highlightEl.sentenceView = sentenceView;
-                highlightEl.sentenceState = sentenceView.getSentenceState();
-                this._onHighlightClick = (function() {sentenceView.selectWord(this)}).bind(this);
+                this._sentenceView = sentenceView;
+                this._onHighlightClick = (function() {sentenceView.selectWord(this);}).bind(this);
                 this.subscribe();
             }
+            this._inputContainer = inputContainer;
         }
+
+        this.showFeedback(false);
+    }
+
+    isHighlighted() {
+        return this.HTML.highlight != undefined;
+    }
+
+    showFeedback(val) {
+        this._feedback = val;
     }
 
     subscribe() {
@@ -708,6 +752,10 @@ class WordView {
         return this._wordState;
     }
 
+    updateFacade() {
+        this.HTML.ending.text.innerText = this.getWordState().getFacade();
+    }
+
     select() {
         if (this.getWordState().getFlag() === "na") {
             console.error("Can't select a word that's not applicable");
@@ -717,6 +765,9 @@ class WordView {
         if (!this.HTML.highlight.classList.replace("nahw-highlight-inactive",
             "nahw-highlight-active")) {
             this.HTML.highlight.classList.add("nahw-highlight-active");
+        }
+        if (this._inputContainer) {
+            this._inputContainer.change(this);
         }
     }
 
@@ -735,6 +786,15 @@ class WordView {
     isSelected() {
         return this._selected;
     }
+
+    attempt(ending) {
+        this.getWordState().attempt(ending);
+        this.updateFacade();
+    }
+
+    getSentenceView() {
+        return this._sentenceView;
+    }
 }
 
 
@@ -742,22 +802,74 @@ class SentenceSmallView {
 
 }
 
-// TODO: Write
 class InputView {
-    constructor(wordState) {
+    constructor() {
         this.HTML = Object.create(null);
         this.HTML.root = document.createElement("div");
         this.HTML.root.classList.add("nahw-input-container");
-        
+    }
+    
+    change(wordView) {
+        this.HTML.root.innerHTML = "";
+        this._currentWordView = wordView;
+        this._buttons = [];
+    
+        for (let option of wordView.getWordState().generateEndings()) {
+            const button = new InputButton(wordView, option, this);
+            if (button.getText() === this._currentWordView.getWordState().getFacade()) {
+                button.select();
+            }
+            this._buttons.push(button);
+            this.HTML.root.appendChild(button.getRootHTML());
+        }
+    }
+
+    hide() {
+        this.HTML.root.setAttribute("hidden", "");
+    }
+
+    show() {
+        this.HTML.root.removeAttribute("hidden");
     }
 
     getRootHTML() {
         return this.HTML.root;
     }
+
+    updateSelection() {
+    }
 }
 
 class InputButton {
+    constructor(wordView, option) {
+        this.HTML = Object.create(null);
+        this.HTML.root = document.createElement("div");
+        this.HTML.root.classList.add("nahw-input-button")
+        this.HTML.root.innerText = option;
 
+        this.HTML.root.addEventListener("click", () => {
+            wordView.attempt(option);
+            wordView.getSentenceView().nextWord(true);
+        });
+
+        this._option = option;
+    }
+
+    getText() {
+        return this._option;
+    }
+
+    unselect() {
+        this.HTML.root.classList.remove("nahw-input-button-active");
+    }
+
+    select() {
+        this.HTML.root.classList.add("nahw-input-button-active");
+    }
+
+    getRootHTML() {
+        return this.HTML.root;
+    }
 }
 
 // TODO: Write
