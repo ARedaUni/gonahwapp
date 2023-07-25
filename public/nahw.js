@@ -19,6 +19,12 @@ function isShortVowel(diacriticName) {
     return diacriticName !== "SHADDA";
 }
 
+function isTanween(diacriticName) {
+    return diacriticName === "DAMMATAN" ||
+        diacriticName === "FATHATAN" ||
+        diacriticName === "KASRATAN";
+}
+
 function getDiacriticName(diacritic) {
     console.assert(typeof diacritic === "string");
     console.assert(diacritic.length === 1);
@@ -55,7 +61,7 @@ function getWordEnding(word) {
             continue;
         }
         if (diacriticName !== "SHADDA") {
-            return word.substr(lastLetter, word.length - lastLetter);
+            return word.substring(lastLetter, word.length);
         }
     }
     return "";
@@ -72,10 +78,21 @@ function getWordBeginning(word) {
             continue;
         }
         if (diacriticName !== "SHADDA") {
-            return word.substr(0, lastLetter);
+            return word.substring(0, lastLetter);
         }
     }
     return word;
+}
+
+function getFirstVowelName(word) {
+    console.assert(typeof word === "string");
+    for (let i = 0; i < word.length; ++i) {
+        const name = getDiacriticName(word[i]);
+        if (name != null && name !== "SHADDA") {
+            return name;
+        }
+    }
+    return null;
 }
 
 class WordState {
@@ -145,14 +162,14 @@ class WordState {
         for (let i = 1; i < sentenceAnswer.length; ++i) {
             let c = sentenceAnswer[i];
             if (c === ' ') {
-                let word = sentenceAnswer.substr(startingIndex, i - startingIndex);
+                let word = sentenceAnswer.substring(startingIndex, i);
                 words.push(new WordState(word, WordState.computeFlag(word)));
                 startingIndex = i + 1;
                 i++;
                 continue;
             }
             if (c === ',' || c === ':' || c === '.' || c === '،') {
-                let word = sentenceAnswer.substr(startingIndex, i - startingIndex);
+                let word = sentenceAnswer.substring(startingIndex, i);
                 words.push(new WordState(word, WordState.computeFlag(word)));
                 words.push(new WordState(c, "na", true));
                 startingIndex = i + 1;
@@ -161,11 +178,31 @@ class WordState {
             }
         }
         if (startingIndex !== sentenceAnswer.length) {
-            let word = sentenceAnswer.substr(
-                startingIndex, sentenceAnswer.length - startingIndex);
+            let word = sentenceAnswer.substring(
+                startingIndex, sentenceAnswer.length);
             words.push(new WordState(word, WordState.computeFlag(word)));
         }
         return words;
+    }
+
+    generateEndings() {
+        if (this.getFlag() === "na") return [];
+        const strippedEnding = removeVowels(this.getWordEnding());
+        const tanween = isTanween(getFirstVowelName(this.getWordEnding()));
+        if (tanween) {
+            return [
+                strippedEnding.substring(0, 1) + diacritics["DAMMATAN"] + strippedEnding.substring(1),
+                strippedEnding.substring(0, 1) + diacritics["FATHATAN"] + strippedEnding.substring(1),
+                strippedEnding.substring(0, 1) + diacritics["KASRATAN"] + strippedEnding.substring(1),
+                strippedEnding.substring(0, 1) + diacritics["SUKOON"] + strippedEnding.substring(1),
+            ];
+        }
+        return [
+            strippedEnding.substring(0, 1) + diacritics["DAMMA"] + strippedEnding.substring(1),
+            strippedEnding.substring(0, 1) + diacritics["FATHA"] + strippedEnding.substring(1),
+            strippedEnding.substring(0, 1) + diacritics["KASRA"] + strippedEnding.substring(1),
+            strippedEnding.substring(0, 1) + diacritics["SUKOON"] + strippedEnding.substring(1),
+        ];
     }
 }
 
@@ -282,10 +319,8 @@ class NahwQV {
             }
         });
 
-        window.view = this;
-        window.state = this.data;
         window.addEventListener("hashchange", (e) => {
-            e.target.view.renderFromURL();
+            this.renderFromURL();
         });
 
         if (!this.renderFromURL()) {
@@ -295,7 +330,7 @@ class NahwQV {
 
     renderFromURL() {
         let success = true;
-        const pageNum = parseInt(window.location.hash.substr(1));
+        const pageNum = parseInt(window.location.hash.substring(1));
         if (isNaN(pageNum)) success = false;
         if (pageNum < 0) success = false;
         if (pageNum > this.data.getSentences().length + 1) success = false;
@@ -303,8 +338,7 @@ class NahwQV {
             history.replaceState(null, "", "#0");
             return false;
         }
-        this.currentPage = pageNum;
-        this.renderPage();
+        this.selectPage(pageNum);
         return true;
     }
 
@@ -340,45 +374,62 @@ class NahwQV {
         this.HTML.root.appendChild(pageNavButtonsEl);
     }
 
+    getCurrentPageNumber() {
+        return this._currentPage;
+    }
+
     // TODO: Render error page if invalid (add when sentences can be loaded using URL)
     selectPage(val) {
         console.assert(val >= 0);
         console.assert(val < this.data.getSentences().length + 1);
-        this.currentPage = val;
+        if (this.getCurrentSentenceState() != undefined) {
+            this.getCurrentSentenceState().getBigView().unsubscribe();
+        }
+        this._currentPage = val;
         this.renderPage();
     }
 
     prevPage() {
         this.lastPage = -1;
-        if (this.currentPage == undefined) {
-            this.currentPage = 0;
-        } else {
-            this.currentPage -= 1;
-            if (this.currentPage === -1) {
-                this.currentPage = this.data.getSentences().length;
-            }
+        if (this.getCurrentPageNumber() == undefined) {
+            this.selectPage(0);
+            return;
         }
-        this.renderPage();
+        let page = this.getCurrentPageNumber() - 1;
+        if (page === -1) {
+            page = this.data.getSentences().length;
+        }
+        this.selectPage(page);
     }
 
     nextPage() {
         this.lastPage = -1;
-        if (this.currentPage == undefined) {
-            this.currentPage = 0;
+        if (this.getCurrentPageNumber() == undefined) {
+            this.selectPage(0);
         } else {
-            this.currentPage = (this.currentPage + 1) % 
-                (this.data.getSentences().length + 1);
+            this.selectPage((this.getCurrentPageNumber() + 1) % 
+                (this.data.getSentences().length + 1));
         }
-        this.renderPage();
+    }
+
+    getCurrentSentenceState() {
+        if (this.getCurrentPageNumber() === 0 ||
+        this.getCurrentPageNumber() == undefined) {
+            return null;
+        }
+        console.assert(this.getCurrentPageNumber() > 0);
+        console.assert(this.getCurrentPageNumber() - 1 < this.data.getSentences().length);
+        return this.data.getSentences()[this.getCurrentPageNumber() - 1];
     }
 
     renderPage() {
-        history.replaceState(null, "", `#${this.currentPage}`);
-        this.progressView.selectPage(this.currentPage);
-        if (this.currentPage === 0) {
+        console.assert(this.getCurrentPageNumber() != undefined, "There is no page to render");
+        history.replaceState(null, "", `#${this._currentPage}`);
+        this.progressView.selectPage(this._currentPage);
+        if (this.getCurrentPageNumber() === 0) {
             this.mainPage();
         } else {
-            this.sentencePage(this.data.getSentences()[this.currentPage - 1]);
+            this.sentencePage(this.getCurrentSentenceState());
         }
     }
 
@@ -416,8 +467,10 @@ class NahwQV {
 
     sentencePage(sentenceState) {
         console.assert(sentenceState instanceof SentenceState);
+        const bigView = sentenceState.getBigView();
         this.HTML.main.innerHTML = "";
-        this.HTML.main.appendChild(sentenceState.getBigView().getRootHTML());
+        this.HTML.main.appendChild(bigView.getRootHTML());
+        bigView.subscribe();
         // TODO: Add input options
 
 
@@ -426,7 +479,6 @@ class NahwQV {
     getRootHTML() {
         return this.HTML.root;
     }
-
 }
 
 // TODO: Write
@@ -509,13 +561,19 @@ class SentenceBigView {
             if (!first && !word.isPunctuation()) {
                 this.HTML.root.appendChild(document.createTextNode(" "));
             }
-            const wordView = new WordView(word);
+            const wordView = new WordView(word, this, SentenceBigView.onHighlightClick);
             this._words.push(wordView);
             this.HTML.root.appendChild(wordView.getRootHTML());
             first = false;
         }
-        this.getWords()[1].select();
-        this.getWords()[1].render();
+        this.nextWord();
+        this._listener = function(e) {
+            if (!e.ctrlKey && e.key === "ArrowRight") {
+                this.prevWord();
+            } else if (!e.ctrlKey && e.key === "ArrowLeft") {
+                this.nextWord();
+            }
+        }.bind(this);
     }
 
     getRootHTML() {
@@ -529,10 +587,97 @@ class SentenceBigView {
     getWords() {
         return this._words;
     }
+
+    getSelectedWordNum() {
+        return this._selected;
+    }
+
+    setSelectedWordNum(val) {
+        console.assert(typeof val === "number");
+        if (this.getSelectedWord() != undefined) {
+            this.getSelectedWord().unselect();
+        }
+        this._selected = val;
+        this.getSelectedWord().select();
+    }
+
+    getSelectedWord() {
+        if (this.getSelectedWordNum() == undefined) return null;
+        return this.getWords()[this.getSelectedWordNum()];
+    }
+
+    selectWord(word) {
+        console.assert(word instanceof WordView);
+        for (let i = 0; i < this.getWords().length; ++i) {
+            const wordView = this.getWords()[i];
+            if (wordView === word) {
+                this.setSelectedWordNum(i);
+                return;
+            }
+        }
+        console.error("Word not found!", word);
+    }
+
+    nextWord() {
+        let prevSelected = this.getSelectedWordNum();
+        let selected;
+        if (prevSelected == undefined) {
+            selected = 0;
+        } else {
+            selected = (prevSelected + 1) % this.getWords().length;
+        }
+
+        let tries = 0;
+        while (this.getWords()[selected].getWordState().getFlag() !== "unattempted") {
+            if (tries === this.getWords().length) {
+                console.error("Cannot find a valid word!");
+                return;
+            }
+            selected = (selected + 1) % this.getWords().length;
+        }
+        this.setSelectedWordNum(selected);
+    }
+
+    prevWord() {
+        let prevSelected = this.getSelectedWordNum();
+        let selected;
+        if (prevSelected == undefined) {
+            selected = 0;
+        } else {
+            selected = prevSelected - 1;
+            if (selected < 0) selected = this.getWords().length - 1;
+        }
+
+        let tries = 0;
+        while (this.getWords()[selected].getWordState().getFlag() !== "unattempted") {
+            if (tries == this.getWords().length) {
+                console.error("Cannot find a valid word!");
+                return;
+            }
+            selected = selected - 1;
+            if (selected < 0) selected = this.getWords().length - 1;
+        }
+        this.setSelectedWordNum(selected);
+    }
+
+    subscribe() {
+        document.body.addEventListener("keydown", this._listener);
+    }
+
+    unsubscribe() {
+        document.body.removeEventListener("keydown", this._listener);
+    }
+
+    static onHighlightClick(e) {
+        const wordView = e.target.wordView;
+        const sentenceView = e.target.sentenceView;
+
+        sentenceView.selectWord(wordView);
+    }
 }
 
 class WordView {
-    constructor(wordState) {
+    constructor(wordState, sentenceView, onHighlightClick) {
         console.assert(wordState instanceof WordState);
         this._wordState = wordState;
         this.HTML = Object.create(null);
@@ -552,8 +697,24 @@ class WordView {
             endingEl.classList.add("nahw-big-sentence-word-hoverable");
             this.HTML.ending.appendChild(highlightEl);
             this.unselect();
+            if (onHighlightClick != undefined) {
+
+                highlightEl.wordView = this;
+                highlightEl.wordState = this.getWordState();
+                highlightEl.sentenceView = sentenceView;
+                highlightEl.sentenceState = sentenceView.getSentenceState();
+                this._onHighlightClick = onHighlightClick;
+                this.subscribe();
+            }
         }
-        this.render();
+    }
+
+    subscribe() {
+        this.HTML.highlight.addEventListener("click", this._onHighlightClick);
+    }
+
+    unsubscribe() {
+        this.HTML.highlight.removeEventListener("click", this._onHighlightClick);
     }
 
     getRootHTML() {
@@ -570,6 +731,10 @@ class WordView {
             return;
         }
         this._selected = true;
+        if (!this.HTML.highlight.classList.replace("nahw-highlight-inactive",
+            "nahw-highlight-active")) {
+            this.HTML.highlight.classList.add("nahw-highlight-active");
+        }
     }
 
     unselect() {
@@ -578,27 +743,14 @@ class WordView {
             return;
         }
         this._selected = false;
+        if (!this.HTML.highlight.classList.replace("nahw-highlight-active",
+            "nahw-highlight-inactive")) {
+            this.HTML.highlight.classList.add("nahw-highlight-inactive");
+        }
     }
 
     isSelected() {
         return this._selected;
-    }
-
-    render() {
-        if (this.getWordState().getFlag() === "na") {
-            return;
-        }
-        if (this.isSelected()) {
-            if (!this.HTML.highlight.classList.replace("nahw-highlight-inactive",
-                "nahw-highlight-active")) {
-                this.HTML.highlight.classList.add("nahw-highlight-active");
-            }
-        } else {
-            if (!this.HTML.highlight.classList.replace("nahw-highlight-active",
-                "nahw-highlight-inactive")) {
-                this.HTML.highlight.classList.add("nahw-highlight-inactive");
-            }
-        }
     }
 }
 
@@ -609,6 +761,19 @@ class SentenceSmallView {
 
 // TODO: Write
 class InputView {
+    constructor(wordState) {
+        this.HTML = Object.create(null);
+        this.HTML.root = document.createElement("div");
+        this.HTML.root.classList.add("nahw-input-container");
+        
+    }
+
+    getRootHTML() {
+        return this.HTML.root;
+    }
+}
+
+class InputButton {
 
 }
 
