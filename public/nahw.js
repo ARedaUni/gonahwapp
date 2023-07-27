@@ -333,6 +333,7 @@ class NahwTextElement extends HTMLElement {
             user-select: none;
             text-align: justify;
             direction: rtl;
+            font-family: Amiri;
         }
 
         span {
