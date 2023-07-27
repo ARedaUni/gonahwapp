@@ -11,6 +11,44 @@
         <link rel="icon" type="image/x-icon" href="./img/favicon.ico">
     </head>
     <body>
+        <template id="nahw-question-small-template">
+            <style>
+
+            </style>
+            <div>
+                <!-- <progress-view></progress-view> -->
+                <!-- <nahw-text></nahw-text> -->
+                <nahw-bar></nahw-bar>
+            </div>
+        </template>
+
+        <template id="sentence-nav-template">
+            <style>
+                :root {
+                    background: #fff;
+                    secondary: #A6A6A6;
+                    secondary-shadow: #E1E1E1;
+                    primary: #42C62F;
+                    primary-shadow: #489D26;
+                }
+
+                div {
+                    background-color: var(--background);
+                }
+
+                button {
+                    
+                }
+
+                .secondary {
+
+                }
+            </style>
+            <div>
+                <button class="secondary"><slot name="secondary">SECONDARY SLOT</slot></button>
+                <button class="primary"><slot name="primary">PRIMARY SLOT</slot></button>
+            </div>
+        </template>
         <script type="text/javascript" src="cards.js"></script>
         <script type="text/javascript" src="nahw.js"></script>
         <script>
@@ -125,9 +163,10 @@
                     }
                 });
             } else if (parentCard.display === "question") {
-                qs = new NahwQS(parentCard.sentences);
-                qv = qs.getView();
-                document.body.appendChild(qv.getRootHTML());
+                qs = new NahwQuestion(parentCard.sentences);
+                const el = document.createElement("nahw-question");
+                el.bindToState(qs);
+                document.body.appendChild(el);
             } else {
                 error(`ID ${ids.join("-")} is not currently supported!`)
             }
