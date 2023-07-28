@@ -371,7 +371,7 @@ class NahwTextElement extends HTMLElement {
         }
 
         p {
-            font-size: 3rem;
+            font-size: clamp(1rem, 4rem, 4vw);
             user-select: none;
             text-align: justify;
             direction: rtl;
