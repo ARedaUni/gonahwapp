@@ -95,7 +95,7 @@ function getFirstVowelName(word) {
     return null;
 }
 
-class WordState {
+class Word {
     static FLAGS = ["correct", "incorrect", "na"]
     constructor(wordAnswer, flag="na", isPunctuation=false) {
         this.setFlag(flag);
@@ -145,7 +145,7 @@ class WordState {
     }
 
     setFlag(value) {
-        console.assert(WordState.FLAGS.indexOf(value) !== -1);
+        console.assert(Word.FLAGS.indexOf(value) !== -1);
         this._flag = value;
     }
 
@@ -163,15 +163,15 @@ class WordState {
             let c = sentenceAnswer[i];
             if (c === ' ') {
                 let word = sentenceAnswer.substring(startingIndex, i);
-                words.push(new WordState(word, WordState.computeFlag(word)));
+                words.push(new Word(word, Word.computeFlag(word)));
                 startingIndex = i + 1;
                 i++;
                 continue;
             }
             if (c === ',' || c === ':' || c === '.' || c === '،') {
                 let word = sentenceAnswer.substring(startingIndex, i);
-                words.push(new WordState(word, WordState.computeFlag(word)));
-                words.push(new WordState(c, "na", true));
+                words.push(new Word(word, Word.computeFlag(word)));
+                words.push(new Word(c, "na", true));
                 startingIndex = i + 1;
                 i++;
                 continue;
@@ -180,7 +180,7 @@ class WordState {
         if (startingIndex !== sentenceAnswer.length) {
             let word = sentenceAnswer.substring(
                 startingIndex, sentenceAnswer.length);
-            words.push(new WordState(word, WordState.computeFlag(word)));
+            words.push(new Word(word, Word.computeFlag(word)));
         }
         return words;
     }
@@ -210,7 +210,7 @@ class Sentence {
     static FLAGS = ["correct", "incorrect", "unattempted"];
 
     constructor(sentenceAnswer, flag="unattempted") {
-        this._words = WordState.generateWords(sentenceAnswer);
+        this._words = Word.generateWords(sentenceAnswer);
     }
 
     getWords() {
