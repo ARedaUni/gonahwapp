@@ -375,9 +375,13 @@ class NahwExitButtonElement extends HTMLElement {
         .hide {
             display: none;
         }
+
+        a {
+            color: inherit;
+        }
     </style>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,-25" /> 
-    <span class="material-symbols-outlined">close</span>`;
+    <a href="index.html"><span class="material-symbols-outlined">close</span></a>`;
     constructor() {
         super();
         const root = this.attachShadow({mode: "open"});
