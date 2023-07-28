@@ -294,19 +294,29 @@ class NahwQuestionElement extends HTMLElement {
         }
 
         #header {
-
-        }
-
-        nahw-progress {
             height: 10px;
             width: 50%;
             margin: 1rem auto;
+            display: flex;
+            align-items: center;
+        }
+
+        nahw-exit-button {
+            opacity: .6;
+            position: relative;
+            top: 2px;
+            margin-right: 1rem;
+        }
+
+        nahw-progress-bar {
+            height: 100%;
+            width: 90%;
         }
     </style>
     <div>
         <header id="header">
-            <exit-button></exit-button>
-            <nahw-progress></nahw-progress>
+            <nahw-exit-button></nahw-exit-button>
+            <nahw-progress-bar></nahw-progress-bar>
         </header>
         <nahw-text></nahw-text>
         <nahw-footer></nahw-footer>
@@ -328,6 +338,28 @@ class NahwQuestionElement extends HTMLElement {
         console.assert(state instanceof NahwQuestion);
         this.state = state;
         this.nahwText.bindToState(state);
+    }
+}
+
+class NahwExitButtonElement extends HTMLElement {
+    static templateHTML = `
+    <style>
+        :host {
+            display: inline;
+        }
+
+        span {
+            user-select: none;
+            cursor: pointer;
+            line-height: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,-25" /> 
+    <span class="material-symbols-outlined">close</span>`;
+    constructor() {
+        super();
+        const root = this.attachShadow({mode: "open"});
+        root.innerHTML = NahwExitButtonElement.templateHTML;
     }
 }
 
@@ -388,11 +420,12 @@ class NahwFooterElement extends HTMLElement {
         }
         
         #footer-container {
-            background-color: var(--nav-bg);
+            background-color: var(--footer-bg);
             position: absolute;
             bottom: 0;
             width: 100%;
             height: 20%;
+            border-top: 2px solid var(--footer-stroke)
         }
 
         #button-container {
@@ -421,17 +454,17 @@ class NahwFooterElement extends HTMLElement {
         }
 
         #secondary {
-            background-color: var(--nav-secondary-fill);
-            color: var(--nav-secondary);
-            box-shadow: 0 3px var(--nav-secondary-shadow);
-            border-color: var(--nav-secondary-stroke);
+            background-color: var(--footer-secondary-fill);
+            color: var(--footer-secondary);
+            box-shadow: 0 3px var(--footer-secondary-shadow);
+            border-color: var(--footer-secondary-stroke);
         }
 
         #primary {
-            background-color: var(--nav-primary-fill);
-            color: var(--nav-primary);
-            box-shadow: 0 3px var(--nav-primary-shadow);
-            border-color: var(--nav-primary-stroke);
+            background-color: var(--footer-primary-fill);
+            color: var(--footer-primary);
+            box-shadow: 0 3px var(--footer-primary-shadow);
+            border-color: var(--footer-primary-stroke);
         }
 
     </style>
@@ -479,16 +512,21 @@ class NahwProgressBarElement extends HTMLElement {
         #glow {
             position: absolute;
             top: 25%;
-            width: 90%;
-            left: 5%;
+            width: 98%;
+            left: 1%;
             height: 3px;
             background-color: var(--progress-glow);
+            border-radius: 25px;
         }
 
         #value.filled {
             border-top-right-radius: 25px;
             border-bottom-right-radius: 25px;
             background-color: var(--progress-complete-value)
+        }
+
+        .filled > #glow {
+
         }
     </style>
     <div>
@@ -1055,4 +1093,5 @@ class ErrorView {
 customElements.define("nahw-question", NahwQuestionElement);
 customElements.define("nahw-text", NahwTextElement);
 customElements.define("nahw-footer", NahwFooterElement);
-customElements.define("nahw-progress", NahwProgressBarElement);
+customElements.define("nahw-progress-bar", NahwProgressBarElement);
+customElements.define("nahw-exit-button", NahwExitButtonElement);

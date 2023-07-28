@@ -6,15 +6,16 @@
     --accent: #e0bd85;
     --text: #000;
 
-    --nav-bg: #fff;
-    --nav-secondary: #a6a6a6;
-    --nav-secondary-fill: #fff;
-    --nav-secondary-stroke: #e1e1e1;
-    --nav-secondary-shadow: #e1e1e1;
-    --nav-primary: #fefefe;
-    --nav-primary-fill: #42C62F;
-    --nav-primary-stroke: #42C62F;
-    --nav-primary-shadow: #38a527;
+    --footer-bg: #fff;
+    --footer-secondary: #a6a6a6;
+    --footer-secondary-fill: #fff;
+    --footer-secondary-stroke: #e1e1e1;
+    --footer-secondary-shadow: #e1e1e1;
+    --footer-primary: #fefefe;
+    --footer-primary-fill: #42C62F;
+    --footer-primary-stroke: #42C62F;
+    --footer-primary-shadow: #38a527;
+    --footer-stroke: #E5E5E5;
 
     --progress-bg: #bababa;
     --progress-value: #58CC02;

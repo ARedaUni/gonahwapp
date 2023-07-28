@@ -7,48 +7,11 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,-25" />
         <link rel="stylesheet" type="text/css" href="style.css">
         <link rel="icon" type="image/x-icon" href="./img/favicon.ico">
     </head>
     <body>
-        <template id="nahw-question-small-template">
-            <style>
-
-            </style>
-            <div>
-                <!-- <progress-view></progress-view> -->
-                <!-- <nahw-text></nahw-text> -->
-                <nahw-bar></nahw-bar>
-            </div>
-        </template>
-
-        <template id="sentence-nav-template">
-            <style>
-                :root {
-                    background: #fff;
-                    secondary: #A6A6A6;
-                    secondary-shadow: #E1E1E1;
-                    primary: #42C62F;
-                    primary-shadow: #489D26;
-                }
-
-                div {
-                    background-color: var(--background);
-                }
-
-                button {
-                    
-                }
-
-                .secondary {
-
-                }
-            </style>
-            <div>
-                <button class="secondary"><slot name="secondary">SECONDARY SLOT</slot></button>
-                <button class="primary"><slot name="primary">PRIMARY SLOT</slot></button>
-            </div>
-        </template>
         <script type="text/javascript" src="cards.js"></script>
         <script type="text/javascript" src="nahw.js"></script>
         <script>
