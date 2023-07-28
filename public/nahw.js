@@ -292,11 +292,21 @@ class NahwQuestionElement extends HTMLElement {
             margin: 0 auto;
             width: 90%;
         }
+
+        #header {
+
+        }
+
+        nahw-progress {
+            height: 10px;
+            width: 50%;
+            margin: 1rem auto;
+        }
     </style>
     <div>
         <header id="header">
             <exit-button></exit-button>
-            <progress-bar></progress-bar>
+            <nahw-progress></nahw-progress>
         </header>
         <nahw-text></nahw-text>
         <nahw-footer></nahw-footer>
@@ -437,6 +447,65 @@ class NahwFooterElement extends HTMLElement {
         super();
         const root = this.attachShadow({mode: "open"});
         root.innerHTML = NahwFooterElement.templateHTML;
+    }
+}
+
+class NahwProgressBarElement extends HTMLElement {
+    static templateHTML = `
+    <style>
+        :host {
+            display: block;
+        }
+
+        div {
+            height: inherit;
+            background-color: var(--progress-bg);
+            border-radius: 25px;
+            box-shadow:
+                inset 0 1px 1px rgba(255, 255, 255, .3),
+                inset 0 -1px 1px rgba(255, 255, 255, .3);
+        }
+
+        #value {
+            display: block;
+            height: 100%;
+            border-top-left-radius: 25px;
+            border-bottom-left-radius: 25px;
+            background-color: var(--progress-value);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #glow {
+            position: absolute;
+            top: 25%;
+            width: 90%;
+            left: 5%;
+            height: 3px;
+            background-color: var(--progress-glow);
+        }
+
+        #value.filled {
+            border-top-right-radius: 25px;
+            border-bottom-right-radius: 25px;
+            background-color: var(--progress-complete-value)
+        }
+    </style>
+    <div>
+        <span id="value" style="width: 80%">
+            <span id="glow"></span>
+        </span>
+    </div>`;
+
+    constructor() {
+        super();
+        const root = this.attachShadow({mode: "open"});
+        root.innerHTML = NahwProgressBarElement.templateHTML;
+    }
+
+    bindToState(state) {
+        console.assert(state instanceof NahwQuestion);
+        this.state = state;
     }
 }
 
@@ -986,3 +1055,4 @@ class ErrorView {
 customElements.define("nahw-question", NahwQuestionElement);
 customElements.define("nahw-text", NahwTextElement);
 customElements.define("nahw-footer", NahwFooterElement);
+customElements.define("nahw-progress", NahwProgressBarElement);

@@ -5,6 +5,7 @@
     --secondary: #525B32;
     --accent: #e0bd85;
     --text: #000;
+
     --nav-bg: #fff;
     --nav-secondary: #a6a6a6;
     --nav-secondary-fill: #fff;
@@ -14,6 +15,13 @@
     --nav-primary-fill: #42C62F;
     --nav-primary-stroke: #42C62F;
     --nav-primary-shadow: #38a527;
+
+    --progress-bg: #bababa;
+    --progress-value: #58CC02;
+    --progress-glow: rgba(255, 255, 255, 0.2);
+    --progress-complete-value: #FFC800;
+    --progress-complete-glow: #FFD333;
+
     --highlight-active: #8abae2;
     --highlight-inactive: #e0dbd8;
 }
