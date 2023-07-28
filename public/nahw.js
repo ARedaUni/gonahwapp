@@ -206,7 +206,7 @@ class WordState {
     }
 }
 
-class SentenceState {
+class Sentence {
     static FLAGS = ["correct", "incorrect", "unattempted"];
 
     constructor(sentenceAnswer, flag="unattempted") {
@@ -239,7 +239,7 @@ class SentenceState {
     }
 
     setFlag(value) {
-        console.assert(SentenceState.FLAGS.some(x => x === value));
+        console.assert(Sentence.FLAGS.some(x => x === value));
         this._flag = value;
     }
 
@@ -254,24 +254,98 @@ class SentenceState {
             return this._smallView;
         return this._smallView = new SentenceSmallView(this);
     }
+
+    [Symbol.iterator]() {
+        return {
+            index: -1,
+            self: this,
+            next() {
+                this.index += 1;
+                let word = this.self.getWords()[this.index];
+                while (word && word.getFlag() === "na") {
+                    this.index += 1;
+                    word = this.self.getWords()[this.index];
+                }
+                if (word == undefined) {
+                    return {
+                        value: null,
+                        done: true,
+                    };
+                }
+                return {
+                    value: word,
+                    done: false,
+                };
+            }
+        }
+    }
 }
 
 class NahwQuestion {
 
     constructor(answers) {
         console.assert(answers != undefined);
-        this._sentences = answers.map(x => new SentenceState(x));
-        this._page = 0;
+        this._sentences = answers.map(x => new Sentence(x));
+        this._page = {sentence: null, word: null};
+        this.resetPageIterator();
+        this._currentPage = null;
         this._pageListeners = [];
     }
 
-    getPageNumber() {
-        return this._page;
+    resetPageIterator() {
+        this._iterator = {
+            self: this,
+            sentenceIndex: -1,
+            sentenceIt: null,
+            pageNumber: -1,
+            next() {
+                this.pageNumber += 1;
+                if (this.sentenceIt == null) {
+                    this.sentenceIndex += 1;
+                    const sentence = this.self.getSentences()[this.sentenceIndex];
+                    if (sentence == undefined) {
+                        return {
+                            value: null,
+                            done: true,
+                        };
+                    }
+                    this.sentenceIt = sentence[Symbol.iterator]();
+                }
+                const r = this.sentenceIt.next();
+                if (r.done) {
+                    this.sentenceIt = null;
+                    return this.next();
+                }
+                const w = r.value;
+                const s = this.self.getSentences()[this.sentenceIndex];
+                return {
+                    value: {word: w, sentence: s, pageNumber: this.pageNumber},
+                    done: false,
+                };
+            }
+        };
+    }
+
+    getCurrentPageNumber() {
+        return this.getCurrentPage()?.value?.pageNumber || null;
+    }
+
+    getCurrentSentence() {
+        return this.getCurrentPage()?.value?.sentence || null;
+    }
+
+    getCurrentWord() {
+        return this.getCurrentPage()?.value?.word || null;
+    }
+
+    getCurrentPage() {
+        return this._currentPage;
     }
 
     nextPage() {
-        this._page += 1;
-        this._pageListeners.forEach(x => x.onPageChange(this._page - 1, this._page));
+        const oldPage = this._currentPage;
+        this._currentPage = this._iterator.next();
+        this._pageListeners.forEach(x => x.onPageChange(oldPage, this._currentPage));
     }
     
     addPageChangeListener(obj) {
@@ -301,9 +375,14 @@ class NahwQuestionElement extends HTMLElement {
     static templateHTML = `
     <style>
         nahw-text {
-            text-align: center;
             margin: 0 auto;
             width: 90%;
+        }
+
+        nahw-text.big {
+            margin: 0 auto;
+            width: 90%;
+            margin-top: clamp(1rem, 7rem, 7vw);
         }
 
         #header {
@@ -349,12 +428,21 @@ class NahwQuestionElement extends HTMLElement {
         if (!this.isConnected) return;
     }
 
+    onPageChange(_oldPage, newPage) {
+        if (newPage === 0) {
+            this._nahwText.classList.remove("big");
+        } else {
+            this._nahwText.classList.add("big");
+        }
+    }
+
     bindToState(state) {
         console.assert(state instanceof NahwQuestion);
         this._state = state;
         this._nahwText.bindToState(state);
         this._nahwProgressBar.bindToState(state);
         this._nahwFooter.bindToState(state);
+        state.addPageChangeListener(this);
     }
 }
 
@@ -405,11 +493,38 @@ class NahwTextElement extends HTMLElement {
             font-family: Amiri;
         }
 
-        span {
+        p > span {
             color: var(--text);
             transition: color .2s, background-color .2s;
             padding-right: .2em;
             padding-left: .2em;
+        }
+
+        p.big {
+            font-size: clamp(1rem, 5rem, 5vw);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        p.big > span {
+            padding: 0;
+            position: relative;
+        }
+
+        span.ending {
+            content: "";
+            width: 100%;
+            height: 80%;
+            position: absolute;
+            display: block;
+            opacity: 61%;
+            background-color: var(--highlight-inactive);
+            top: 0;
+            left: 0;
+        }
+        
+        span.ending.active {
+            background-color: var(--highlight-active);
         }
     </style>
     <p></p>`;
@@ -421,14 +536,55 @@ class NahwTextElement extends HTMLElement {
         this._container = root.querySelector("p");
     }
 
-    bindToState(state) {
-        console.assert(state instanceof NahwQuestion);
-        this._state = state;
-        for (let sentence of state.getSentences()) {
+    onPageChange(_oldPage, newPage) {
+        // TODO: OUT OF DATE
+        if (newPage === 0) {
+            this.loadParagraphFacade();
+            return;
+        }
+        this.loadSentenceFacade();
+    }
+    
+    loadSentenceFacade() {
+        this._container.innerHTML = "";
+        this._container.classList.add("big");
+        const sentence = this.getState().getCurrentSentence();
+        for (let word of sentence.getWords()) {
+            const beginningSpan = document.createElement("span");
+            beginningSpan.innerText = word.getWordBeginning();
+            const endingSpan = document.createElement("span");
+            endingSpan.innerText = word.getFacade();
+            const endingSpanHighlight = document.createElement("span");
+            endingSpanHighlight.classList.add("ending");
+            if (word === this.getState().getCurrentWord()) {
+                endingSpanHighlight.classList.add("active");
+            }
+            endingSpan.appendChild(endingSpanHighlight);
+            this._container.appendChild(beginningSpan);
+            this._container.appendChild(endingSpan);
+            this._container.appendChild(document.createTextNode(" "));
+        }
+    }
+
+    loadParagraphFacade() {
+        this._container.innerHTML = "";
+        this._container.classList.remove("big");
+        for (let sentence of this.getState().getSentences()) {
             const span = document.createElement("span");
             span.innerText = sentence.getFacade() + "\u200c";
             this._container.appendChild(span);
         }
+    }
+
+    bindToState(state) {
+        console.assert(state instanceof NahwQuestion);
+        this._state = state;
+        this.loadParagraphFacade();
+        state.addPageChangeListener(this);
+    }
+
+    getState() {
+        return this._state;
     }
 }
 
@@ -572,7 +728,8 @@ class NahwFooterElement extends HTMLElement {
     bindToState(state) {
         console.assert(state instanceof NahwQuestion);
         this._state = state;
-        if (this.getState().getPageNumber() === 0) {
+        const pgNumber = this.getState().getCurrentPageNumber();
+        if (pgNumber === 0 || pgNumber == null) {
             this.updateBoth("START", `<a href="index.html">RETURN</a>`);
             this._primaryButton.putEventListener(state.nextPage.bind(state));
         }
@@ -581,6 +738,7 @@ class NahwFooterElement extends HTMLElement {
 
     onPageChange(_oldPage, _newPage) {
         this._primaryButton.setAttribute("type", "inactive");
+        this._primaryButton.resetListener();
         this.updateBoth("SELECT", "SKIP");
     }
 
@@ -649,7 +807,8 @@ class NahwProgressBarElement extends HTMLElement {
     }
 
     updateBar() {
-        if (this.getState().getPageNumber() === 0) {
+        let pgNumber = this.getState().getCurrentPageNumber();
+        if (pgNumber === 0 || pgNumber == null) {
             this.setValue(0);
         }
     }
