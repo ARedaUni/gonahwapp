@@ -19,6 +19,12 @@ function isShortVowel(diacriticName) {
     return diacriticName !== "SHADDA";
 }
 
+function isTanween(diacriticName) {
+    return diacriticName === "DAMMATAN" ||
+        diacriticName === "FATHATAN" ||
+        diacriticName === "KASRATAN";
+}
+
 function getDiacriticName(diacritic) {
     console.assert(typeof diacritic === "string");
     console.assert(diacritic.length === 1);
@@ -55,7 +61,7 @@ function getWordEnding(word) {
             continue;
         }
         if (diacriticName !== "SHADDA") {
-            return word.substr(lastLetter, word.length - lastLetter);
+            return word.substring(lastLetter, word.length);
         }
     }
     return "";
@@ -72,14 +78,25 @@ function getWordBeginning(word) {
             continue;
         }
         if (diacriticName !== "SHADDA") {
-            return word.substr(0, lastLetter);
+            return word.substring(0, lastLetter);
         }
     }
     return word;
 }
 
+function getFirstVowelName(word) {
+    console.assert(typeof word === "string");
+    for (let i = 0; i < word.length; ++i) {
+        const name = getDiacriticName(word[i]);
+        if (name != null && name !== "SHADDA") {
+            return name;
+        }
+    }
+    return null;
+}
+
 class WordState {
-    static flags = ["correct", "incorrect", "unattempted", "na"]
+    static FLAGS = ["correct", "incorrect", "na"]
     constructor(wordAnswer, flag="na", isPunctuation=false) {
         this.setFlag(flag);
         // TODO: I could optimize this
@@ -106,7 +123,7 @@ class WordState {
     }
 
     reset() {
-        this.setFlag("unattempted");
+        this.setFlag("incorrect");
         this._facade = removeVowels(this.getAnswer());
     }
 
@@ -128,7 +145,7 @@ class WordState {
     }
 
     setFlag(value) {
-        console.assert(WordState.flags.indexOf(value) !== -1);
+        console.assert(WordState.FLAGS.indexOf(value) !== -1);
         this._flag = value;
     }
 
@@ -136,7 +153,7 @@ class WordState {
         if (getWordEnding(wordAns) === "") {
             return "na";
         }
-        return "unattempted";
+        return "incorrect";
     }
 
     static generateWords(sentenceAnswer) {
@@ -145,14 +162,14 @@ class WordState {
         for (let i = 1; i < sentenceAnswer.length; ++i) {
             let c = sentenceAnswer[i];
             if (c === ' ') {
-                let word = sentenceAnswer.substr(startingIndex, i - startingIndex);
+                let word = sentenceAnswer.substring(startingIndex, i);
                 words.push(new WordState(word, WordState.computeFlag(word)));
                 startingIndex = i + 1;
                 i++;
                 continue;
             }
             if (c === ',' || c === ':' || c === '.' || c === '،') {
-                let word = sentenceAnswer.substr(startingIndex, i - startingIndex);
+                let word = sentenceAnswer.substring(startingIndex, i);
                 words.push(new WordState(word, WordState.computeFlag(word)));
                 words.push(new WordState(c, "na", true));
                 startingIndex = i + 1;
@@ -161,16 +178,36 @@ class WordState {
             }
         }
         if (startingIndex !== sentenceAnswer.length) {
-            let word = sentenceAnswer.substr(
-                startingIndex, sentenceAnswer.length - startingIndex);
+            let word = sentenceAnswer.substring(
+                startingIndex, sentenceAnswer.length);
             words.push(new WordState(word, WordState.computeFlag(word)));
         }
         return words;
     }
+
+    generateEndings() {
+        if (this.getFlag() === "na") return [];
+        const strippedEnding = removeVowels(this.getAnswer());
+        const tanween = isTanween(getFirstVowelName(this.getAnswer()));
+        if (tanween) {
+            return [
+                strippedEnding.substring(0, 1) + diacritics["DAMMATAN"] + strippedEnding.substring(1),
+                strippedEnding.substring(0, 1) + diacritics["FATHATAN"] + strippedEnding.substring(1),
+                strippedEnding.substring(0, 1) + diacritics["KASRATAN"] + strippedEnding.substring(1),
+                strippedEnding.substring(0, 1) + diacritics["SUKOON"] + strippedEnding.substring(1),
+            ];
+        }
+        return [
+            strippedEnding.substring(0, 1) + diacritics["DAMMA"] + strippedEnding.substring(1),
+            strippedEnding.substring(0, 1) + diacritics["FATHA"] + strippedEnding.substring(1),
+            strippedEnding.substring(0, 1) + diacritics["KASRA"] + strippedEnding.substring(1),
+            strippedEnding.substring(0, 1) + diacritics["SUKOON"] + strippedEnding.substring(1),
+        ];
+    }
 }
 
 class SentenceState {
-    static flags = ["correct", "incorrect", "unattempted"];
+    static FLAGS = ["correct", "incorrect", "unattempted"];
 
     constructor(sentenceAnswer, flag="unattempted") {
         this._words = WordState.generateWords(sentenceAnswer);
@@ -202,14 +239,14 @@ class SentenceState {
     }
 
     setFlag(value) {
-        console.assert(SentenceState.flags.some(x => x === value));
+        console.assert(SentenceState.FLAGS.some(x => x === value));
         this._flag = value;
     }
 
-    getBigView() {
+    getBigView(inputContainer=undefined, nahwQv=undefined) {
         if (this._bigView)
             return this._bigView;
-        return this._bigView = new SentenceBigView(this);
+        return this._bigView = new SentenceBigView(this, inputContainer, nahwQv);
     }
 
     getSmallView() {
@@ -219,7 +256,7 @@ class SentenceState {
     }
 }
 
-class NahwQS {
+class NahwQuestion {
     static FLAGS = ["wrong", "correct"]
 
     constructor(answers) {
@@ -246,6 +283,263 @@ class NahwQS {
     }
 }
 
+
+class NahwQuestionElement extends HTMLElement {
+    static templateHTML = `
+    <style>
+        nahw-text {
+            text-align: center;
+            margin: 0 auto;
+            width: 90%;
+        }
+
+        #header {
+            height: 10px;
+            width: 50%;
+            margin: 1rem auto;
+            display: flex;
+            align-items: center;
+        }
+
+        nahw-exit-button {
+            opacity: .6;
+            position: relative;
+            top: 2px;
+            margin-right: 1rem;
+        }
+
+        nahw-progress-bar {
+            height: 100%;
+            width: 90%;
+        }
+    </style>
+    <div>
+        <header id="header">
+            <nahw-exit-button></nahw-exit-button>
+            <nahw-progress-bar></nahw-progress-bar>
+        </header>
+        <nahw-text></nahw-text>
+        <nahw-footer></nahw-footer>
+    </div>`;
+
+    constructor() {
+        super();
+        const root = this.attachShadow({mode: "open"});
+        root.innerHTML = NahwQuestionElement.templateHTML;
+
+        this.nahwText = root.querySelector("nahw-text");
+    }
+
+    connectedCallback() {
+        if (!this.isConnected) return;
+    }
+
+    bindToState(state) {
+        console.assert(state instanceof NahwQuestion);
+        this.state = state;
+        this.nahwText.bindToState(state);
+    }
+}
+
+class NahwExitButtonElement extends HTMLElement {
+    static templateHTML = `
+    <style>
+        :host {
+            display: inline;
+        }
+
+        span {
+            user-select: none;
+            cursor: pointer;
+            line-height: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,-25" /> 
+    <span class="material-symbols-outlined">close</span>`;
+    constructor() {
+        super();
+        const root = this.attachShadow({mode: "open"});
+        root.innerHTML = NahwExitButtonElement.templateHTML;
+    }
+}
+
+class NahwTextElement extends HTMLElement {
+    static templateHTML = `
+    <style>
+        :host {
+            display: block;
+        }
+
+        p {
+            font-size: clamp(1rem, 4rem, 4vw);
+            user-select: none;
+            text-align: justify;
+            direction: rtl;
+            font-family: Amiri;
+        }
+
+        span {
+            color: var(--text);
+            transition: color .2s, background-color .2s;
+            padding-right: .2em;
+            padding-left: .2em;
+        }
+    </style>
+    <p></p>`;
+    
+    constructor() {
+        super();
+        const root = this.attachShadow({mode: "open"});
+        root.innerHTML = NahwTextElement.templateHTML;
+        this.container = root.querySelector("p");
+    }
+
+    bindToState(state) {
+        console.assert(state instanceof NahwQuestion);
+        for (let sentence of state.getSentences()) {
+            const span = document.createElement("span");
+            span.innerText = sentence.getFacade() + "\u200c";
+            this.container.appendChild(span);
+        }
+    }
+}
+
+class NahwFooterElement extends HTMLElement {
+    static templateHTML = `
+    <style>
+        :host {
+            display: block;
+            box-sizing: border-box;
+        }
+        
+        #footer-container {
+            background-color: var(--footer-bg);
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 20%;
+            border-top: 2px solid var(--footer-stroke)
+        }
+
+        #button-container {
+            display: flex;
+            width: 80%;
+            height: 100%;
+            align-items: center;
+            justify-content: space-between;
+            margin: 0 auto;
+        }
+
+        button {
+            border-radius: 16px;
+            font-weight: 800;
+            border-width: thin;
+            border-style: solid;
+            padding: .5rem 1rem;
+            cursor: pointer;
+            appearance: none;
+            width: 150px;
+        }
+
+        button:active {
+            box-shadow: none !important;
+            transform: translate(0, 3px);
+        }
+
+        #secondary {
+            background-color: var(--footer-secondary-fill);
+            color: var(--footer-secondary);
+            box-shadow: 0 3px var(--footer-secondary-shadow);
+            border-color: var(--footer-secondary-stroke);
+        }
+
+        #primary {
+            background-color: var(--footer-primary-fill);
+            color: var(--footer-primary);
+            box-shadow: 0 3px var(--footer-primary-shadow);
+            border-color: var(--footer-primary-stroke);
+        }
+
+    </style>
+    <div id="footer-container">
+        <div id="button-container">
+            <button id="secondary">SECONDARY</button>
+            <button id="primary">PRIMARY</button>
+        </div>
+    </div>
+    `;
+
+    constructor() {
+        super();
+        const root = this.attachShadow({mode: "open"});
+        root.innerHTML = NahwFooterElement.templateHTML;
+    }
+}
+
+class NahwProgressBarElement extends HTMLElement {
+    static templateHTML = `
+    <style>
+        :host {
+            display: block;
+        }
+
+        div {
+            height: inherit;
+            background-color: var(--progress-bg);
+            border-radius: 25px;
+            box-shadow:
+                inset 0 1px 1px rgba(255, 255, 255, .3),
+                inset 0 -1px 1px rgba(255, 255, 255, .3);
+        }
+
+        #value {
+            display: block;
+            height: 100%;
+            border-top-left-radius: 25px;
+            border-bottom-left-radius: 25px;
+            background-color: var(--progress-value);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #glow {
+            position: absolute;
+            top: 25%;
+            width: 98%;
+            left: 1%;
+            height: 3px;
+            background-color: var(--progress-glow);
+            border-radius: 25px;
+        }
+
+        #value.filled {
+            border-top-right-radius: 25px;
+            border-bottom-right-radius: 25px;
+            background-color: var(--progress-complete-value)
+        }
+
+        .filled > #glow {
+
+        }
+    </style>
+    <div>
+        <span id="value" style="width: 80%">
+            <span id="glow"></span>
+        </span>
+    </div>`;
+
+    constructor() {
+        super();
+        const root = this.attachShadow({mode: "open"});
+        root.innerHTML = NahwProgressBarElement.templateHTML;
+    }
+
+    bindToState(state) {
+        console.assert(state instanceof NahwQuestion);
+        this.state = state;
+    }
+}
+
 class NahwQV {
     constructor(data) {
         this.data = data;
@@ -255,11 +549,20 @@ class NahwQV {
 
         this.progressView = new ProgressView(this);
         this.HTML.root.appendChild(this.progressView.getRootHTML());
-        this.pageActionButtons();
 
         this.HTML.main = document.createElement("div");
         this.HTML.main.classList.add("nahw-question-main");
         this.HTML.root.appendChild(this.HTML.main);
+                
+        this.input = new InputView();
+        // TODO: Append somewhere
+        
+        const submitEl = document.createElement("div");
+        submitEl.innerText = "Submit";
+        submitEl.classList.add("nahw-submit");
+        submitEl.classList.add("nahw-submit-inactive");
+
+        this.HTML.root.appendChild(submitEl);
 
         this.lastPage = -1;
 
@@ -282,10 +585,8 @@ class NahwQV {
             }
         });
 
-        window.view = this;
-        window.state = this.data;
         window.addEventListener("hashchange", (e) => {
-            e.target.view.renderFromURL();
+            this.renderFromURL();
         });
 
         if (!this.renderFromURL()) {
@@ -295,7 +596,7 @@ class NahwQV {
 
     renderFromURL() {
         let success = true;
-        const pageNum = parseInt(window.location.hash.substr(1));
+        const pageNum = parseInt(window.location.hash.substring(1));
         if (isNaN(pageNum)) success = false;
         if (pageNum < 0) success = false;
         if (pageNum > this.data.getSentences().length + 1) success = false;
@@ -303,130 +604,90 @@ class NahwQV {
             history.replaceState(null, "", "#0");
             return false;
         }
-        this.currentPage = pageNum;
-        this.renderPage();
+        this.selectPage(pageNum);
         return true;
     }
 
-    pageActionButtons() {
-        const pageNavButtonsEl = this.HTML.pageNavButtons =
-            document.createElement("div");
-        pageNavButtonsEl.classList.add("nahw-action-container");
-        const nextEl = this.HTML.nextBtn = document.createElement("div");
-        nextEl.innerHTML = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path clip-rule="evenodd" d="M12.2929 4.29289C12.6834 3.90237 13.3166 3.90237 13.7071 4.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L13.7071 19.7071C13.3166 20.0976 12.6834 20.0976 12.2929 19.7071C11.9024 19.3166 11.9024 18.6834 12.2929 18.2929L17.5858 13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H17.5858L12.2929 5.70711C11.9024 5.31658 11.9024 4.68342 12.2929 4.29289Z"></path> </g></svg>`;
-        nextEl.classList.add("nahw-nav");
-        nextEl.view = this;
-        nextEl.state = this.data;
-        nextEl.addEventListener("click", (e) => e.target.view.nextPage());
-
-        const prevEl = document.createElement("div");
-        prevEl.innerHTML = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" transform="matrix(-1, 0, 0, 1, 0, 0)"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M12.2929 4.29289C12.6834 3.90237 13.3166 3.90237 13.7071 4.29289L20.7071 11.2929C21.0976 11.6834 21.0976 12.3166 20.7071 12.7071L13.7071 19.7071C13.3166 20.0976 12.6834 20.0976 12.2929 19.7071C11.9024 19.3166 11.9024 18.6834 12.2929 18.2929L17.5858 13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H17.5858L12.2929 5.70711C11.9024 5.31658 11.9024 4.68342 12.2929 4.29289Z"></path> </g></svg>`;
-        prevEl.classList.add("nahw-nav");
-        prevEl.view = this;
-        prevEl.state = this.data;
-        prevEl.onclick = (e) => e.target.view.prevPage();
-
-        const submitEl = document.createElement("div");
-        submitEl.innerText = "Submit";
-        submitEl.classList.add("nahw-submit");
-        submitEl.classList.add("nahw-submit-inactive");
-        submitEl.view = this;
-        submitEl.state = this.data;
-        // submitEl.onclick = (e) => e.target.view.prevPage();
-
-        pageNavButtonsEl.appendChild(prevEl);
-        pageNavButtonsEl.appendChild(submitEl);
-        pageNavButtonsEl.appendChild(nextEl);
-        this.HTML.root.appendChild(pageNavButtonsEl);
+    getCurrentPageNumber() {
+        return this._currentPage;
     }
 
     // TODO: Render error page if invalid (add when sentences can be loaded using URL)
     selectPage(val) {
         console.assert(val >= 0);
         console.assert(val < this.data.getSentences().length + 1);
-        this.currentPage = val;
+        if (this.getCurrentSentenceState() != undefined) {
+            this.getCurrentSentenceState().getBigView().unsubscribe();
+        }
+        this._currentPage = val;
         this.renderPage();
     }
 
     prevPage() {
         this.lastPage = -1;
-        if (this.currentPage == undefined) {
-            this.currentPage = 0;
-        } else {
-            this.currentPage -= 1;
-            if (this.currentPage === -1) {
-                this.currentPage = this.data.getSentences().length;
-            }
+        if (this.getCurrentPageNumber() == undefined) {
+            this.selectPage(0);
+            return;
         }
-        this.renderPage();
+        let page = this.getCurrentPageNumber() - 1;
+        if (page === -1) {
+            page = this.data.getSentences().length;
+        }
+        this.selectPage(page);
     }
 
     nextPage() {
         this.lastPage = -1;
-        if (this.currentPage == undefined) {
-            this.currentPage = 0;
+        if (this.getCurrentPageNumber() == undefined) {
+            this.selectPage(0);
         } else {
-            this.currentPage = (this.currentPage + 1) % 
-                (this.data.getSentences().length + 1);
+            this.selectPage((this.getCurrentPageNumber() + 1) % 
+                (this.data.getSentences().length + 1));
         }
-        this.renderPage();
+    }
+
+    getCurrentSentenceState() {
+        if (this.getCurrentPageNumber() === 0 ||
+        this.getCurrentPageNumber() == undefined) {
+            return null;
+        }
+        console.assert(this.getCurrentPageNumber() > 0);
+        console.assert(this.getCurrentPageNumber() - 1 < this.data.getSentences().length);
+        return this.data.getSentences()[this.getCurrentPageNumber() - 1];
     }
 
     renderPage() {
-        history.replaceState(null, "", `#${this.currentPage}`);
-        this.progressView.selectPage(this.currentPage);
-        if (this.currentPage === 0) {
+        console.assert(this.getCurrentPageNumber() != undefined, "There is no page to render");
+        history.replaceState(null, "", `#${this._currentPage}`);
+        this.progressView.selectPage(this._currentPage);
+        if (this.getCurrentPageNumber() === 0) {
             this.mainPage();
         } else {
-            this.sentencePage(this.data.getSentences()[this.currentPage - 1]);
+            this.sentencePage(this.getCurrentSentenceState());
         }
-    }
-
-    // TODO: Switch to SentenceSmallView
-    mainPage() {
-        this.HTML.main.innerHTML = "";
-        // Create text (TODO: Make sentence clickable)
-        const textEl = this.HTML.text = document.createElement("p");
-        textEl.classList.add("nahw-full-text");
-        textEl.setAttribute("lang", "ar");
-        for (let i = 0; i < this.data.getSentences().length; ++i) {
-            let sentence = this.data.getSentences()[i];
-            const span = document.createElement("span");
-            // U+200C = Zero Width Non-Joiner
-            // It prevents adjacent letters from forming ligatures
-            // Perfect since:
-            // I want a margin between sentences (done with CSS)
-            // I don't want a space since that shows up when hovering
-            // I don't want letters connecting between sentences (i.e U+200C)
-            // NOTE: display: block does the same thing BUT
-            // it breaks text-align: justify, while the unicode doesn't
-            span.innerText = sentence.getFacade() + "\u200c";
-            span.classList.add("nahw-full-text-sentence");
-            span.setAttribute("lang", "ar");
-            span.view = this; // TODO: Change to SentenceSmallView
-            span.state = sentence;
-            span.onclick = (e) => e.target.view.selectPage(i + 1);
-            textEl.appendChild(span);
-        }
-        // TODO: Create back-to-question or back-to-text
-        // TODO: Add submit
-        // Append all elements
-        this.HTML.main.appendChild(textEl);
     }
 
     sentencePage(sentenceState) {
         console.assert(sentenceState instanceof SentenceState);
-        this.HTML.main.innerHTML = "";
-        this.HTML.main.appendChild(sentenceState.getBigView().getRootHTML());
-        // TODO: Add input options
+        this.getInputView().show();
+        const bigView = sentenceState.getBigView(this.getInputView(), this);
+        if (bigView.empty()) {
+            this.getInputView().hide();
+        } else {
+            this.getInputView().change(bigView.getSelectedWord());
+        }
+        this.HTML.main.inner.text.innerHTML = "";
+        this.HTML.main.inner.text.appendChild(bigView.getRootHTML());
+        bigView.subscribe();
+    }
 
-
+    getInputView() {
+        return this.input;
     }
 
     getRootHTML() {
         return this.HTML.root;
     }
-
 }
 
 // TODO: Write
@@ -444,9 +705,7 @@ class ProgressView {
         const mainPageEl = this.HTML.mainPage = document.createElement("div");
         mainPageEl.classList.add("nahw-top-bar-page");
         mainPageEl.classList.add("nahw-top-bar-square");
-        mainPageEl.view = view;
-        mainPageEl.state = view.data;
-        mainPageEl.onclick = (e) => e.target.view.selectPage(0);
+        mainPageEl.onclick = (e) => view.selectPage(0);
         topBarEl.appendChild(mainPageEl);
 
         this.HTML.sentencePage = [];
@@ -454,9 +713,7 @@ class ProgressView {
             const sentencePageEl = document.createElement("div");
             sentencePageEl.classList.add("nahw-top-bar-page");
             sentencePageEl.classList.add("nahw-top-bar-circle");
-            sentencePageEl.view = view;
-            sentencePageEl.state = view.data;
-            sentencePageEl.onclick = (e) => e.target.view.selectPage(i + 1);
+            sentencePageEl.onclick = (e) => view.selectPage(i + 1);
             this.HTML.sentencePage.push(sentencePageEl);
             topBarEl.appendChild(sentencePageEl);
         }
@@ -492,9 +749,9 @@ class ProgressView {
     }
 }
 
-// TODO: Write
 class SentenceBigView {
-    constructor(sentenceState) {
+    
+    constructor(sentenceState, inputContainer, nahwQv) {
         console.assert(sentenceState instanceof SentenceState);
         this._sentenceState = sentenceState;
         this._words = []; // list of WordView
@@ -509,13 +766,20 @@ class SentenceBigView {
             if (!first && !word.isPunctuation()) {
                 this.HTML.root.appendChild(document.createTextNode(" "));
             }
-            const wordView = new WordView(word);
+            const wordView = new WordView(word, this, inputContainer);
             this._words.push(wordView);
             this.HTML.root.appendChild(wordView.getRootHTML());
             first = false;
         }
-        this.getWords()[1].select();
-        this.getWords()[1].render();
+        this.nextWord();
+        this._listener = function(e) {
+            if (!e.ctrlKey && e.key === "ArrowRight") {
+                this.prevWord();
+            } else if (!e.ctrlKey && e.key === "ArrowLeft") {
+                this.nextWord();
+            }
+        }.bind(this);
+        this._nahwQv = nahwQv;
     }
 
     getRootHTML() {
@@ -529,10 +793,115 @@ class SentenceBigView {
     getWords() {
         return this._words;
     }
+
+    getNahwQV() {
+        return this._nahwQv;
+    }
+
+    getSelectedWordNum() {
+        return this._selected;
+    }
+
+    setSelectedWordNum(val) {
+        console.assert(typeof val === "number");
+        if (this.getSelectedWord() != undefined) {
+            this.getSelectedWord().unselect();
+        }
+        this._selected = val;
+        this.getSelectedWord().select();
+    }
+
+    getSelectedWord() {
+        if (this.getSelectedWordNum() == undefined) return null;
+        return this.getWords()[this.getSelectedWordNum()];
+    }
+
+    selectWord(word) {
+        console.assert(word instanceof WordView);
+        for (let i = 0; i < this.getWords().length; ++i) {
+            const wordView = this.getWords()[i];
+            if (wordView === word) {
+                this.setSelectedWordNum(i);
+                return;
+            }
+        }
+        console.error("Word not found!", word);
+    }
+
+    nextWord(goToPage=false) {
+        let prevSelected = this.getSelectedWordNum();
+        let selected;
+        if (prevSelected == undefined) {
+            selected = 0;
+        } else {
+            selected = (prevSelected + 1);
+            if (goToPage && selected >= this.getWords().length) {
+                this.getNahwQV().nextPage();
+                return;
+            }
+
+            selected %= this.getWords().length;
+        }
+
+        let tries = 0;
+        while (!this.getWords()[selected].isHighlighted()) {
+            if (tries === this.getWords().length) {
+                console.error("Cannot find a valid word!");
+                return;
+            }
+            selected += 1;
+            if (goToPage && selected >= this.getWords().length) {
+                this.getNahwQV().nextPage();
+                return;
+            }
+            selected %= this.getWords().length;
+        }
+        this.setSelectedWordNum(selected);
+    }
+
+    prevWord() {
+        let prevSelected = this.getSelectedWordNum();
+        let selected;
+        if (prevSelected == undefined) {
+            selected = 0;
+        } else {
+            selected = prevSelected - 1;
+            if (selected < 0) selected = this.getWords().length - 1;
+        }
+
+        let tries = 0;
+        while (!this.getWords()[selected].isHighlighted()) {
+            if (tries == this.getWords().length) {
+                console.error("Cannot find a valid word!");
+                return;
+            }
+            selected = selected - 1;
+            if (selected < 0) selected = this.getWords().length - 1;
+        }
+        this.setSelectedWordNum(selected);
+    }
+
+    empty() {
+        for (let word of this.getWords()) {
+            if (word.isHighlighted()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    subscribe() {
+        document.body.addEventListener("keydown", this._listener);
+    }
+
+    unsubscribe() {
+        document.body.removeEventListener("keydown", this._listener);
+    }
 }
 
 class WordView {
-    constructor(wordState) {
+
+    constructor(wordState, sentenceView=undefined, inputContainer=undefined) {
         console.assert(wordState instanceof WordState);
         this._wordState = wordState;
         this.HTML = Object.create(null);
@@ -542,7 +911,9 @@ class WordView {
         const baseEl = this.HTML.base = document.createElement("span");
         baseEl.innerText = wordState.getWordBeginning();
         const endingEl = this.HTML.ending = document.createElement("span");
-        endingEl.innerText = wordState.getFacade();
+        this.HTML.ending.text = document.createElement("span");
+        endingEl.appendChild(this.HTML.ending.text);
+        this.HTML.ending.text.innerText = wordState.getFacade();
 
         this.HTML.root.appendChild(baseEl);
         this.HTML.root.appendChild(endingEl);
@@ -552,8 +923,31 @@ class WordView {
             endingEl.classList.add("nahw-big-sentence-word-hoverable");
             this.HTML.ending.appendChild(highlightEl);
             this.unselect();
+            if (sentenceView != undefined) {
+                this._sentenceView = sentenceView;
+                this._onHighlightClick = (function() {sentenceView.selectWord(this);}).bind(this);
+                this.subscribe();
+            }
+            this._inputContainer = inputContainer;
         }
-        this.render();
+
+        this.showFeedback(false);
+    }
+
+    isHighlighted() {
+        return this.HTML.highlight != undefined;
+    }
+
+    showFeedback(val) {
+        this._feedback = val;
+    }
+
+    subscribe() {
+        this.HTML.highlight.addEventListener("click", this._onHighlightClick);
+    }
+
+    unsubscribe() {
+        this.HTML.highlight.removeEventListener("click", this._onHighlightClick);
     }
 
     getRootHTML() {
@@ -564,12 +958,23 @@ class WordView {
         return this._wordState;
     }
 
+    updateFacade() {
+        this.HTML.ending.text.innerText = this.getWordState().getFacade();
+    }
+
     select() {
         if (this.getWordState().getFlag() === "na") {
             console.error("Can't select a word that's not applicable");
             return;
         }
         this._selected = true;
+        if (!this.HTML.highlight.classList.replace("nahw-highlight-inactive",
+            "nahw-highlight-active")) {
+            this.HTML.highlight.classList.add("nahw-highlight-active");
+        }
+        if (this._inputContainer) {
+            this._inputContainer.change(this);
+        }
     }
 
     unselect() {
@@ -578,27 +983,23 @@ class WordView {
             return;
         }
         this._selected = false;
+        if (!this.HTML.highlight.classList.replace("nahw-highlight-active",
+            "nahw-highlight-inactive")) {
+            this.HTML.highlight.classList.add("nahw-highlight-inactive");
+        }
     }
 
     isSelected() {
         return this._selected;
     }
 
-    render() {
-        if (this.getWordState().getFlag() === "na") {
-            return;
-        }
-        if (this.isSelected()) {
-            if (!this.HTML.highlight.classList.replace("nahw-highlight-inactive",
-                "nahw-highlight-active")) {
-                this.HTML.highlight.classList.add("nahw-highlight-active");
-            }
-        } else {
-            if (!this.HTML.highlight.classList.replace("nahw-highlight-active",
-                "nahw-highlight-inactive")) {
-                this.HTML.highlight.classList.add("nahw-highlight-inactive");
-            }
-        }
+    attempt(ending) {
+        this.getWordState().attempt(ending);
+        this.updateFacade();
+    }
+
+    getSentenceView() {
+        return this._sentenceView;
     }
 }
 
@@ -607,12 +1008,83 @@ class SentenceSmallView {
 
 }
 
-// TODO: Write
 class InputView {
+    constructor() {
+        this.HTML = Object.create(null);
+        this.HTML.root = document.createElement("div");
+        this.HTML.root.classList.add("nahw-input-container");
+    }
+    
+    change(wordView) {
+        this.HTML.root.innerHTML = "";
+        this._currentWordView = wordView;
+        this._buttons = [];
+    
+        for (let option of wordView.getWordState().generateEndings()) {
+            const button = new InputButton(wordView, option, this);
+            if (button.getText() === this._currentWordView.getWordState().getFacade()) {
+                button.select();
+            }
+            this._buttons.push(button);
+            this.HTML.root.appendChild(button.getRootHTML());
+        }
+    }
 
+    hide() {
+        this.HTML.root.setAttribute("hidden", "");
+    }
+
+    show() {
+        this.HTML.root.removeAttribute("hidden");
+    }
+
+    getRootHTML() {
+        return this.HTML.root;
+    }
+
+    updateSelection() {
+    }
+}
+
+class InputButton {
+    constructor(wordView, option) {
+        this.HTML = Object.create(null);
+        this.HTML.root = document.createElement("div");
+        this.HTML.root.classList.add("nahw-input-button")
+        this.HTML.root.innerText = option;
+
+        this.HTML.root.addEventListener("click", () => {
+            wordView.attempt(option);
+            wordView.getSentenceView().nextWord(true);
+        });
+
+        this._option = option;
+    }
+
+    getText() {
+        return this._option;
+    }
+
+    unselect() {
+        this.HTML.root.classList.remove("nahw-input-button-active");
+    }
+
+    select() {
+        this.HTML.root.classList.add("nahw-input-button-active");
+    }
+
+    getRootHTML() {
+        return this.HTML.root;
+    }
 }
 
 // TODO: Write
 class ErrorView {
 
 }
+
+customElements.define("nahw-question", NahwQuestionElement);
+customElements.define("nahw-text", NahwTextElement);
+customElements.define("nahw-footer", NahwFooterElement);
+customElements.define("nahw-progress-bar", NahwProgressBarElement);
+customElements.define("nahw-exit-button", NahwExitButtonElement);
