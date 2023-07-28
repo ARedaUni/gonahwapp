@@ -384,12 +384,6 @@ class NahwTextElement extends HTMLElement {
             padding-right: .2em;
             padding-left: .2em;
         }
-
-        span:hover {
-            color: var(--background);
-            background-color: var(--text);
-            cursor: pointer;        
-        }
     </style>
     <p></p>`;
     
@@ -405,7 +399,6 @@ class NahwTextElement extends HTMLElement {
         for (let sentence of state.getSentences()) {
             const span = document.createElement("span");
             span.innerText = sentence.getFacade() + "\u200c";
-            span.addEventListener("click", () => console.error("NOT IMPLEMENTED YET"));
             this.container.appendChild(span);
         }
     }
