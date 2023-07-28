@@ -271,10 +271,10 @@ class NahwQuestion {
 
     nextPage() {
         this._page += 1;
-        this._pageListeners.forEach(x => x.onPageChange);
+        this._pageListeners.forEach(x => x.onPageChange(this._page - 1, this._page));
     }
-
-    addPageListener(obj) {
+    
+    addPageChangeListener(obj) {
         console.assert(obj.onPageChange != undefined, "Object must have an onPageChange method");
         this._pageListeners.push(obj);
     }
@@ -367,8 +367,13 @@ class NahwExitButtonElement extends HTMLElement {
 
         span {
             user-select: none;
+            -webkit-user-select: none;
             cursor: pointer;
             line-height: 10px;
+        }
+
+        .hide {
+            display: none;
         }
     </style>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,-25" /> 
@@ -377,6 +382,7 @@ class NahwExitButtonElement extends HTMLElement {
         super();
         const root = this.attachShadow({mode: "open"});
         root.innerHTML = NahwExitButtonElement.templateHTML;
+        this._span = root.querySelector("span");
     }
 }
 
@@ -422,6 +428,91 @@ class NahwTextElement extends HTMLElement {
     }
 }
 
+class NahwButtonElement extends HTMLElement {
+    static templateHTML = `
+    <style>
+        button {
+            border-radius: 16px;
+            font-weight: 800;
+            border-width: thin;
+            border-style: solid;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            appearance: none;
+            width: 150px;
+            title-transform: uppercase;
+            font-size: 1.2rem;
+        }
+
+        button:active:not(.inactive) {
+            box-shadow: none !important;
+            transform: translate(0, 3px);
+        }
+
+        .secondary {
+            background-color: var(--button-secondary-fill);
+            color: var(--button-secondary);
+            box-shadow: 0 3px var(--button-secondary-shadow);
+            border-color: var(--button-secondary-stroke);
+        }
+
+        .primary {
+            background-color: var(--button-primary-fill);
+            color: var(--button-primary);
+            box-shadow: 0 3px var(--button-primary-shadow);
+            border-color: var(--button-primary-stroke);
+        }
+
+        .inactive {
+            color: var(--button-inactive);
+            background-color: var(--button-inactive-fill);
+            box-shadow: 0;
+            cursor: not-allowed;
+            border-color: var(--button-inactive-fill);
+        }
+    </style>
+    <button type="button"><slot>SLOT</slot></button>
+    `;
+    constructor() {
+        super();
+        const root = this.attachShadow({mode: "open"});
+        root.innerHTML = NahwButtonElement.templateHTML;
+        this._container = root.querySelector("button");
+        root.appendChild(this._container);
+        this.setType(this.getAttribute("type"));
+    }
+
+    putEventListener(func) {
+        if (this._eventListener) {
+            this._container.removeEventListener("click", this._eventListener);
+        }
+        this._eventListener = func;
+        this._container.addEventListener("click", this._eventListener);
+    }
+
+    resetListener() {
+        this._container.removeEventListener("click", this._eventListener);
+        this._eventListener = null;
+    }
+
+    setType(type) {
+        console.assert(type === "primary" ||
+            type === "secondary" ||
+            type === "inactive");
+        this._container.className = type;
+    }
+
+    attributeChangedCallback(name, _oldValue, newValue) {
+        if (name === "type") {
+            this.setType(newValue);
+        }
+    }
+
+    static get observedAttributes() {
+        return ["type"];
+    }
+}
+
 class NahwFooterElement extends HTMLElement {
     static templateHTML = `
     <style>
@@ -448,77 +539,45 @@ class NahwFooterElement extends HTMLElement {
             margin: 0 auto;
         }
 
-        button {
-            border-radius: 16px;
-            font-weight: 800;
-            border-width: thin;
-            border-style: solid;
-            padding: 1rem 1.5rem;
-            cursor: pointer;
-            appearance: none;
-            width: 150px;
-            title-transform: uppercase;
-            font-size: 1.2rem;
+        a {
+            text-decoration: none;
+            color: inherit;
         }
-
-        button:active {
-            box-shadow: none !important;
-            transform: translate(0, 3px);
-        }
-
-        #secondary {
-            background-color: var(--footer-secondary-fill);
-            color: var(--footer-secondary);
-            box-shadow: 0 3px var(--footer-secondary-shadow);
-            border-color: var(--footer-secondary-stroke);
-        }
-
-        #primary {
-            background-color: var(--footer-primary-fill);
-            color: var(--footer-primary);
-            box-shadow: 0 3px var(--footer-primary-shadow);
-            border-color: var(--footer-primary-stroke);
-        }
-
     </style>
     <div id="footer-container">
         <div id="button-container">
-            <button id="secondary">SECONDARY</button>
-            <button id="primary">PRIMARY</button>
+            <nahw-button type="secondary">SECONDARY</nahw-button>
+            <nahw-button type="primary">PRIMARY</nahw-button>
         </div>
-    </div>
-    `;
+    </div>`;
 
     constructor() {
         super();
         const root = this.attachShadow({mode: "open"});
         root.innerHTML = NahwFooterElement.templateHTML;
 
-        this._secondaryButton = root.querySelectorAll("button")[0];
-        this._primaryButton = root.querySelectorAll("button")[1];
-    }
-
-    updateSecondaryText(val) {
-        console.assert(typeof val === "string");
-        this._secondaryButton.innerText = val;
-    }
-
-    updatePrimaryText(val) {
-        console.assert(typeof val === "string");
-        this._primaryButton.innerText = val;
+        this._secondaryButton = root.querySelectorAll("nahw-button")[0];
+        this._primaryButton = root.querySelectorAll("nahw-button")[1];
     }
 
     updateBoth(primary, secondary) {
-        this.updatePrimaryText(primary);
-        this.updateSecondaryText(secondary);
+        this._primaryButton.innerHTML = primary;
+        this._secondaryButton.innerHTML = secondary;
     }
 
     bindToState(state) {
         console.assert(state instanceof NahwQuestion);
         this._state = state;
         if (this.getState().getPageNumber() === 0) {
-            this.updateBoth("START", "RETURN");
+            this.updateBoth("START", `<a href="index.html">RETURN</a>`);
+            this._primaryButton.putEventListener(state.nextPage.bind(state));
         }
+        state.addPageChangeListener(this);
+    }
+
+    onPageChange(_oldPage, _newPage) {
+        this._primaryButton.setAttribute("type", "inactive");
+        this.updateBoth("SELECT", "SKIP");
     }
 
     getState() {
@@ -567,10 +626,6 @@ class NahwProgressBarElement extends HTMLElement {
             border-bottom-right-radius: 25px;
             background-color: var(--progress-complete-value)
         }
-
-        .filled > #glow {
-
-        }
     </style>
     <div>
         <span id="value" style="width: 80%">
@@ -606,487 +661,9 @@ class NahwProgressBarElement extends HTMLElement {
     }
 }
 
-class NahwQV {
-    constructor(data) {
-        this.data = data;
-        this.HTML = Object.create(null);
-        this.HTML.root = document.createElement("div");
-        this.HTML.root.classList.add("nahw-question");
-
-        this.progressView = new ProgressView(this);
-        this.HTML.root.appendChild(this.progressView.getRootHTML());
-
-        this.HTML.main = document.createElement("div");
-        this.HTML.main.classList.add("nahw-question-main");
-        this.HTML.root.appendChild(this.HTML.main);
-                
-        this.input = new InputView();
-        // TODO: Append somewhere
-        
-        const submitEl = document.createElement("div");
-        submitEl.innerText = "Submit";
-        submitEl.classList.add("nahw-submit");
-        submitEl.classList.add("nahw-submit-inactive");
-
-        this.HTML.root.appendChild(submitEl);
-
-        this.lastPage = -1;
-
-        document.body.addEventListener("keydown", (e) => {
-            if (e.ctrlKey && e.key === "ArrowRight") {
-                this.nextPage();
-            } else if (e.ctrlKey && e.key === "ArrowLeft") {
-                this.prevPage();
-            } else if ((e.ctrlKey && e.key === "ArrowUp") || e.key === "Home") {
-                if (this.currentPage === 0) return;
-                this.lastPage = this.currentPage;
-                this.selectPage(0);
-            } else if (e.ctrlKey && e.key === "ArrowDown") {
-                if (this.lastPage !== -1) {
-                    this.selectPage(this.lastPage);
-                }
-            } else if (e.key === "End") {
-                this.lastPage = -1;
-                this.selectPage(this.data.getSentences().length);
-            }
-        });
-
-        window.addEventListener("hashchange", (e) => {
-            this.renderFromURL();
-        });
-
-        if (!this.renderFromURL()) {
-            this.nextPage();
-        }
-    }
-
-    renderFromURL() {
-        let success = true;
-        const pageNum = parseInt(window.location.hash.substring(1));
-        if (isNaN(pageNum)) success = false;
-        if (pageNum < 0) success = false;
-        if (pageNum > this.data.getSentences().length + 1) success = false;
-        if (!success) {
-            history.replaceState(null, "", "#0");
-            return false;
-        }
-        this.selectPage(pageNum);
-        return true;
-    }
-
-    getCurrentPageNumber() {
-        return this._currentPage;
-    }
-
-    // TODO: Render error page if invalid (add when sentences can be loaded using URL)
-    selectPage(val) {
-        console.assert(val >= 0);
-        console.assert(val < this.data.getSentences().length + 1);
-        if (this.getCurrentSentenceState() != undefined) {
-            this.getCurrentSentenceState().getBigView().unsubscribe();
-        }
-        this._currentPage = val;
-        this.renderPage();
-    }
-
-    prevPage() {
-        this.lastPage = -1;
-        if (this.getCurrentPageNumber() == undefined) {
-            this.selectPage(0);
-            return;
-        }
-        let page = this.getCurrentPageNumber() - 1;
-        if (page === -1) {
-            page = this.data.getSentences().length;
-        }
-        this.selectPage(page);
-    }
-
-    nextPage() {
-        this.lastPage = -1;
-        if (this.getCurrentPageNumber() == undefined) {
-            this.selectPage(0);
-        } else {
-            this.selectPage((this.getCurrentPageNumber() + 1) % 
-                (this.data.getSentences().length + 1));
-        }
-    }
-
-    getCurrentSentenceState() {
-        if (this.getCurrentPageNumber() === 0 ||
-        this.getCurrentPageNumber() == undefined) {
-            return null;
-        }
-        console.assert(this.getCurrentPageNumber() > 0);
-        console.assert(this.getCurrentPageNumber() - 1 < this.data.getSentences().length);
-        return this.data.getSentences()[this.getCurrentPageNumber() - 1];
-    }
-
-    renderPage() {
-        console.assert(this.getCurrentPageNumber() != undefined, "There is no page to render");
-        history.replaceState(null, "", `#${this._currentPage}`);
-        this.progressView.selectPage(this._currentPage);
-        if (this.getCurrentPageNumber() === 0) {
-            this.mainPage();
-        } else {
-            this.sentencePage(this.getCurrentSentenceState());
-        }
-    }
-
-    sentencePage(sentenceState) {
-        console.assert(sentenceState instanceof SentenceState);
-        this.getInputView().show();
-        const bigView = sentenceState.getBigView(this.getInputView(), this);
-        if (bigView.empty()) {
-            this.getInputView().hide();
-        } else {
-            this.getInputView().change(bigView.getSelectedWord());
-        }
-        this.HTML.main.inner.text.innerHTML = "";
-        this.HTML.main.inner.text.appendChild(bigView.getRootHTML());
-        bigView.subscribe();
-    }
-
-    getInputView() {
-        return this.input;
-    }
-
-    getRootHTML() {
-        return this.HTML.root;
-    }
-}
-
-class SentenceBigView {
-    
-    constructor(sentenceState, inputContainer, nahwQv) {
-        console.assert(sentenceState instanceof SentenceState);
-        this._sentenceState = sentenceState;
-        this._words = []; // list of WordView
-
-        this.HTML = Object.create(null);
-        this.HTML.root = document.createElement("p");
-
-        this.HTML.root.classList.add("nahw-big-sentence");
-        this.HTML.root.setAttribute("lang", "ar");
-        let first = true;
-        for (let word of sentenceState.getWords()) {
-            if (!first && !word.isPunctuation()) {
-                this.HTML.root.appendChild(document.createTextNode(" "));
-            }
-            const wordView = new WordView(word, this, inputContainer);
-            this._words.push(wordView);
-            this.HTML.root.appendChild(wordView.getRootHTML());
-            first = false;
-        }
-        this.nextWord();
-        this._listener = function(e) {
-            if (!e.ctrlKey && e.key === "ArrowRight") {
-                this.prevWord();
-            } else if (!e.ctrlKey && e.key === "ArrowLeft") {
-                this.nextWord();
-            }
-        }.bind(this);
-        this._nahwQv = nahwQv;
-    }
-
-    getRootHTML() {
-        return this.HTML.root;
-    }
-
-    getSentenceState() {
-        return this._sentenceState;
-    }
-
-    getWords() {
-        return this._words;
-    }
-
-    getNahwQV() {
-        return this._nahwQv;
-    }
-
-    getSelectedWordNum() {
-        return this._selected;
-    }
-
-    setSelectedWordNum(val) {
-        console.assert(typeof val === "number");
-        if (this.getSelectedWord() != undefined) {
-            this.getSelectedWord().unselect();
-        }
-        this._selected = val;
-        this.getSelectedWord().select();
-    }
-
-    getSelectedWord() {
-        if (this.getSelectedWordNum() == undefined) return null;
-        return this.getWords()[this.getSelectedWordNum()];
-    }
-
-    selectWord(word) {
-        console.assert(word instanceof WordView);
-        for (let i = 0; i < this.getWords().length; ++i) {
-            const wordView = this.getWords()[i];
-            if (wordView === word) {
-                this.setSelectedWordNum(i);
-                return;
-            }
-        }
-        console.error("Word not found!", word);
-    }
-
-    nextWord(goToPage=false) {
-        let prevSelected = this.getSelectedWordNum();
-        let selected;
-        if (prevSelected == undefined) {
-            selected = 0;
-        } else {
-            selected = (prevSelected + 1);
-            if (goToPage && selected >= this.getWords().length) {
-                this.getNahwQV().nextPage();
-                return;
-            }
-
-            selected %= this.getWords().length;
-        }
-
-        let tries = 0;
-        while (!this.getWords()[selected].isHighlighted()) {
-            if (tries === this.getWords().length) {
-                console.error("Cannot find a valid word!");
-                return;
-            }
-            selected += 1;
-            if (goToPage && selected >= this.getWords().length) {
-                this.getNahwQV().nextPage();
-                return;
-            }
-            selected %= this.getWords().length;
-        }
-        this.setSelectedWordNum(selected);
-    }
-
-    prevWord() {
-        let prevSelected = this.getSelectedWordNum();
-        let selected;
-        if (prevSelected == undefined) {
-            selected = 0;
-        } else {
-            selected = prevSelected - 1;
-            if (selected < 0) selected = this.getWords().length - 1;
-        }
-
-        let tries = 0;
-        while (!this.getWords()[selected].isHighlighted()) {
-            if (tries == this.getWords().length) {
-                console.error("Cannot find a valid word!");
-                return;
-            }
-            selected = selected - 1;
-            if (selected < 0) selected = this.getWords().length - 1;
-        }
-        this.setSelectedWordNum(selected);
-    }
-
-    empty() {
-        for (let word of this.getWords()) {
-            if (word.isHighlighted()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    subscribe() {
-        document.body.addEventListener("keydown", this._listener);
-    }
-
-    unsubscribe() {
-        document.body.removeEventListener("keydown", this._listener);
-    }
-}
-
-class WordView {
-
-    constructor(wordState, sentenceView=undefined, inputContainer=undefined) {
-        console.assert(wordState instanceof WordState);
-        this._wordState = wordState;
-        this.HTML = Object.create(null);
-        this.HTML.root = document.createElement("span");
-        this.HTML.root.classList.add("nahw-big-sentence-word");
-        this.HTML.root.setAttribute("lang", "ar");
-        const baseEl = this.HTML.base = document.createElement("span");
-        baseEl.innerText = wordState.getWordBeginning();
-        const endingEl = this.HTML.ending = document.createElement("span");
-        this.HTML.ending.text = document.createElement("span");
-        endingEl.appendChild(this.HTML.ending.text);
-        this.HTML.ending.text.innerText = wordState.getFacade();
-
-        this.HTML.root.appendChild(baseEl);
-        this.HTML.root.appendChild(endingEl);
-        if (wordState.getFlag() !== "na") {
-            const highlightEl = this.HTML.highlight = document.createElement("div");
-            highlightEl.classList.add("nahw-big-sentence-word-highlight");
-            endingEl.classList.add("nahw-big-sentence-word-hoverable");
-            this.HTML.ending.appendChild(highlightEl);
-            this.unselect();
-            if (sentenceView != undefined) {
-                this._sentenceView = sentenceView;
-                this._onHighlightClick = (function() {sentenceView.selectWord(this);}).bind(this);
-                this.subscribe();
-            }
-            this._inputContainer = inputContainer;
-        }
-
-        this.showFeedback(false);
-    }
-
-    isHighlighted() {
-        return this.HTML.highlight != undefined;
-    }
-
-    showFeedback(val) {
-        this._feedback = val;
-    }
-
-    subscribe() {
-        this.HTML.highlight.addEventListener("click", this._onHighlightClick);
-    }
-
-    unsubscribe() {
-        this.HTML.highlight.removeEventListener("click", this._onHighlightClick);
-    }
-
-    getRootHTML() {
-        return this.HTML.root;
-    }
-
-    getWordState() {
-        return this._wordState;
-    }
-
-    updateFacade() {
-        this.HTML.ending.text.innerText = this.getWordState().getFacade();
-    }
-
-    select() {
-        if (this.getWordState().getFlag() === "na") {
-            console.error("Can't select a word that's not applicable");
-            return;
-        }
-        this._selected = true;
-        if (!this.HTML.highlight.classList.replace("nahw-highlight-inactive",
-            "nahw-highlight-active")) {
-            this.HTML.highlight.classList.add("nahw-highlight-active");
-        }
-        if (this._inputContainer) {
-            this._inputContainer.change(this);
-        }
-    }
-
-    unselect() {
-        if (this.getWordState().getFlag() === "na") {
-            console.error("Can't unselect a word that's not applicable");
-            return;
-        }
-        this._selected = false;
-        if (!this.HTML.highlight.classList.replace("nahw-highlight-active",
-            "nahw-highlight-inactive")) {
-            this.HTML.highlight.classList.add("nahw-highlight-inactive");
-        }
-    }
-
-    isSelected() {
-        return this._selected;
-    }
-
-    attempt(ending) {
-        this.getWordState().attempt(ending);
-        this.updateFacade();
-    }
-
-    getSentenceView() {
-        return this._sentenceView;
-    }
-}
-
-class InputView {
-    constructor() {
-        this.HTML = Object.create(null);
-        this.HTML.root = document.createElement("div");
-        this.HTML.root.classList.add("nahw-input-container");
-    }
-    
-    change(wordView) {
-        this.HTML.root.innerHTML = "";
-        this._currentWordView = wordView;
-        this._buttons = [];
-    
-        for (let option of wordView.getWordState().generateEndings()) {
-            const button = new InputButton(wordView, option, this);
-            if (button.getText() === this._currentWordView.getWordState().getFacade()) {
-                button.select();
-            }
-            this._buttons.push(button);
-            this.HTML.root.appendChild(button.getRootHTML());
-        }
-    }
-
-    hide() {
-        this.HTML.root.setAttribute("hidden", "");
-    }
-
-    show() {
-        this.HTML.root.removeAttribute("hidden");
-    }
-
-    getRootHTML() {
-        return this.HTML.root;
-    }
-
-    updateSelection() {
-    }
-}
-
-class InputButton {
-    constructor(wordView, option) {
-        this.HTML = Object.create(null);
-        this.HTML.root = document.createElement("div");
-        this.HTML.root.classList.add("nahw-input-button")
-        this.HTML.root.innerText = option;
-
-        this.HTML.root.addEventListener("click", () => {
-            wordView.attempt(option);
-            wordView.getSentenceView().nextWord(true);
-        });
-
-        this._option = option;
-    }
-
-    getText() {
-        return this._option;
-    }
-
-    unselect() {
-        this.HTML.root.classList.remove("nahw-input-button-active");
-    }
-
-    select() {
-        this.HTML.root.classList.add("nahw-input-button-active");
-    }
-
-    getRootHTML() {
-        return this.HTML.root;
-    }
-}
-
-// TODO: Write
-class ErrorView {
-
-}
-
 customElements.define("nahw-question", NahwQuestionElement);
 customElements.define("nahw-text", NahwTextElement);
 customElements.define("nahw-footer", NahwFooterElement);
 customElements.define("nahw-progress-bar", NahwProgressBarElement);
 customElements.define("nahw-exit-button", NahwExitButtonElement);
+customElements.define("nahw-button", NahwButtonElement);
