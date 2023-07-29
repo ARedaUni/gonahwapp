@@ -289,7 +289,9 @@ class NahwQuestion {
         this._page = {sentence: null, word: null};
         this.resetPageIterator();
         this._currentPage = null;
+        this._choice = null;
         this._pageListeners = [];
+        this._selectionListeners = [];
         this._totalPages = this.getSentences().reduce((x, s) => x + s.getWords().filter(w => w.getFlag() !== "na").length, 0);
     }
 
@@ -349,13 +351,28 @@ class NahwQuestion {
         this._pageListeners.forEach(x => x.onPageChange(oldPage, this._currentPage));
     }
     
+    getTotalPages() {
+        return this._totalPages;
+    }
+
     addPageChangeListener(obj) {
         console.assert(obj.onPageChange != undefined, "Object must have an onPageChange method");
         this._pageListeners.push(obj);
     }
 
-    getTotalPages() {
-        return this._totalPages;
+    selectChoice(choice) {
+        const oldChoice = this.getChoice();
+        this._choice = choice;
+        this._selectionListeners.forEach(x => x.onSelectionChange(oldChoice, choice));
+    }
+
+    getChoice() {
+        return this._choice;
+    }
+
+    addSelectionChangeListener(obj) {
+        console.assert(obj.onSelectionChange != undefined, "Object must have an onSelectionChange method");
+        this._selectionListeners.push(obj);
     }
 
     getSentences() {
@@ -425,10 +442,6 @@ class NahwQuestionElement extends HTMLElement {
             margin-top: 5rem;
             height: 30%;
         }
-
-        .hidden {
-            display: none;
-        }
     </style>
     <div>
         <header id="header">
@@ -458,10 +471,8 @@ class NahwQuestionElement extends HTMLElement {
     onPageChange(_oldPage, newPage) {
         if (newPage == null) {
             this._nahwText.classList.remove("big");
-            this._nahwInput.classList.add("hidden");
         } else {
             this._nahwText.classList.add("big");
-            this._nahwInput.classList.remove("hidden")
         }
     }
 
@@ -471,6 +482,7 @@ class NahwQuestionElement extends HTMLElement {
         this._nahwText.bindToState(state);
         this._nahwProgressBar.bindToState(state);
         this._nahwFooter.bindToState(state);
+        this._nahwInput.bindToState(state);
         state.addPageChangeListener(this);
         this.onPageChange(null, state.getCurrentPage());
     }
@@ -867,17 +879,50 @@ class NahwInputElement extends HTMLElement {
             justify-content: space-between;
             height: 100%;
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
     <div>
-        <nahw-input-card>لَ</nahw-input-card>
-        <nahw-input-card>لُ</nahw-input-card>
-        <nahw-input-card>لِ</nahw-input-card>
-        <nahw-input-card>لْ</nahw-input-card>
+        <nahw-input-card>TEST</nahw-input-card>
+        <nahw-input-card>TEST</nahw-input-card>
+        <nahw-input-card>TEST</nahw-input-card>
+        <nahw-input-card>TEST</nahw-input-card>
     </div>`;
     constructor() {
         super();
         const root = this.attachShadow({mode: "open"});
         root.innerHTML = NahwInputElement.templateHTML;
+        this._container = root.querySelector("div");
+    }
+
+    onPageChange(_oldPage, newPage) {
+        if (newPage == null) {
+            this._container.classList.add("hidden");
+            return;
+        }
+        this._container.classList.remove("hidden");
+        const word = newPage.value.word;
+        const endings = word.generateEndings();
+        for (let i = 0; i < this._container.children.length; ++i) {
+            const el = this._container.children[i];
+            const ending = endings[i];
+            el.setChoice(ending);
+        }
+    }
+
+    bindToState(state) {
+        this._state = state;
+        for (let card of this._container.children) {
+            card.bindToState(state);
+        }
+        state.addPageChangeListener(this);
+        this.onPageChange(null, state.getCurrentPage());
+    }
+
+    getState() {
+        return this._state || null;
     }
 }
 
@@ -890,7 +935,7 @@ class NahwInputCardElement extends HTMLElement {
             display: block;
         }
 
-        #container {
+        .container {
             height: 100%;
             width: 12rem;
             background-color: var(--input-card-fill);
@@ -904,13 +949,13 @@ class NahwInputCardElement extends HTMLElement {
             cursor: pointer;
         }
 
-        #choice {
+        .choice {
             font-size: 7rem;
             user-select: none;
             font-family: Amiri;
         }
 
-        #shortcut {
+        .shortcut {
             position: absolute;
             right: 10%;
             bottom: 2%;
@@ -920,16 +965,51 @@ class NahwInputCardElement extends HTMLElement {
             font-size: 1.5rem;
             border-radius: 8px;
         }
+
+        .active {
+            background-color: var(--input-card-active-fill);
+            border-color: var(--input-card-active-stroke);
+            box-shadow: 0 4px var(--input-card-active-stroke);
+        }
+
     </style>
-    <div id="container">
-        <p id="choice"><slot></slot></p>
-        <p id="shortcut">1</p>
+    <div class="container">
+        <p class="choice"><slot></slot></p>
+        <p class="shortcut">1</p>
     </div>`;
 
     constructor() {
         super();
         const root = this.attachShadow({mode: "open"});
         root.innerHTML = NahwInputCardElement.templateHTML;
+        this._container = root.querySelector(".container");
+        this._choice = root.querySelector(".choice");
+    }
+    
+    bindToState(state) {
+        this._state = state;
+        state.addSelectionChangeListener(this);
+        this._onClick = () => state.selectChoice(this._choice.innerText);
+        this._container.addEventListener("click", this._onClick);
+    }
+
+    setChoice(choice) {
+        this._container.removeEventListener("click", this._onClick);
+        this._choice.innerText = choice;
+        this._onClick = () => this.getState().selectChoice(this._choice.innerText);
+        this._container.addEventListener("click", this._onClick);
+    }
+
+    onSelectionChange(oldSelection, newSelection) {
+        if (newSelection === this._choice.innerText) {
+            this._container.classList.add("active");
+        } else if (oldSelection === this._choice.innerText) {
+            this._container.classList.remove("active");
+        }
+    }
+
+    getState() {
+        return this._state;
     }
 }
 

@@ -32,6 +32,9 @@
     --input-card-fill: #fff;
     --input-card-stroke: #e5e5e5;
     --input-card-shortcut: #afafaf;
+    --input-card-active-fill: #DDF4FF;
+    --input-card-active-stroke: #84D8FF;
+
 
     --highlight-active: #4093DC;
     --highlight-inactive: #e0dbd8;
