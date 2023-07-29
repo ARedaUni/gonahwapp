@@ -290,6 +290,7 @@ class NahwQuestion {
         this.resetPageIterator();
         this._currentPage = null;
         this._pageListeners = [];
+        this._totalPages = this.getSentences().reduce((x, s) => x + s.getWords().filter(w => w.getFlag() !== "na").length, 0);
     }
 
     resetPageIterator() {
@@ -354,7 +355,7 @@ class NahwQuestion {
     }
 
     getTotalPages() {
-        return this.getSentences().reduce((x, s) => x + s.getWords().filter(w => w.getFlag() !== "na").length, 0);
+        return this._totalPages;
     }
 
     getSentences() {
@@ -374,6 +375,17 @@ class NahwQuestion {
 class NahwQuestionElement extends HTMLElement {
     static templateHTML = `
     <style>
+        :host {
+            display: block;
+            height: 100%;
+            width: 100%;
+        }
+
+        div {
+            height: 100%;
+            width: 100%;
+        }
+
         nahw-text {
             margin: 0 auto;
             width: 90%;
@@ -388,7 +400,9 @@ class NahwQuestionElement extends HTMLElement {
         #header {
             height: 10px;
             width: 50%;
-            margin: 1rem auto;
+            margin: 0 auto;
+            padding-top: 1rem;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
         }
@@ -404,6 +418,17 @@ class NahwQuestionElement extends HTMLElement {
             height: 100%;
             width: 90%;
         }
+
+        nahw-input {
+            width: 50%;
+            margin: 0 auto;
+            margin-top: 5rem;
+            height: 30%;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
     <div>
         <header id="header">
@@ -411,6 +436,7 @@ class NahwQuestionElement extends HTMLElement {
             <nahw-progress-bar></nahw-progress-bar>
         </header>
         <nahw-text></nahw-text>
+        <nahw-input></nahw-input>
         <nahw-footer></nahw-footer>
     </div>`;
 
@@ -422,6 +448,7 @@ class NahwQuestionElement extends HTMLElement {
         this._nahwText = root.querySelector("nahw-text");
         this._nahwProgressBar = root.querySelector("nahw-progress-bar");
         this._nahwFooter = root.querySelector("nahw-footer");
+        this._nahwInput = root.querySelector("nahw-input");
     }
 
     connectedCallback() {
@@ -429,10 +456,12 @@ class NahwQuestionElement extends HTMLElement {
     }
 
     onPageChange(_oldPage, newPage) {
-        if (newPage === 0) {
+        if (newPage == null) {
             this._nahwText.classList.remove("big");
+            this._nahwInput.classList.add("hidden");
         } else {
             this._nahwText.classList.add("big");
+            this._nahwInput.classList.remove("hidden")
         }
     }
 
@@ -443,6 +472,7 @@ class NahwQuestionElement extends HTMLElement {
         this._nahwProgressBar.bindToState(state);
         this._nahwFooter.bindToState(state);
         state.addPageChangeListener(this);
+        this.onPageChange(null, state.getCurrentPage());
     }
 }
 
@@ -612,14 +642,14 @@ class NahwButtonElement extends HTMLElement {
         .secondary {
             background-color: var(--button-secondary-fill);
             color: var(--button-secondary);
-            box-shadow: 0 3px var(--button-secondary-shadow);
+            box-shadow: 0 5px var(--button-secondary-shadow);
             border-color: var(--button-secondary-stroke);
         }
 
         .primary {
             background-color: var(--button-primary-fill);
             color: var(--button-primary);
-            box-shadow: 0 3px var(--button-primary-shadow);
+            box-shadow: 0 5px var(--button-primary-shadow);
             border-color: var(--button-primary-stroke);
         }
 
@@ -725,17 +755,16 @@ class NahwFooterElement extends HTMLElement {
         this._secondaryButton.innerHTML = secondary;
     }
 
+    // TODO: Move the page stuff outta here
     bindToState(state) {
         console.assert(state instanceof NahwQuestion);
         this._state = state;
-        const pgNumber = this.getState().getCurrentPageNumber();
-        if (pgNumber === 0 || pgNumber == null) {
-            this.updateBoth("START", `<a href="index.html">RETURN</a>`);
-            this._primaryButton.putEventListener(state.nextPage.bind(state));
-        }
+        this.updateBoth("START", `<a href="index.html">RETURN</a>`);
+        this._primaryButton.putEventListener(state.nextPage.bind(state));
         state.addPageChangeListener(this);
     }
 
+    // TODO: Take into account page
     onPageChange(_oldPage, _newPage) {
         this._primaryButton.setAttribute("type", "inactive");
         this._primaryButton.resetListener();
@@ -808,8 +837,10 @@ class NahwProgressBarElement extends HTMLElement {
 
     updateBar() {
         let pgNumber = this.getState().getCurrentPageNumber();
-        if (pgNumber === 0 || pgNumber == null) {
+        if (pgNumber == null) {
             this.setValue(0);
+        } else {
+            this.setValue(pgNumber / this.getState().getTotalPages());
         }
     }
 
@@ -824,9 +855,89 @@ class NahwProgressBarElement extends HTMLElement {
     }
 }
 
+class NahwInputElement extends HTMLElement {
+    static templateHTML = `
+    <style>
+        :host {
+            display: block;
+        }
+
+        div {
+            display: flex;
+            justify-content: space-between;
+            height: 100%;
+        }
+    </style>
+    <div>
+        <nahw-input-card>لَ</nahw-input-card>
+        <nahw-input-card>لُ</nahw-input-card>
+        <nahw-input-card>لِ</nahw-input-card>
+        <nahw-input-card>لْ</nahw-input-card>
+    </div>`;
+    constructor() {
+        super();
+        const root = this.attachShadow({mode: "open"});
+        root.innerHTML = NahwInputElement.templateHTML;
+    }
+}
+
+class NahwInputCardElement extends HTMLElement {
+    // TODO: Assign #shortcut via attribute and add event listener
+    // TODO: Set color of text
+    static templateHTML = `
+    <style>
+        :host {
+            display: block;
+        }
+
+        #container {
+            height: 100%;
+            width: 10rem;
+            background-color: var(--input-card-fill);
+            border-radius: 12px;
+            border: 2px solid var(--input-card-stroke);
+            box-shadow: 0 4px var(--input-card-stroke);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #choice {
+            font-size: 7rem;
+            user-select: none;
+            font-family: Amiri;
+        }
+
+        #shortcut {
+            position: absolute;
+            right: 10%;
+            bottom: 2%;
+            user-select: none;
+            border: 4px solid var(--input-card-stroke);
+            color: var(--input-card-shortcut);
+            font-weight: 800;
+            padding: .5rem .7rem;
+            border-radius: 8px;
+        }
+    </style>
+    <div id="container">
+        <p id="choice"><slot></slot></p>
+        <p id="shortcut">1</p>
+    </div>`;
+
+    constructor() {
+        super();
+        const root = this.attachShadow({mode: "open"});
+        root.innerHTML = NahwInputCardElement.templateHTML;
+    }
+}
+
 customElements.define("nahw-question", NahwQuestionElement);
 customElements.define("nahw-text", NahwTextElement);
 customElements.define("nahw-footer", NahwFooterElement);
 customElements.define("nahw-progress-bar", NahwProgressBarElement);
 customElements.define("nahw-exit-button", NahwExitButtonElement);
 customElements.define("nahw-button", NahwButtonElement);
+customElements.define("nahw-input", NahwInputElement);
+customElements.define("nahw-input-card", NahwInputCardElement);

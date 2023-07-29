@@ -12,7 +12,7 @@
     --button-primary: #fefefe;
     --button-primary-fill: #42C62F;
     --button-primary-stroke: #42C62F;
-    --button-primary-shadow: #38a527;
+    --button-primary-shadow: #257519;
 
     --button-secondary: #a6a6a6;
     --button-secondary-fill: #fff;
@@ -28,6 +28,11 @@
     --progress-complete-value: #FFC800;
     --progress-complete-glow: #FFD333;
 
+    --input-card: #000;
+    --input-card-fill: #fff;
+    --input-card-stroke: #e5e5e5;
+    --input-card-shortcut: #afafaf;
+
     --highlight-active: #4093DC;
     --highlight-inactive: #e0dbd8;
 }
@@ -41,6 +46,7 @@ body {
     background-color: var(--background);
     color: var(--text);
     font-family: Roboto, Helvetica, "Amiri", sans-serif;
+    height: 100vh;
 }
 
 [lang="ar"] {
@@ -88,7 +94,9 @@ body {
 
 .cards {
     display: flex;
-    margin: 2rem;
+    padding-top: 2rem;
+    margin-left: 2rem;
+    margin-bottom: 2rem;
     flex-wrap: wrap;
 }
 
