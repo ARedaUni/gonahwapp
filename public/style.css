@@ -9,6 +9,12 @@
     --footer-bg: #fff;
     --footer-stroke: #E5E5E5;
 
+    --footer-wrong-bg: #FFDADC;
+    --footer-wrong: #EE282D;
+
+    --footer-correct-bg: #D7FFB8;
+    --footer-correct: #489D26;
+
     --button-primary: #fefefe;
     --button-primary-fill: #42C62F;
     --button-primary-stroke: #42C62F;
@@ -18,6 +24,11 @@
     --button-secondary-fill: #fff;
     --button-secondary-stroke: #e1e1e1;
     --button-secondary-shadow: #e1e1e1;
+
+    --button-red: #fff;
+    --button-red-fill: #FF4347;
+    --button-red-stroke: #FF4347;
+    --button-red-shadow: #a5272a;
 
     --button-inactive: #a6a6a6;
     --button-inactive-fill: #e1e1e1;

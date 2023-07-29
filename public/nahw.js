@@ -292,6 +292,7 @@ class NahwQuestion {
         this._choice = null;
         this._pageListeners = [];
         this._selectionListeners = [];
+        this._submissionListeners = [];
         this._totalPages = this.getSentences().reduce((x, s) => x + s.getWords().filter(w => w.getFlag() !== "na").length, 0);
     }
 
@@ -317,16 +318,25 @@ class NahwQuestion {
                 const r = this.sentenceIt.next();
                 if (r.done) {
                     this.sentenceIt = null;
+                    this.pageNumber -= 1;
                     return this.next();
                 }
                 const w = r.value;
                 const s = this.self.getSentences()[this.sentenceIndex];
                 return {
-                    value: {word: w, sentence: s, pageNumber: this.pageNumber},
+                    value: {word: w, sentence: s, pageNumber: this.pageNumber, sentenceNumber: this.sentenceIndex},
                     done: false,
                 };
             }
         };
+    }
+
+    getCurrentSentenceNumber() {
+        return this.getCurrentPage()?.value?.sentenceNumber || null;
+    }
+
+    getTotalSentences() {
+        return this.getSentences().length;
     }
 
     getCurrentPageNumber() {
@@ -348,6 +358,7 @@ class NahwQuestion {
     nextPage() {
         const oldPage = this._currentPage;
         this._currentPage = this._iterator.next();
+        this._choice = null;
         this._pageListeners.forEach(x => x.onPageChange(oldPage, this._currentPage));
     }
     
@@ -356,13 +367,14 @@ class NahwQuestion {
     }
 
     addPageChangeListener(obj) {
-        console.assert(obj.onPageChange != undefined, "Object must have an onPageChange method");
+        console.assert(typeof obj.onPageChange === "function", "Object must have an onPageChange method");
         this._pageListeners.push(obj);
     }
 
     selectChoice(choice) {
         const oldChoice = this.getChoice();
         this._choice = choice;
+        this.getCurrentWord()?.attempt(choice);
         this._selectionListeners.forEach(x => x.onSelectionChange(oldChoice, choice));
     }
 
@@ -371,8 +383,17 @@ class NahwQuestion {
     }
 
     addSelectionChangeListener(obj) {
-        console.assert(obj.onSelectionChange != undefined, "Object must have an onSelectionChange method");
+        console.assert(typeof obj.onSelectionChange === "function", "Object must have an onSelectionChange method");
         this._selectionListeners.push(obj);
+    }
+
+    addOnSubmissionListener(obj) {
+        console.assert(typeof obj.onSubmission === "function", "Object must have an onSubmission method");
+        this._submissionListeners.push(obj);
+    }
+
+    submit() {
+        this._submissionListeners.forEach(x => x.onSubmission(this.getCurrentPage(), this.getChoice(), this.getCurrentWord().getFlag()));
     }
 
     getSentences() {
@@ -580,10 +601,14 @@ class NahwTextElement extends HTMLElement {
 
     onPageChange(_oldPage, newPage) {
         // TODO: OUT OF DATE
-        if (newPage === 0) {
+        if (newPage == null) {
             this.loadParagraphFacade();
             return;
         }
+        this.loadSentenceFacade();
+    }
+
+    onSelectionChange(_oldSelection, _newSelection) {
         this.loadSentenceFacade();
     }
     
@@ -621,8 +646,9 @@ class NahwTextElement extends HTMLElement {
     bindToState(state) {
         console.assert(state instanceof NahwQuestion);
         this._state = state;
-        this.loadParagraphFacade();
         state.addPageChangeListener(this);
+        state.addSelectionChangeListener(this);
+        this.onPageChange(null, state.getCurrentPage());
     }
 
     getState() {
@@ -665,6 +691,13 @@ class NahwButtonElement extends HTMLElement {
             border-color: var(--button-primary-stroke);
         }
 
+        .red {
+            background-color: var(--button-red-fill);
+            color: var(--button-red);
+            box-shadow: 0 5px var(--button-red-shadow);
+            border-color: var(--button-red-stroke);
+        }
+
         .inactive {
             color: var(--button-inactive);
             background-color: var(--button-inactive-fill);
@@ -700,7 +733,8 @@ class NahwButtonElement extends HTMLElement {
     setType(type) {
         console.assert(type === "primary" ||
             type === "secondary" ||
-            type === "inactive");
+            type === "inactive" ||
+            type === "red");
         this._container.className = type;
     }
 
@@ -717,22 +751,24 @@ class NahwButtonElement extends HTMLElement {
 
 class NahwFooterElement extends HTMLElement {
     static templateHTML = `
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@40,400,0,0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@40,400,0,0" />
     <style>
         :host {
             display: block;
             box-sizing: border-box;
         }
         
-        #footer-container {
+        .footer-container {
             background-color: var(--footer-bg);
             position: absolute;
             bottom: 0;
             width: 100%;
             height: 20%;
-            border-top: 2px solid var(--footer-stroke)
+            border-top: 2px solid var(--footer-stroke);
         }
 
-        #button-container {
+        .button-container {
             display: flex;
             width: 80%;
             height: 100%;
@@ -741,14 +777,101 @@ class NahwFooterElement extends HTMLElement {
             margin: 0 auto;
         }
 
+        .left {
+            display: flex;
+            align-items: center;
+        }
+
+        .feedback-icon {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 100%;
+            border: 1px solid #fff;
+            float: left;
+            margin-right: 1rem;
+        }
+
+        .feedback-icon svg {
+            transform: scale(120%);
+        }
+
         a {
             text-decoration: none;
             color: inherit;
         }
+
+        .footer-container.wrong {
+            color: var(--footer-wrong) !important;
+            background-color: var(--footer-wrong-bg);
+        }
+
+        .footer-container.wrong .feedback-correct {
+            display: none;
+        }
+
+        .footer-container.correct {
+            color: var(--footer-correct) !important;
+            background-color: var(--footer-correct-bg);
+        }
+
+        .footer-container.correct .feedback-wrong {
+            display: none;
+        }
+
+        .footer-container.wrong .secondary, .footer-container.correct .secondary {
+            display: none;
+        }
+
+        .footer-container:not(.wrong, .correct) .feedback {
+            display: none;
+        }
+
+        .feedback h1 {
+            line-height: 0;
+        }
+
+        .feedback > p {
+            width: 30rem;
+        }
+
+        .feedback-buttons {
+            display: flex;
+            margin: 0;
+            line-height: 0;
+        }
+
+        .feedback-buttons p {
+            margin: 0;
+            margin-right: 1rem;
+        }
     </style>
-    <div id="footer-container">
-        <div id="button-container">
-            <nahw-button type="secondary">SECONDARY</nahw-button>
+    <div class="footer-container">
+        <div class="button-container">
+            <div class="left">
+                <nahw-button class="secondary" type="secondary">SECONDARY</nahw-button>
+                <div class="feedback feedback-wrong">
+                    <div class="feedback-icon">
+                        <svg class="wrong-icon" width="32" height="31" viewBox="0 0 32 31" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M23.91 15.4384L30.24 9.10842C31.2044 8.09976 31.7356 6.75365 31.72 5.35822C31.7043 3.9628 31.143 2.62895 30.1563 1.64217C29.1695 0.655399 27.8356 0.094115 26.4402 0.0784614C25.0448 0.0628077 23.6987 0.594028 22.69 1.55842L16.36 7.88842L10 1.55842C8.99135 0.594028 7.64524 0.0628077 6.24982 0.0784614C4.85439 0.094115 3.52054 0.655399 2.53377 1.64217C1.54699 2.62895 0.985717 3.9628 0.970063 5.35822C0.954409 6.75365 1.48562 8.09976 2.45001 9.10842L8.78001 15.4384L2.45001 21.7684C1.48562 22.7771 0.954409 24.1232 0.970063 25.5186C0.985717 26.914 1.54699 28.2479 2.53377 29.2347C3.52054 30.2214 4.85439 30.7827 6.24982 30.7984C7.64524 30.814 8.99135 30.2828 10 29.3184L16.33 22.9884L22.66 29.3184C23.6687 30.2828 25.0148 30.814 26.4102 30.7984C27.8056 30.7827 29.1395 30.2214 30.1263 29.2347C31.113 28.2479 31.6743 26.914 31.69 25.5186C31.7056 24.1232 31.1744 22.7771 30.21 21.7684L23.91 15.4384Z" fill="#EC0B1B"/></svg>
+                    </div>
+                    <h1>Correct solution:</h1>
+                    <p>This is a <b><u>past tense verb</u></b> so it ends with a <i>fatha</i>.</p>
+                    <div class="feedback-buttons">
+                        <p><span class="material-symbols-outlined">flag</span> REPORT</p>
+                        <p><span class="material-symbols-outlined">article_shortcut</span>REVIEW RULE</p>
+                    </div>
+                </div>
+                <div class="feedback feedback-correct">
+                    <div class="feedback-icon">
+                        <svg class="correct-icon" width="40" height="30" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M35 5.5L15.2067 24.3278C14.8136 24.7017 14.194 24.694 13.8103 24.3103L5.5 16" stroke="#80B42C" stroke-width="10" stroke-linecap="round"/></svg>
+                    </div>
+                    <h1>Correct solution:</h1>
+                    <p>This is a <b><u>past tense verb</u></b> so it ends with a <i>fatha</i>.</p>
+                    <div class="feedback-buttons">
+                        <p><span class="material-symbols-outlined">flag</span> REPORT</p>
+                        <p><span class="material-symbols-outlined">article_shortcut</span>REVIEW RULE</p>
+                    </div>
+                </div>
+            </div>
             <nahw-button type="primary">PRIMARY</nahw-button>
         </div>
     </div>`;
@@ -758,6 +881,7 @@ class NahwFooterElement extends HTMLElement {
         const root = this.attachShadow({mode: "open"});
         root.innerHTML = NahwFooterElement.templateHTML;
 
+        this._container = root.querySelector(".footer-container");
         this._secondaryButton = root.querySelectorAll("nahw-button")[0];
         this._primaryButton = root.querySelectorAll("nahw-button")[1];
     }
@@ -767,17 +891,56 @@ class NahwFooterElement extends HTMLElement {
         this._secondaryButton.innerHTML = secondary;
     }
 
-    // TODO: Move the page stuff outta here
     bindToState(state) {
         console.assert(state instanceof NahwQuestion);
         this._state = state;
-        this.updateBoth("START", `<a href="index.html">RETURN</a>`);
-        this._primaryButton.putEventListener(state.nextPage.bind(state));
-        state.addPageChangeListener(this);
+        this.getState().addPageChangeListener(this);
+        this.getState().addSelectionChangeListener(this);
+        this.getState().addOnSubmissionListener(this);
+        this.onPageChange(null, this.getState().getCurrentPage());
     }
 
-    // TODO: Take into account page
-    onPageChange(_oldPage, _newPage) {
+    onSelectionChange(_oldSelection, _newSelection) {
+        this._primaryButton.setAttribute("type", "primary");
+        if (_oldSelection == null) {
+            this._primaryButton.putEventListener(this.getState().submit.bind(this.getState()));
+        }
+    }
+
+    onSubmission(_currentPage, _choice, flag) {
+        this._primaryButton.innerHTML = "CONTINUE";
+        this._primaryButton.putEventListener(this.getState().nextPage.bind(this.getState()));
+        if (flag === "correct") {
+            this.showCorrectFeedback();
+        } else {
+            this.showWrongFeedback();
+        }
+    }
+    
+    showWrongFeedback() {
+        this._primaryButton.setType("red");
+        this._container.classList.add("wrong");
+        this._container.classList.remove("correct");
+    }
+
+    showCorrectFeedback() {
+        this._primaryButton.setType("primary");
+        this._container.classList.remove("wrong");
+        this._container.classList.add("correct");
+    }
+
+    hideFeedback() {
+        this._container.classList.remove("wrong");
+        this._container.classList.remove("correct");
+    }
+
+    onPageChange(_oldPage, newPage) {
+        if (newPage == null) {
+            this.updateBoth("START", `<a href="index.html">RETURN</a>`);
+            this._primaryButton.putEventListener(this.getState().nextPage.bind(this.getState()));
+            return;
+        }
+        this.hideFeedback();
         this._primaryButton.setAttribute("type", "inactive");
         this._primaryButton.resetListener();
         this.updateBoth("SELECT", "SKIP");
@@ -848,17 +1011,22 @@ class NahwProgressBarElement extends HTMLElement {
     }
 
     updateBar() {
-        let pgNumber = this.getState().getCurrentPageNumber();
-        if (pgNumber == null) {
+        let pgNum = this.getState().getCurrentPageNumber();
+        if (pgNum == null) {
             this.setValue(0);
         } else {
-            this.setValue(pgNumber / this.getState().getTotalPages());
+            this.setValue(pgNum / this.getState().getTotalPages() * 100);
         }
     }
 
     bindToState(state) {
         console.assert(state instanceof NahwQuestion);
         this._state = state;
+        state.addPageChangeListener(this);
+        this.updateBar();
+    }
+
+    onPageChange(_oldPage, _newPage) {
         this.updateBar();
     }
 
@@ -989,6 +1157,7 @@ class NahwInputCardElement extends HTMLElement {
     bindToState(state) {
         this._state = state;
         state.addSelectionChangeListener(this);
+        state.addPageChangeListener(this);
         this._onClick = () => state.selectChoice(this._choice.innerText);
         this._container.addEventListener("click", this._onClick);
     }
@@ -1000,12 +1169,16 @@ class NahwInputCardElement extends HTMLElement {
         this._container.addEventListener("click", this._onClick);
     }
 
-    onSelectionChange(oldSelection, newSelection) {
+    onSelectionChange(_oldSelection, newSelection) {
         if (newSelection === this._choice.innerText) {
             this._container.classList.add("active");
-        } else if (oldSelection === this._choice.innerText) {
+        } else {
             this._container.classList.remove("active");
         }
+    }
+
+    onPageChange(_oldPage, _newPage) {
+        this._container.classList.remove("active");
     }
 
     getState() {
