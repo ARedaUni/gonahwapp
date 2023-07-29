@@ -459,7 +459,7 @@ class NahwQuestionElement extends HTMLElement {
         }
 
         nahw-input {
-            width: 60%;
+            width: 50%;
             margin: 0 auto;
             margin-top: 5rem;
             height: 30%;
