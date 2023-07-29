@@ -340,7 +340,8 @@ class NahwQuestion {
     }
 
     getCurrentPageNumber() {
-        return this.getCurrentPage()?.value?.pageNumber || null;
+        if (this.getCurrentPage() == undefined) return null;
+        return this.getCurrentPage().value.pageNumber;
     }
 
     getCurrentSentence() {
@@ -830,7 +831,7 @@ class NahwFooterElement extends HTMLElement {
             line-height: 0;
         }
 
-        .feedback > p {
+        .feedback > h1 {
             width: 30rem;
         }
 
@@ -864,7 +865,7 @@ class NahwFooterElement extends HTMLElement {
                     <div class="feedback-icon">
                         <svg class="correct-icon" width="40" height="30" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M35 5.5L15.2067 24.3278C14.8136 24.7017 14.194 24.694 13.8103 24.3103L5.5 16" stroke="#80B42C" stroke-width="10" stroke-linecap="round"/></svg>
                     </div>
-                    <h1>Correct solution:</h1>
+                    <h1>Great job!</h1>
                     <p>This is a <b><u>past tense verb</u></b> so it ends with a <i>fatha</i>.</p>
                     <div class="feedback-buttons">
                         <p><span class="material-symbols-outlined">flag</span> REPORT</p>
@@ -1012,9 +1013,11 @@ class NahwProgressBarElement extends HTMLElement {
 
     updateBar() {
         let pgNum = this.getState().getCurrentPageNumber();
+        console.log(pgNum);
         if (pgNum == null) {
             this.setValue(0);
         } else {
+            pgNum += 1;
             this.setValue(pgNum / this.getState().getTotalPages() * 100);
         }
     }
@@ -1022,11 +1025,11 @@ class NahwProgressBarElement extends HTMLElement {
     bindToState(state) {
         console.assert(state instanceof NahwQuestion);
         this._state = state;
-        state.addPageChangeListener(this);
+        state.addOnSubmissionListener(this);
         this.updateBar();
     }
 
-    onPageChange(_oldPage, _newPage) {
+    onSubmission() {
         this.updateBar();
     }
 
@@ -1114,6 +1117,9 @@ class NahwInputCardElement extends HTMLElement {
             justify-content: center;
             align-items: center;
             position: relative;
+        }
+
+        .selectable {
             cursor: pointer;
         }
 
@@ -1141,7 +1147,7 @@ class NahwInputCardElement extends HTMLElement {
         }
 
     </style>
-    <div class="container">
+    <div class="container selectable">
         <p class="choice"><slot></slot></p>
         <p class="shortcut">1</p>
     </div>`;
@@ -1158,6 +1164,7 @@ class NahwInputCardElement extends HTMLElement {
         this._state = state;
         state.addSelectionChangeListener(this);
         state.addPageChangeListener(this);
+        state.addOnSubmissionListener(this);
         this._onClick = () => state.selectChoice(this._choice.innerText);
         this._container.addEventListener("click", this._onClick);
     }
@@ -1179,6 +1186,13 @@ class NahwInputCardElement extends HTMLElement {
 
     onPageChange(_oldPage, _newPage) {
         this._container.classList.remove("active");
+        this._container.classList.add("selectable");
+        this._container.addEventListener("click", this._onClick);
+    }
+
+    onSubmission() {
+        this._container.removeEventListener("click", this._onClick);
+        this._container.classList.remove("selectable");
     }
 
     getState() {

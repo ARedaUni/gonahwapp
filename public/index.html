@@ -129,7 +129,6 @@
                 });
             } else if (parentCard.display === "question") {
                 qs = new NahwQuestion(parentCard.sentences);
-                qs.nextPage();
                 const el = document.createElement("nahw-question");
                 el.bindToState(qs);
                 document.body.appendChild(el);
