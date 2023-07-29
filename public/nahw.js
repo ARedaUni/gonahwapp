@@ -420,7 +420,7 @@ class NahwQuestionElement extends HTMLElement {
         }
 
         nahw-input {
-            width: 50%;
+            width: 60%;
             margin: 0 auto;
             margin-top: 5rem;
             height: 30%;
@@ -892,7 +892,7 @@ class NahwInputCardElement extends HTMLElement {
 
         #container {
             height: 100%;
-            width: 10rem;
+            width: 12rem;
             background-color: var(--input-card-fill);
             border-radius: 12px;
             border: 2px solid var(--input-card-stroke);
@@ -901,6 +901,7 @@ class NahwInputCardElement extends HTMLElement {
             justify-content: center;
             align-items: center;
             position: relative;
+            cursor: pointer;
         }
 
         #choice {
@@ -914,10 +915,9 @@ class NahwInputCardElement extends HTMLElement {
             right: 10%;
             bottom: 2%;
             user-select: none;
-            border: 4px solid var(--input-card-stroke);
             color: var(--input-card-shortcut);
             font-weight: 800;
-            padding: .5rem .7rem;
+            font-size: 1.5rem;
             border-radius: 8px;
         }
     </style>
