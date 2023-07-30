@@ -960,6 +960,12 @@ class NahwFooterElement extends HTMLElement {
             this._primaryButton.putEventListener(this.getState().nextPage.bind(this.getState()));
             return;
         }
+        if (newPage.done) {
+            this.updateBoth("CONTINUE", "REVIEW TEXT");
+            this.hideFeedback();
+            this._primaryButton.setAttribute("type", "primary");
+            return;
+        }
         this.hideFeedback();
         this._primaryButton.setAttribute("type", "inactive");
         this._primaryButton.resetListener();
