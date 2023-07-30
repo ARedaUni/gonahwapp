@@ -96,7 +96,7 @@ function getFirstVowelName(word) {
 }
 
 class Word {
-    static FLAGS = ["correct", "incorrect", "na"]
+    static FLAGS = ["correct", "incorrect", "unattempted", "na"]
     constructor(wordAnswer, flag="na", isPunctuation=false) {
         this.setFlag(flag);
         // TODO: I could optimize this
@@ -123,7 +123,7 @@ class Word {
     }
 
     reset() {
-        this.setFlag("incorrect");
+        this.setFlag("unattempted");
         this._facade = removeVowels(this.getAnswer());
     }
 
@@ -153,7 +153,7 @@ class Word {
         if (getWordEnding(wordAns) === "") {
             return "na";
         }
-        return "incorrect";
+        return "unattempted";
     }
 
     static generateWords(sentenceAnswer) {
@@ -579,19 +579,14 @@ class NahwTextElement extends HTMLElement {
         p > span {
             color: var(--text);
             transition: color .2s, background-color .2s;
-            padding-right: .2em;
-            padding-left: .2em;
+            padding: 0;
+            position: relative;
         }
 
         p.big {
             font-size: clamp(1rem, 5rem, 5vw);
             margin: 0 auto;
             text-align: center;
-        }
-
-        p.big > span {
-            padding: 0;
-            position: relative;
         }
 
         span.ending {
@@ -608,6 +603,11 @@ class NahwTextElement extends HTMLElement {
         
         span.ending.active {
             background-color: var(--highlight-active);
+        }
+
+        span.ending.incorrect {
+            background-color: var(--highlight-incorrect);
+            opacity: 40%;
         }
     </style>
     <p></p>`;
@@ -658,9 +658,22 @@ class NahwTextElement extends HTMLElement {
         this._container.innerHTML = "";
         this._container.classList.remove("big");
         for (let sentence of this.getState().getSentences()) {
-            const span = document.createElement("span");
-            span.innerText = sentence.getFacade() + "\u200c";
-            this._container.appendChild(span);
+            for (let word of sentence.getWords()) {
+                const beginningSpan = document.createElement("span");
+                beginningSpan.innerText = word.getWordBeginning();
+                const endingSpan = document.createElement("span");
+                endingSpan.innerText = word.getFacade();
+                if (word.getFlag() === "incorrect") {
+                    const endingSpanHighlight = document.createElement("span");
+                    endingSpanHighlight.classList.add("ending", "incorrect");
+                    endingSpan.appendChild(endingSpanHighlight);
+                }
+                if (!word.isPunctuation()) {
+                    this._container.appendChild(document.createTextNode(" "));
+                }
+                this._container.appendChild(beginningSpan);
+                this._container.appendChild(endingSpan);
+            }
         }
     }
 
@@ -961,7 +974,7 @@ class NahwFooterElement extends HTMLElement {
             return;
         }
         if (newPage.done) {
-            this.updateBoth("CONTINUE", "REVIEW TEXT");
+            this.updateBoth("CONTINUE", "REVIEW");
             this.hideFeedback();
             this._primaryButton.setAttribute("type", "primary");
             return;
