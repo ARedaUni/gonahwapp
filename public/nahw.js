@@ -485,7 +485,6 @@ class NahwQuestionElement extends HTMLElement {
             </header>
         </div>
         <nahw-text></nahw-text>
-        <nahw-input></nahw-input>
         <nahw-footer></nahw-footer>
     </div>`;
 
@@ -494,10 +493,11 @@ class NahwQuestionElement extends HTMLElement {
         const root = this.attachShadow({mode: "open"});
         root.innerHTML = NahwQuestionElement.templateHTML;
 
+        this._container = root.querySelector(".container");
         this._nahwText = root.querySelector("nahw-text");
         this._nahwProgressBar = root.querySelector("nahw-progress-bar");
         this._nahwFooter = root.querySelector("nahw-footer");
-        this._nahwInput = root.querySelector("nahw-input");
+        this._nahwInput = document.createElement("nahw-input");
         this._completeP = root.querySelector("p");
     }
 
@@ -508,11 +508,20 @@ class NahwQuestionElement extends HTMLElement {
     onPageChange(_oldPage, newPage) {
         if (newPage == null) {
             this._nahwText.classList.remove("big");
+            if (this._nahwInput.parentNode) {
+                this._nahwInput.parentNode.removeChild(this._nahwInput);
+            }
             this._completeP.style.display = "none";
         } else if (!newPage.done) {
             this._nahwText.classList.add("big");
+            if (!this._nahwInput.parent) {
+                this._container.insertBefore(this._nahwInput, this._nahwFooter);
+            }
             this._completeP.style.display = "none";
         } else {
+            if (this._nahwInput.parentNode) {
+                this._nahwInput.parentNode.removeChild(this._nahwInput);
+            }
             this._completeP.style.display = "block";
         }
     }
@@ -740,14 +749,14 @@ class NahwButtonElement extends HTMLElement {
 
     putEventListener(func) {
         if (this._eventListener) {
-            this._container.removeEventListener("click", this._eventListener);
+            this.shadowRoot.removeEventListener("click", this._eventListener);
         }
         this._eventListener = func;
-        this._container.addEventListener("click", this._eventListener);
+        this.shadowRoot.addEventListener("click", this._eventListener);
     }
 
     resetListener() {
-        this._container.removeEventListener("click", this._eventListener);
+        this.shadowRoot.removeEventListener("click", this._eventListener);
         this._eventListener = null;
     }
 
@@ -762,6 +771,12 @@ class NahwButtonElement extends HTMLElement {
     attributeChangedCallback(name, _oldValue, newValue) {
         if (name === "type") {
             this.setType(newValue);
+        }
+    }
+
+    click() {
+        if (this._eventListener) {
+            this._eventListener();
         }
     }
 
@@ -904,6 +919,23 @@ class NahwFooterElement extends HTMLElement {
         this._container = root.querySelector(".footer-container");
         this._secondaryButton = root.querySelectorAll("nahw-button")[0];
         this._primaryButton = root.querySelectorAll("nahw-button")[1];
+        this._enterFunc = (e) => {
+            if (e.key === "Enter") {
+                this._primaryButton.click();
+            }
+        };
+    }
+
+    connectedCallback() {
+        if (this._enterFunc) {
+            document.body.addEventListener("keydown", this._enterFunc2);
+        }
+    }
+
+    disconnectedCallback() {
+        if (this._enterFunc) {
+            document.body.removeEventListener("keydown", this._enterFunc2);
+        }
     }
 
     updateBoth(primary, secondary) {
@@ -1089,6 +1121,10 @@ class NahwInputElement extends HTMLElement {
         const root = this.attachShadow({mode: "open"});
         root.innerHTML = NahwInputElement.templateHTML;
         this._container = root.querySelector("div");
+        for (let i = 0; i < this._container.children.length; ++i) {
+            const card = this._container.children[i];
+            card.setShortcut("" + (i + 1));
+        }
     }
 
     onPageChange(_oldPage, newPage) {
@@ -1181,6 +1217,7 @@ class NahwInputCardElement extends HTMLElement {
         root.innerHTML = NahwInputCardElement.templateHTML;
         this._container = root.querySelector(".container");
         this._choice = root.querySelector(".choice");
+        this._shortcut = root.querySelector(".shortcut");
     }
     
     bindToState(state) {
@@ -1195,7 +1232,7 @@ class NahwInputCardElement extends HTMLElement {
     setChoice(choice) {
         this._container.removeEventListener("click", this._onClick);
         this._choice.innerText = choice;
-        this._onClick = () => this.getState().selectChoice(this._choice.innerText);
+        this._onClick = () => {console.log("test"); this.getState().selectChoice(this._choice.innerText)};
         this._container.addEventListener("click", this._onClick);
     }
 
@@ -1216,6 +1253,29 @@ class NahwInputCardElement extends HTMLElement {
     onSubmission() {
         this._container.removeEventListener("click", this._onClick);
         this._container.classList.remove("selectable");
+    }
+
+    setShortcut(key) {
+        console.assert(typeof key === "string");
+        console.assert(key.length === 1);
+        this._shortcutFunc = (e) => {
+            if (e.key === key) {
+                this._container.click();
+            }
+        };
+        this._shortcut.innerText = key;
+    }
+    
+    connectedCallback() {
+        if (this._shortcutFunc) {
+            document.body.addEventListener("keydown", this._shortcutFunc);
+        }
+    }
+
+    disconnectedCallback() {
+        if (this._shortcutFunc) {
+            document.body.removeEventListener("keydown", this._shortcutFunc);
+        }
     }
 
     getState() {
