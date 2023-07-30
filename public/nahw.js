@@ -921,6 +921,7 @@ class NahwFooterElement extends HTMLElement {
         this._primaryButton = root.querySelectorAll("nahw-button")[1];
         this._enterFunc = (e) => {
             if (e.key === "Enter") {
+                console.log("TEST");
                 this._primaryButton.click();
             }
         };
@@ -928,13 +929,13 @@ class NahwFooterElement extends HTMLElement {
 
     connectedCallback() {
         if (this._enterFunc) {
-            document.body.addEventListener("keydown", this._enterFunc2);
+            document.body.addEventListener("keydown", this._enterFunc);
         }
     }
 
     disconnectedCallback() {
         if (this._enterFunc) {
-            document.body.removeEventListener("keydown", this._enterFunc2);
+            document.body.removeEventListener("keydown", this._enterFunc);
         }
     }
 
