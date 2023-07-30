@@ -51,6 +51,7 @@
 
     --highlight-active: #4093DC;
     --highlight-inactive: #e0dbd8;
+    --highlight-incorrect: #C13535;
 }
 
 * {
