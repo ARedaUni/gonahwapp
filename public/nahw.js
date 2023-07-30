@@ -420,9 +420,13 @@ class NahwQuestionElement extends HTMLElement {
             width: 100%;
         }
 
-        div {
+        .container {
             height: 100%;
             width: 100%;
+        }
+
+        .top {
+            padding-top: 1rem;
         }
 
         nahw-text {
@@ -440,10 +444,18 @@ class NahwQuestionElement extends HTMLElement {
             height: 10px;
             width: 50%;
             margin: 0 auto;
-            padding-top: 1rem;
+            padding-top: .5rem;
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
+        }
+
+        p {
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            color: var(--progress-complete-value);
+            font-family: inter;
         }
 
         nahw-exit-button {
@@ -462,14 +474,16 @@ class NahwQuestionElement extends HTMLElement {
             width: 50%;
             margin: 0 auto;
             margin-top: 5rem;
-            height: 30%;
         }
     </style>
-    <div>
-        <header id="header">
-            <nahw-exit-button></nahw-exit-button>
-            <nahw-progress-bar></nahw-progress-bar>
-        </header>
+    <div class="container">
+        <div class="top">
+            <p>COMPLETE!</p>
+            <header id="header">
+                <nahw-exit-button></nahw-exit-button>
+                <nahw-progress-bar></nahw-progress-bar>
+            </header>
+        </div>
         <nahw-text></nahw-text>
         <nahw-input></nahw-input>
         <nahw-footer></nahw-footer>
@@ -484,6 +498,7 @@ class NahwQuestionElement extends HTMLElement {
         this._nahwProgressBar = root.querySelector("nahw-progress-bar");
         this._nahwFooter = root.querySelector("nahw-footer");
         this._nahwInput = root.querySelector("nahw-input");
+        this._completeP = root.querySelector("p");
     }
 
     connectedCallback() {
@@ -493,8 +508,12 @@ class NahwQuestionElement extends HTMLElement {
     onPageChange(_oldPage, newPage) {
         if (newPage == null) {
             this._nahwText.classList.remove("big");
-        } else {
+            this._completeP.style.display = "none";
+        } else if (!newPage.done) {
             this._nahwText.classList.add("big");
+            this._completeP.style.display = "none";
+        } else {
+            this._completeP.style.display = "block";
         }
     }
 
@@ -512,6 +531,7 @@ class NahwQuestionElement extends HTMLElement {
 
 class NahwExitButtonElement extends HTMLElement {
     static templateHTML = `
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@40,400,0,0" />
     <style>
         :host {
             display: inline;
@@ -532,7 +552,6 @@ class NahwExitButtonElement extends HTMLElement {
             color: inherit;
         }
     </style>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,-25" /> 
     <a href="index.html"><span class="material-symbols-outlined">close</span></a>`;
     constructor() {
         super();
@@ -601,12 +620,13 @@ class NahwTextElement extends HTMLElement {
     }
 
     onPageChange(_oldPage, newPage) {
-        // TODO: OUT OF DATE
         if (newPage == null) {
             this.loadParagraphFacade();
-            return;
+        } else if (!newPage.done) {
+            this.loadSentenceFacade();
+        } else {
+            this.loadParagraphFacade();
         }
-        this.loadSentenceFacade();
     }
 
     onSelectionChange(_oldSelection, _newSelection) {
@@ -752,8 +772,7 @@ class NahwButtonElement extends HTMLElement {
 
 class NahwFooterElement extends HTMLElement {
     static templateHTML = `
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@40,400,0,0" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@40,400,0,0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,-25" />
     <style>
         :host {
             display: block;
@@ -993,6 +1012,7 @@ class NahwProgressBarElement extends HTMLElement {
             border-bottom-right-radius: 25px;
             background-color: var(--progress-complete-value)
         }
+
     </style>
     <div>
         <span id="value" style="width: 80%">
@@ -1009,11 +1029,15 @@ class NahwProgressBarElement extends HTMLElement {
 
     setValue(value) {
         this._valueSpan.style.width = `${value}%`;
+        if (value === 100) {
+            this._valueSpan.classList.add("filled");
+        } else {
+            this._valueSpan.classList.remove("filled");
+        }
     }
 
     updateBar() {
         let pgNum = this.getState().getCurrentPageNumber();
-        console.log(pgNum);
         if (pgNum == null) {
             this.setValue(0);
         } else {
@@ -1048,7 +1072,6 @@ class NahwInputElement extends HTMLElement {
         div {
             display: flex;
             justify-content: space-between;
-            height: 100%;
         }
 
         .hidden {
@@ -1069,7 +1092,7 @@ class NahwInputElement extends HTMLElement {
     }
 
     onPageChange(_oldPage, newPage) {
-        if (newPage == null) {
+        if (newPage == null || newPage.done) {
             this._container.classList.add("hidden");
             return;
         }
@@ -1107,7 +1130,7 @@ class NahwInputCardElement extends HTMLElement {
         }
 
         .container {
-            height: 100%;
+            height: 18rem;
             width: 12rem;
             background-color: var(--input-card-fill);
             border-radius: 12px;
