@@ -582,6 +582,59 @@ class NahwExitButtonElement extends HTMLElement {
     }
 }
 
+class NahwTooltipElement extends HTMLElement {
+    static templateHTML = `
+    <style>
+        :host {
+            display: block;
+            position: absolute;
+            width: 100%;
+            transform: translateX(100%);
+        }
+
+        p {
+            background-color: var(--tooltip-bg);
+            min-width: 50px;
+            box-shadow: 0 3px 1px var(--tooltip-stroke);
+            border: 0 1px solid var(--tooltip-stroke);
+            font-family: Inter;
+            position: absolute;
+            font-size: 1.5rem;
+            border-radius: 16px;
+            z-index: 1;
+            padding: .5rem;
+        }
+        
+        p.normal {
+            color: var(--tooltip);
+        }
+
+        p.incorrect {
+            color: var(--tooltip-incorrect);
+            text-decoration: underline;
+        }
+    </style>
+    <p><slot></slot></p>`;
+
+    constructor() {
+        super();
+        const root = this.attachShadow({mode: "open"});
+        root.innerHTML = NahwTooltipElement.templateHTML;
+        this._container = root.querySelector("p");
+    }
+
+    attributeChangedCallback(name, _oldValue, newValue) {
+        if (name === "type") {
+            console.assert(newValue === "normal" || newValue === "incorrect");
+            this._container.classList.add(newValue);
+        }
+    }
+
+    static get observedAttributes() {
+        return ["type"];
+    }
+}
+
 class NahwTextElement extends HTMLElement {
     static templateHTML = `
     <style>
@@ -629,11 +682,16 @@ class NahwTextElement extends HTMLElement {
         span.ending.incorrect {
             background-color: var(--highlight-incorrect);
             opacity: 40%;
+            cursor: pointer;
         }
 
         span.ending.skipped {
             background-color: var(--highlight-skipped);
             opacity: 50%;
+        }
+
+        nahw-tooltip {
+
         }
     </style>
     <p></p>`;
@@ -689,10 +747,27 @@ class NahwTextElement extends HTMLElement {
                 beginningSpan.innerText = word.getWordBeginning();
                 const endingSpan = document.createElement("span");
                 endingSpan.innerText = word.getFacade();
-                if (word.getFlag() === "incorrect" || word.getFlag() == "skipped") {
+                if (word.getFlag() === "incorrect" || word.getFlag() === "skipped") {
                     const endingSpanHighlight = document.createElement("span");
                     endingSpanHighlight.classList.add("ending", word.getFlag());
                     endingSpan.appendChild(endingSpanHighlight);
+                    this._tooltip = document.createElement("nahw-tooltip");
+                    this._tooltip.style.left = "0";
+                    this._tooltip.style.top = "-60%";
+                    if (word.getFlag() === "skipped") {
+                        this._tooltip.setAttribute("type", "normal");
+                        this._tooltip.innerText = "skipped";
+                    } else {
+                        this._tooltip.setAttribute("type", "incorrect");
+                        this._tooltip.innerText = "ERROR(temp)";
+                    }
+                    endingSpanHighlight.addEventListener("mouseenter", () => {
+                        endingSpan.appendChild(this._tooltip);
+                    });
+                    endingSpanHighlight.addEventListener("mouseleave", () => {
+                        console.log("removed");
+                        endingSpan.removeChild(this._tooltip);
+                    });
                 }
                 if (!word.isPunctuation()) {
                     this._container.appendChild(document.createTextNode(" "));
@@ -1341,3 +1416,4 @@ customElements.define("nahw-exit-button", NahwExitButtonElement);
 customElements.define("nahw-button", NahwButtonElement);
 customElements.define("nahw-input", NahwInputElement);
 customElements.define("nahw-input-card", NahwInputCardElement);
+customElements.define("nahw-tooltip", NahwTooltipElement);

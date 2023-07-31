@@ -48,11 +48,15 @@
     --input-card-active-fill: #DDF4FF;
     --input-card-active-stroke: #84D8FF;
 
-
     --highlight-active: #4093DC;
     --highlight-inactive: #e0dbd8;
     --highlight-incorrect: #C13535;
     --highlight-skipped: #BABABA;
+
+    --tooltip-bg: #fff;
+    --tooltip-incorrect: #EE282D;
+    --tooltip: #a6a6a6;
+    --tooltip-stroke: #E5E5E5;
 }
 
 * {
