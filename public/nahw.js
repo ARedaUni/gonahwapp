@@ -1365,7 +1365,7 @@ class NahwInputCardElement extends HTMLElement {
 
         .container {
             height: 32vh;
-            width: 12rem;
+            width: 9.5vw;
             background-color: var(--input-card-fill);
             border-radius: 12px;
             border: 2px solid var(--input-card-stroke);
