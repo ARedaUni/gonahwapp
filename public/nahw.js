@@ -1029,6 +1029,8 @@ class NahwFooterElement extends HTMLElement {
             this.updateBoth("CONTINUE", "REVIEW");
             this.hideFeedback();
             this._primaryButton.setAttribute("type", "primary");
+            // TODO: Secondary Button review button
+            this._secondaryButton.resetListener();
             return;
         }
         this.hideFeedback();
