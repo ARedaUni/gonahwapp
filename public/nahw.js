@@ -509,6 +509,7 @@ class NahwQuestionElement extends HTMLElement {
         nahw-text {
             margin: 0 auto;
             width: 90%;
+            height: 23vh;
         }
 
         nahw-text.big {
@@ -550,7 +551,6 @@ class NahwQuestionElement extends HTMLElement {
         nahw-input {
             width: 50%;
             margin: 0 auto;
-            margin-top: 5rem;
         }
     </style>
     <div class="container">
@@ -963,7 +963,7 @@ class NahwFooterElement extends HTMLElement {
             position: absolute;
             bottom: 0;
             width: 100%;
-            height: 20%;
+            height: 20vh;
             border-top: 2px solid var(--footer-stroke);
         }
 
@@ -1364,7 +1364,7 @@ class NahwInputCardElement extends HTMLElement {
         }
 
         .container {
-            height: 18rem;
+            height: 32vh;
             width: 12rem;
             background-color: var(--input-card-fill);
             border-radius: 12px;
