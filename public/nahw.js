@@ -61,10 +61,63 @@ function getWordEnding(word) {
             continue;
         }
         if (diacriticName !== "SHADDA") {
-            return word.substring(lastLetter, word.length);
+            return makeEndingStandard(word.substring(lastLetter, word.length));
         }
     }
     return "";
+}
+
+function makeEndingStandard(ending) {
+    console.assert(typeof ending === "string");
+    console.assert(ending.length <= 3);
+    if (ending.length > 0) {
+        console.assert(getDiacriticName(ending[0]) === null, "First index must be a letter:", ending);
+    }
+    if (ending.length <= 2) return ending;
+    let result = "";
+    let vowelName = null;
+    let firstVowelFound = false;
+    let shaddaFound = false;
+    for (let i = 0; i < ending.length; ++i) {
+        const letter = ending[i];
+        if (!firstVowelFound && i < 3) {
+            vowelName = getDiacriticName(letter);
+            if (vowelName !== null && vowelName !== "SHADDA") {
+                firstVowelFound = true;
+                continue;
+            }
+        }
+        if (!shaddaFound && i < 3) {
+            if (getDiacriticName(letter) === "SHADDA") {
+                shaddaFound = true;
+                continue;
+            }
+        }
+        result += letter;
+    }
+    if (!firstVowelFound) {
+        console.error("No vowel on the first letter in ending:", ending);
+        return;
+    }
+    if (shaddaFound) {
+        result = result.substring(0, 1) + diacritics[vowelName] + diacritics["SHADDA"] + result.substring(1);
+    } else {
+        result = result.substring(0, 1) + diacritics[vowelName] + result.substring(1);
+    }
+    return result;
+}
+
+// Checks if the letter ending is in the order of LETTER - TASHKEEL - SHADDA - EVERYTHING ELSE
+function isEndingStandard(ending) {
+    console.assert(typeof ending === "string");
+    if (ending === "") return true;
+    let d0 = getDiacriticName(ending[0]);
+    let d1 = getDiacriticName(ending[1]);
+    let d2 = getDiacriticName(ending[2]);
+    if (ending.length >= 1 && d0 !== null) return false;
+    if (ending.length >= 2 && d1 === null) return false;
+    if (ending.length === 3 && (d1 === "SHADDA" || d2 !== "SHADDA")) return false;
+    return true;
 }
 
 function getWordBeginning(word) {
@@ -286,20 +339,23 @@ class NahwQuestion {
     constructor(answers) {
         console.assert(answers != undefined);
         this._sentences = answers.map(x => new Sentence(x));
-        this._page = {sentence: null, word: null};
-        this._currentPage = null;
         this._choice = null;
         this._pageListeners = [];
         this._selectionListeners = [];
         this._submissionListeners = [];
-        this._onSkipListeners = [];
-        this._onResetListeners = [];
         this.resetPageIterator();
-        this._totalPages = this.getSentences().reduce((x, s) => x + s.getWords().filter(w => w.getFlag() !== "na" && w.getFlag() !== "correct").length, 0);
+    }
+
+    calculateTotalPages() {
+        this._totalPages = this.getSentences().reduce(
+            (x, s) => x + s.getWords().filter(w => w.getFlag() !== "na" && w.getFlag() !== "correct").length, 0
+        );
     }
 
     // Iterates through all words (excluding correct & na words)
     resetPageIterator() {
+        this.calculateTotalPages();
+        this._currentPage = null;
         this._iterator = {
             self: this,
             sentenceIndex: -1,
@@ -310,6 +366,7 @@ class NahwQuestion {
                 if (this.sentenceIt == null) {
                     this.sentenceIndex += 1;
                     const sentence = this.self.getSentences()[this.sentenceIndex];
+                    console.log("next():", this.sentenceIndex);
                     if (sentence == undefined) {
                         return {
                             value: null,
@@ -326,21 +383,19 @@ class NahwQuestion {
                 }
                 const w = r.value;
                 const s = this.self.getSentences()[this.sentenceIndex];
+                console.log("next():", w);
                 return {
                     value: {word: w, sentence: s, pageNumber: this.pageNumber, sentenceNumber: this.sentenceIndex},
                     done: false,
                 };
             }
         };
-        this._onResetListeners.forEach((x) => x.onReset());
-    }
-
-    addOnResetListener(obj) {
-        console.assert(typeof obj.onReset === "function", "Object must have an onReset method");
-        this._onResetListeners.push(obj);
     }
 
     getCurrentSentenceNumber() {
+        if (this.getCurrentPage()?.done) {
+            console.error("Can't return sentence number if iteration is done:", this.getCurrentPage());
+        }
         return this.getCurrentPage()?.value?.sentenceNumber || null;
     }
 
@@ -349,15 +404,23 @@ class NahwQuestion {
     }
 
     getCurrentPageNumber() {
-        if (this.getCurrentPage() == undefined) return null;
-        return this.getCurrentPage().value.pageNumber;
+        if (this.getCurrentPage()?.done) {
+            console.error("Can't return page number if iteration is done:", this.getCurrentPage());
+        }
+        return this.getCurrentPage()?.value?.pageNumber;
     }
 
     getCurrentSentence() {
+        if (this.getCurrentPage()?.done) {
+            console.error("Can't return page sentence if iteration is done:", this.getCurrentPage());
+        }
         return this.getCurrentPage()?.value?.sentence || null;
     }
 
     getCurrentWord() {
+        if (this.getCurrentPage()?.done) {
+            console.error("Can't return current word if iteration is done", this.getCurrentPage());
+        }
         return this.getCurrentPage()?.value?.word || null;
     }
 
@@ -368,6 +431,7 @@ class NahwQuestion {
     nextPage() {
         const oldPage = this._currentPage;
         this._currentPage = this._iterator.next();
+        console.log("nextPage():", this._currentPage);
         this._choice = null;
         this._pageListeners.forEach(x => x.onPageChange(oldPage, this._currentPage));
     }
@@ -402,18 +466,12 @@ class NahwQuestion {
         this._submissionListeners.push(obj);
     }
 
-    addSkipListener(obj) {
-        console.assert(typeof obj.onSkip === "function", "Object must have an onSkip method");
-        this._onSkipListeners.push(obj);
-    }
-
     submit() {
         this._submissionListeners.forEach(x => x.onSubmission(this.getCurrentPage(), this.getChoice(), this.getCurrentWord().getFlag()));
     }
 
     skip() {
         this.getCurrentWord().setFlag("skipped");
-        this._onSkipListeners.forEach(x => x.onSkip(this.getCurrentPage()));
     }
 
     getSentences() {
@@ -538,7 +596,6 @@ class NahwQuestionElement extends HTMLElement {
             }
             this._completeP.style.display = "none";
         } else {
-            console.log("DONE");
             if (this._nahwInput.parentNode) {
                 this._nahwInput.parentNode.removeChild(this._nahwInput);
             }
@@ -767,7 +824,6 @@ class NahwTextElement extends HTMLElement {
                         endingSpan.appendChild(this._tooltip);
                     });
                     endingSpanHighlight.addEventListener("mouseleave", () => {
-                        console.log("removed");
                         endingSpan.removeChild(this._tooltip);
                     });
                 }
@@ -1206,16 +1262,31 @@ class NahwProgressBarElement extends HTMLElement {
         console.assert(state instanceof NahwQuestion);
         this._state = state;
         state.addSubmissionListener(this);
-        state.addSkipListener(this);
+        state.addPageChangeListener(this);
         this.updateBar();
     }
 
     onSubmission() {
-        this.updateBar();
+        let pgNum = this.getState().getCurrentPageNumber();
+        if (pgNum == null) {
+            this.setValue(0);
+        } else {
+            pgNum += 1;
+            this.setValue(pgNum / this.getState().getTotalPages() * 100);
+        }
     }
 
-    onSkip(_page) {
-        this.updateBar();
+    onPageChange(_oldPage, newPage) {
+        if (newPage.done) {
+            this.setValue(100);
+            return;
+        }
+        let pgNum = this.getState().getCurrentPageNumber();
+        if (pgNum == null) {
+            this.setValue(0);
+        } else {
+            this.setValue(pgNum / this.getState().getTotalPages() * 100);
+        }
     }
 
     getState() {
@@ -1286,8 +1357,6 @@ class NahwInputElement extends HTMLElement {
 }
 
 class NahwInputCardElement extends HTMLElement {
-    // TODO: Assign #shortcut via attribute and add event listener
-    // TODO: Set color of text
     static templateHTML = `
     <style>
         :host {
