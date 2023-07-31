@@ -293,6 +293,7 @@ class NahwQuestion {
         this._pageListeners = [];
         this._selectionListeners = [];
         this._submissionListeners = [];
+        this._onSkipListeners = [];
         this._totalPages = this.getSentences().reduce((x, s) => x + s.getWords().filter(w => w.getFlag() !== "na").length, 0);
     }
 
@@ -357,7 +358,6 @@ class NahwQuestion {
     }
 
     nextPage() {
-        console.log("NEXT PAGE");
         const oldPage = this._currentPage;
         this._currentPage = this._iterator.next();
         this._choice = null;
@@ -389,18 +389,23 @@ class NahwQuestion {
         this._selectionListeners.push(obj);
     }
 
-    addOnSubmissionListener(obj) {
+    addSubmissionListener(obj) {
         console.assert(typeof obj.onSubmission === "function", "Object must have an onSubmission method");
         this._submissionListeners.push(obj);
     }
 
+    addSkipListener(obj) {
+        console.assert(typeof obj.onSkip === "function", "Object must have an onSkip method");
+        this._onSkipListeners.push(obj);
+    }
+
     submit() {
-        console.log("SUBMIT");
         this._submissionListeners.forEach(x => x.onSubmission(this.getCurrentPage(), this.getChoice(), this.getCurrentWord().getFlag()));
     }
 
     skip() {
         this.getCurrentWord().setFlag("skipped");
+        this._onSkipListeners.forEach(x => x.onSkip(this.getCurrentPage()));
     }
 
     getSentences() {
@@ -525,6 +530,7 @@ class NahwQuestionElement extends HTMLElement {
             }
             this._completeP.style.display = "none";
         } else {
+            console.log("DONE");
             if (this._nahwInput.parentNode) {
                 this._nahwInput.parentNode.removeChild(this._nahwInput);
             }
@@ -683,9 +689,9 @@ class NahwTextElement extends HTMLElement {
                 beginningSpan.innerText = word.getWordBeginning();
                 const endingSpan = document.createElement("span");
                 endingSpan.innerText = word.getFacade();
-                if (word.getFlag() === "incorrect") {
+                if (word.getFlag() === "incorrect" || word.getFlag() == "skipped") {
                     const endingSpanHighlight = document.createElement("span");
-                    endingSpanHighlight.classList.add("ending", "incorrect");
+                    endingSpanHighlight.classList.add("ending", word.getFlag());
                     endingSpan.appendChild(endingSpanHighlight);
                 }
                 if (!word.isPunctuation()) {
@@ -720,11 +726,11 @@ class NahwButtonElement extends HTMLElement {
             border-style: solid;
             padding: 1rem 1.5rem;
             cursor: pointer;
-            appearance: none;
             min-width: 100px;
             text-align: center;
             title-transform: uppercase;
             font-size: 1.2rem;
+            user-select: none;
         }
 
         div:active:not(.inactive) {
@@ -801,7 +807,6 @@ class NahwButtonElement extends HTMLElement {
 
     click() {
         if (this._eventListener) {
-            console.log("CLICK");
             this._eventListener();
         }
     }
@@ -974,7 +979,7 @@ class NahwFooterElement extends HTMLElement {
         this._state = state;
         this.getState().addPageChangeListener(this);
         this.getState().addSelectionChangeListener(this);
-        this.getState().addOnSubmissionListener(this);
+        this.getState().addSubmissionListener(this);
         this.onPageChange(null, this.getState().getCurrentPage());
     }
 
@@ -984,16 +989,10 @@ class NahwFooterElement extends HTMLElement {
             this._primaryButton.putEventListener(() => {
                 this.getState().submit();
             });
-            this._secondaryButton.putEventListener(() => {
-                console.log("SKIP");
-                this,getState().skip();
-                this.getState().nextPage();
-            });
         }
     }
 
     onSubmission(_currentPage, _choice, flag) {
-        console.log("Footer onSubmission");
         this._primaryButton.innerHTML = "CONTINUE";
         this._primaryButton.putEventListener(this.getState().nextPage.bind(this.getState()));
         if (flag === "correct") {
@@ -1035,6 +1034,10 @@ class NahwFooterElement extends HTMLElement {
         this.hideFeedback();
         this._primaryButton.setAttribute("type", "inactive");
         this._primaryButton.resetListener();
+        this._secondaryButton.putEventListener(() => {
+            this.getState().skip();
+            this.getState().nextPage();
+        });
         this.updateBoth("SELECT", "SKIP");
     }
 
@@ -1121,11 +1124,16 @@ class NahwProgressBarElement extends HTMLElement {
     bindToState(state) {
         console.assert(state instanceof NahwQuestion);
         this._state = state;
-        state.addOnSubmissionListener(this);
+        state.addSubmissionListener(this);
+        state.addSkipListener(this);
         this.updateBar();
     }
 
     onSubmission() {
+        this.updateBar();
+    }
+
+    onSkip(_page) {
         this.updateBar();
     }
 
@@ -1264,7 +1272,7 @@ class NahwInputCardElement extends HTMLElement {
         this._state = state;
         state.addSelectionChangeListener(this);
         state.addPageChangeListener(this);
-        state.addOnSubmissionListener(this);
+        state.addSubmissionListener(this);
         this._onClick = () => state.selectChoice(this._choice.innerText);
         this._container.addEventListener("click", this._onClick);
     }
