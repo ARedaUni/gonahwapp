@@ -585,42 +585,35 @@ class NahwExitButtonElement extends HTMLElement {
 class NahwTooltipElement extends HTMLElement {
     static templateHTML = `
     <style>
-        :host {
-            display: block;
-            position: absolute;
-            width: 100%;
-            transform: translateX(100%);
-        }
-
-        p {
+        span {
             background-color: var(--tooltip-bg);
-            min-width: 50px;
+            width: max-content;
             box-shadow: 0 3px 1px var(--tooltip-stroke);
             border: 0 1px solid var(--tooltip-stroke);
             font-family: Inter;
-            position: absolute;
             font-size: 1.5rem;
             border-radius: 16px;
-            z-index: 1;
-            padding: .5rem;
+            padding: .5rem 1rem;
+            transform: translateX(-50%);
+            display: block;
         }
         
-        p.normal {
+        .normal {
             color: var(--tooltip);
         }
 
-        p.incorrect {
+        .incorrect {
             color: var(--tooltip-incorrect);
             text-decoration: underline;
         }
     </style>
-    <p><slot></slot></p>`;
+    <span><slot></slot></span>`;
 
     constructor() {
         super();
         const root = this.attachShadow({mode: "open"});
         root.innerHTML = NahwTooltipElement.templateHTML;
-        this._container = root.querySelector("p");
+        this._container = root.querySelector("span");
     }
 
     attributeChangedCallback(name, _oldValue, newValue) {
@@ -691,7 +684,10 @@ class NahwTextElement extends HTMLElement {
         }
 
         nahw-tooltip {
-
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            z-index: 1;
         }
     </style>
     <p></p>`;
@@ -752,16 +748,14 @@ class NahwTextElement extends HTMLElement {
                     endingSpanHighlight.classList.add("ending", word.getFlag());
                     endingSpan.appendChild(endingSpanHighlight);
                     this._tooltip = document.createElement("nahw-tooltip");
-                    this._tooltip.style.left = "0";
-                    this._tooltip.style.top = "-60%";
-                    if (word.getFlag() === "skipped") {
-                        this._tooltip.setAttribute("type", "normal");
-                        this._tooltip.innerText = "skipped";
-                    } else {
-                        this._tooltip.setAttribute("type", "incorrect");
-                        this._tooltip.innerText = "ERROR(temp)";
-                    }
                     endingSpanHighlight.addEventListener("mouseenter", () => {
+                        if (word.getFlag() === "skipped") {
+                            this._tooltip.setAttribute("type", "normal");
+                            this._tooltip.innerText = "skipped";
+                        } else {
+                            this._tooltip.setAttribute("type", "incorrect");
+                            this._tooltip.innerText = "ERROR(temp)";
+                        }
                         endingSpan.appendChild(this._tooltip);
                     });
                     endingSpanHighlight.addEventListener("mouseleave", () => {
