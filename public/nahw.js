@@ -262,7 +262,7 @@ class Sentence {
             next() {
                 this.index += 1;
                 let word = this.self.getWords()[this.index];
-                while (word && word.getFlag() === "na") {
+                while (word && (word.getFlag() === "na" || word.getFlag() === "correct")) {
                     this.index += 1;
                     word = this.self.getWords()[this.index];
                 }
@@ -287,16 +287,18 @@ class NahwQuestion {
         console.assert(answers != undefined);
         this._sentences = answers.map(x => new Sentence(x));
         this._page = {sentence: null, word: null};
-        this.resetPageIterator();
         this._currentPage = null;
         this._choice = null;
         this._pageListeners = [];
         this._selectionListeners = [];
         this._submissionListeners = [];
         this._onSkipListeners = [];
-        this._totalPages = this.getSentences().reduce((x, s) => x + s.getWords().filter(w => w.getFlag() !== "na").length, 0);
+        this._onResetListeners = [];
+        this.resetPageIterator();
+        this._totalPages = this.getSentences().reduce((x, s) => x + s.getWords().filter(w => w.getFlag() !== "na" && w.getFlag() !== "correct").length, 0);
     }
 
+    // Iterates through all words (excluding correct & na words)
     resetPageIterator() {
         this._iterator = {
             self: this,
@@ -330,6 +332,12 @@ class NahwQuestion {
                 };
             }
         };
+        this._onResetListeners.forEach((x) => x.onReset());
+    }
+
+    addOnResetListener(obj) {
+        console.assert(typeof obj.onReset === "function", "Object must have an onReset method");
+        this._onResetListeners.push(obj);
     }
 
     getCurrentSentenceNumber() {
@@ -619,7 +627,7 @@ class NahwTooltipElement extends HTMLElement {
     attributeChangedCallback(name, _oldValue, newValue) {
         if (name === "type") {
             console.assert(newValue === "normal" || newValue === "incorrect");
-            this._container.classList.add(newValue);
+            this._container.classList = newValue;
         }
     }
 
@@ -1098,8 +1106,10 @@ class NahwFooterElement extends HTMLElement {
             this.updateBoth("CONTINUE", "REVIEW");
             this.hideFeedback();
             this._primaryButton.setAttribute("type", "primary");
-            // TODO: Secondary Button review button
-            this._secondaryButton.resetListener();
+            this._secondaryButton.putEventListener(() => {
+                this.getState().resetPageIterator();
+                this.getState().nextPage();
+            });
             return;
         }
         this.hideFeedback();
