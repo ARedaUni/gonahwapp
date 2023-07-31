@@ -96,7 +96,7 @@ function getFirstVowelName(word) {
 }
 
 class Word {
-    static FLAGS = ["correct", "incorrect", "unattempted", "na"]
+    static FLAGS = ["correct", "incorrect", "unattempted", "skipped", "na"]
     constructor(wordAnswer, flag="na", isPunctuation=false) {
         this.setFlag(flag);
         // TODO: I could optimize this
@@ -357,6 +357,7 @@ class NahwQuestion {
     }
 
     nextPage() {
+        console.log("NEXT PAGE");
         const oldPage = this._currentPage;
         this._currentPage = this._iterator.next();
         this._choice = null;
@@ -394,7 +395,12 @@ class NahwQuestion {
     }
 
     submit() {
+        console.log("SUBMIT");
         this._submissionListeners.forEach(x => x.onSubmission(this.getCurrentPage(), this.getChoice(), this.getCurrentWord().getFlag()));
+    }
+
+    skip() {
+        this.getCurrentWord().setFlag("skipped");
     }
 
     getSentences() {
@@ -604,10 +610,10 @@ class NahwTextElement extends HTMLElement {
             height: 80%;
             position: absolute;
             display: block;
-            opacity: 61%;
             background-color: var(--highlight-inactive);
             top: 0;
             left: 0;
+            opacity: 61%;
         }
         
         span.ending.active {
@@ -617,6 +623,11 @@ class NahwTextElement extends HTMLElement {
         span.ending.incorrect {
             background-color: var(--highlight-incorrect);
             opacity: 40%;
+        }
+
+        span.ending.skipped {
+            background-color: var(--highlight-skipped);
+            opacity: 50%;
         }
     </style>
     <p></p>`;
@@ -702,7 +713,7 @@ class NahwTextElement extends HTMLElement {
 class NahwButtonElement extends HTMLElement {
     static templateHTML = `
     <style>
-        button {
+        div {
             border-radius: 16px;
             font-weight: 800;
             border-width: thin;
@@ -710,12 +721,13 @@ class NahwButtonElement extends HTMLElement {
             padding: 1rem 1.5rem;
             cursor: pointer;
             appearance: none;
-            width: 150px;
+            min-width: 100px;
+            text-align: center;
             title-transform: uppercase;
             font-size: 1.2rem;
         }
 
-        button:active:not(.inactive) {
+        div:active:not(.inactive) {
             box-shadow: none !important;
             transform: translate(0, 3px);
         }
@@ -749,27 +761,27 @@ class NahwButtonElement extends HTMLElement {
             border-color: var(--button-inactive-fill);
         }
     </style>
-    <button type="button"><slot>SLOT</slot></button>
+    <div><slot>SLOT</slot></div>
     `;
     constructor() {
         super();
         const root = this.attachShadow({mode: "open"});
         root.innerHTML = NahwButtonElement.templateHTML;
-        this._container = root.querySelector("button");
+        this._container = root.querySelector("div");
         root.appendChild(this._container);
         this.setType(this.getAttribute("type"));
     }
 
     putEventListener(func) {
         if (this._eventListener) {
-            this.shadowRoot.removeEventListener("click", this._eventListener);
+            this._container.removeEventListener("click", this._eventListener);
         }
         this._eventListener = func;
-        this.shadowRoot.addEventListener("click", this._eventListener);
+        this._container.addEventListener("click", this._eventListener);
     }
 
     resetListener() {
-        this.shadowRoot.removeEventListener("click", this._eventListener);
+        this._container.removeEventListener("click", this._eventListener);
         this._eventListener = null;
     }
 
@@ -789,6 +801,7 @@ class NahwButtonElement extends HTMLElement {
 
     click() {
         if (this._eventListener) {
+            console.log("CLICK");
             this._eventListener();
         }
     }
@@ -934,7 +947,6 @@ class NahwFooterElement extends HTMLElement {
         this._primaryButton = root.querySelectorAll("nahw-button")[1];
         this._enterFunc = (e) => {
             if (e.key === "Enter") {
-                console.log("TEST");
                 this._primaryButton.click();
             }
         };
@@ -969,11 +981,19 @@ class NahwFooterElement extends HTMLElement {
     onSelectionChange(_oldSelection, _newSelection) {
         this._primaryButton.setAttribute("type", "primary");
         if (_oldSelection == null) {
-            this._primaryButton.putEventListener(this.getState().submit.bind(this.getState()));
+            this._primaryButton.putEventListener(() => {
+                this.getState().submit();
+            });
+            this._secondaryButton.putEventListener(() => {
+                console.log("SKIP");
+                this,getState().skip();
+                this.getState().nextPage();
+            });
         }
     }
 
     onSubmission(_currentPage, _choice, flag) {
+        console.log("Footer onSubmission");
         this._primaryButton.innerHTML = "CONTINUE";
         this._primaryButton.putEventListener(this.getState().nextPage.bind(this.getState()));
         if (flag === "correct") {
@@ -1252,7 +1272,7 @@ class NahwInputCardElement extends HTMLElement {
     setChoice(choice) {
         this._container.removeEventListener("click", this._onClick);
         this._choice.innerText = choice;
-        this._onClick = () => {console.log("test"); this.getState().selectChoice(this._choice.innerText)};
+        this._onClick = () => this.getState().selectChoice(this._choice.innerText);
         this._container.addEventListener("click", this._onClick);
     }
 
