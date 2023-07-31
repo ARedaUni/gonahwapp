@@ -1,5 +1,8 @@
 "use strict";
 
+import firebase from "firebase/compat/app";
+import "firebase/firestore";
+
 const diacritics = {
     "DAMMA": "\u064f",
     "DAMMATAN": "\u064c",
