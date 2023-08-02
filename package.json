@@ -1,5 +1,20 @@
 {
+  "name": "arabic",
+  "description": "This is an experiment/project I've started for my own personal note taking. I've realized that while writing down notes helps me memorize the material, I only retain the information for a short while. Revisiting the notes is difficult because reading is boring and by itself is bad at keeping retention.",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "esbuild src/index.js --bundle --sourcemap --outfile=public/bundler.js --format=esm"
+  },
+  "author": "",
+  "license": "ISC",
   "devDependencies": {
-    "firebase-tools": "^12.4.5"
+    "css-loader": "^6.8.1",
+    "esbuild": "^0.18.17",
+    "firebase-tools": "^12.4.5",
+    "style-loader": "^3.3.3"
+  },
+  "dependencies": {
+    "firebase": "^10.1.0"
   }
 }

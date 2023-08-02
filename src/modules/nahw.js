@@ -1,5 +1,3 @@
-"use strict";
-
 const diacritics = {
     "DAMMA": "\u064f",
     "DAMMATAN": "\u064c",
@@ -9,7 +7,6 @@ const diacritics = {
     "KASRATAN": "\u064d",
     "SUKOON": "\u0652",
     "SHADDA": "\u0651",
-
 }
 
 function isShortVowel(diacriticName) {
@@ -1490,3 +1487,5 @@ customElements.define("nahw-button", NahwButtonElement);
 customElements.define("nahw-input", NahwInputElement);
 customElements.define("nahw-input-card", NahwInputCardElement);
 customElements.define("nahw-tooltip", NahwTooltipElement);
+
+export default NahwQuestion;
