@@ -1,0 +1,78 @@
+{
+  "words": [
+    {
+      "letters": [
+        {
+          "letter": "ه",
+          "tashkeel": "َ",
+          "shadda": false
+        },
+        {
+          "letter": "ذ",
+          "tashkeel": "َ",
+          "shadda": false
+        },
+        {
+          "letter": "ا",
+          "tashkeel": "ْ",
+          "shadda": false
+        }
+      ],
+      "shrinked": false,
+      "preceding": false,
+      "tags": [
+        "مبني",
+        "مبتدأ",
+        "اسم مرفوع"
+      ],
+      "punctuation": false,
+      "sentenceStart": true
+    },
+    {
+      "letters": [
+        {
+          "letter": "م",
+          "tashkeel": "ُ",
+          "shadda": false
+        },
+        {
+          "letter": "س",
+          "tashkeel": "ْ",
+          "shadda": false
+        },
+        {
+          "letter": "ل",
+          "tashkeel": "ِ",
+          "shadda": false
+        },
+        {
+          "letter": "م",
+          "tashkeel": "ٌ",
+          "shadda": false
+        }
+      ],
+      "shrinked": false,
+      "preceding": true,
+      "tags": [
+        "اسم مرفوع",
+        "خبر "
+      ],
+      "punctuation": false,
+      "sentenceStart": false
+    },
+    {
+      "letters": [
+        {
+          "letter": ".",
+          "tashkeel": "",
+          "shadda": false
+        }
+      ],
+      "shrinked": false,
+      "preceding": true,
+      "tags": [],
+      "punctuation": true,
+      "sentenceStart": false
+    }
+  ]
+}
