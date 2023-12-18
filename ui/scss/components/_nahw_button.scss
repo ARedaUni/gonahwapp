@@ -1,0 +1,51 @@
+.nahw-button {
+  --_background: var(--background, red);
+  --_color: var(--color, white);
+  --_shadow: var(--shadow, black);
+  --_stroke: var(--stroke, red);
+
+  background-color: var(--_background);
+  color: var(--_color);
+  box-shadow: 0 5px var(--_shadow);
+  border-color: var(--_stroke);
+
+  min-width: 100px;
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  border-width: thin;
+  border-style: solid;
+  font-family: Roboto, sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  text-align: center;
+  text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+  appearance: none;
+
+  &:active:not(.-inactive) {
+    box-shadow: none;
+    transform: translate(0, 3px);
+  }
+
+  &.-primary {
+    --background: var(--green-500);
+    --color: white;
+    --shadow: var(--green-600);
+    --stroke: var(--green-500);
+  }
+
+  &.-secondary {
+    --background: white;
+    --color: var(--gray-500);
+    --shadow: var(--gray-200);
+    --stroke: var(--gray-200);
+  }
+
+  &.-wrong {
+    --background: var(--red-500);
+    --color: white;
+    --shadow: var(--red-600);
+    --stroke: var(--red-500);
+  }
+}

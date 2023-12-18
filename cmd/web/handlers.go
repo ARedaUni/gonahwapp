@@ -14,6 +14,6 @@ func (app *application) textGet() http.Handler {
 
 func (app *application) nahwQuestionGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
+		app.renderTemplate(w, "nahw.tmpl", http.StatusOK, newTemplateData())
 	})
 }

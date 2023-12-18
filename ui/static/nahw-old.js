@@ -849,20 +849,6 @@ class NahwTextElement extends HTMLElement {
 class NahwButtonElement extends HTMLElement {
   static templateHTML = `
     <style>
-        div {
-            border-radius: 16px;
-            font-weight: 800;
-            border-width: thin;
-            border-style: solid;
-            padding: 1rem 1.5rem;
-            cursor: pointer;
-            min-width: 100px;
-            text-align: center;
-            title-transform: uppercase;
-            font-size: 1.2rem;
-            user-select: none;
-        }
-
         div:active:not(.inactive) {
             box-shadow: none !important;
             transform: translate(0, 3px);
