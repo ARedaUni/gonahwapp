@@ -48,4 +48,13 @@
     --shadow: var(--red-600);
     --stroke: var(--red-500);
   }
+
+  &.-inactive {
+    --background: var(--gray-200);
+    --color: var(--gray-700);
+    --shadow: var(--gray-200);
+    --stroke: var(--gray-200);
+
+    cursor: not-allowed;
+  }
 }
