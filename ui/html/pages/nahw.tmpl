@@ -1,6 +1,10 @@
 {{define "main"}}
-<button class="nahw-button -primary">Start</button>
-<button class="nahw-button -secondary">Return</button>
-<button class="nahw-button -wrong">Continue</button>
-<button class="nahw-button -inactive">Select</button>
+<div class="_screen-h _flex _flex-col">
+  <div></div> {{/* Progress bar */}}
+  <div class="_grow"></div> {{/* Text */}}
+  <footer class="nahw-footer">
+    <button class="nahw-button">Return</button>
+    <button class="nahw-button -primary">Start</button>
+  </footer>
+</div>
 {{end}}

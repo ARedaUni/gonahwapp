@@ -28,6 +28,38 @@
   --gray-900: #1b1b1b;
 }
 
+._flex {
+  display: flex !important;
+}
+
+._flex-row {
+  flex-direction: row !important;
+}
+
+._flex-col {
+  flex-direction: column !important;
+}
+
+._flex-row-reverse {
+  flex-direction: row-reverse !important;
+}
+
+._flex-col-reverse {
+  flex-direction: column-reverse !important;
+}
+
+._grow {
+  flex-grow: 1 !important;
+}
+
+._grow-0 {
+  flex-grow: 0 !important;
+}
+
+._screen-h {
+  min-height: 100vh;
+}
+
 body {
   background-color: #fff5eb;
   color: black;
@@ -41,10 +73,10 @@ body {
 }
 
 .nahw-button {
-  --_background: var(--background, red);
-  --_color: var(--color, white);
-  --_shadow: var(--shadow, black);
-  --_stroke: var(--stroke, red);
+  --_background: var(--background, white);
+  --_color: var(--color, var(--gray-500));
+  --_shadow: var(--shadow, var(--gray-200));
+  --_stroke: var(--stroke, var(--gray-200));
   background-color: var(--_background);
   color: var(--_color);
   box-shadow: 0 5px var(--_shadow);
@@ -70,16 +102,10 @@ body {
 .nahw-button.-primary {
   --background: var(--green-500);
   --color: white;
-  --shadow: var(--green-600);
+  --shadow: var(--green-700);
   --stroke: var(--green-500);
 }
-.nahw-button.-secondary {
-  --background: white;
-  --color: var(--gray-500);
-  --shadow: var(--gray-200);
-  --stroke: var(--gray-200);
-}
-.nahw-button.-wrong {
+.nahw-button.-incorrect {
   --background: var(--red-500);
   --color: white;
   --shadow: var(--red-600);
@@ -93,6 +119,15 @@ body {
   cursor: not-allowed;
 }
 
+.nahw-footer {
+  --_background: var(--background, white);
+  background: var(--_background);
+  display: flex;
+  align-content: center;
+  justify-content: space-between;
+  padding: 2rem 10rem;
+  border-top: 2px solid var(--gray-100);
+}
 :root {
   --footer-bg: #fff;
   --footer-stroke: #E5E5E5;

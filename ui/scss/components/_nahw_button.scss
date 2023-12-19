@@ -1,8 +1,8 @@
 .nahw-button {
-  --_background: var(--background, red);
-  --_color: var(--color, white);
-  --_shadow: var(--shadow, black);
-  --_stroke: var(--stroke, red);
+  --_background: var(--background, white);
+  --_color: var(--color, var(--gray-500));
+  --_shadow: var(--shadow, var(--gray-200));
+  --_stroke: var(--stroke, var(--gray-200));
 
   background-color: var(--_background);
   color: var(--_color);
@@ -31,18 +31,11 @@
   &.-primary {
     --background: var(--green-500);
     --color: white;
-    --shadow: var(--green-600);
+    --shadow: var(--green-700);
     --stroke: var(--green-500);
   }
 
-  &.-secondary {
-    --background: white;
-    --color: var(--gray-500);
-    --shadow: var(--gray-200);
-    --stroke: var(--gray-200);
-  }
-
-  &.-wrong {
+  &.-incorrect {
     --background: var(--red-500);
     --color: white;
     --shadow: var(--red-600);
