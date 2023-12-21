@@ -27,5 +27,33 @@
 }
 
 ._screen-h {
-	min-height: 100vh;
+	min-height: 100vh !important;
+}
+
+._w-1\/2 {
+	width: 50% !important;
+}
+
+._w-full {
+	width: 100% !important;
+}
+
+._h-8 {
+	height: 1.2rem !important;
+}
+
+._h-10 {
+	height: 1.6rem !important;
+}
+
+._h-full {
+	height: 100% !important;
+}
+
+._pt-8 {
+	padding-top: 1.2rem !important;
+}
+
+._mx-center {
+	margin: 0 auto !important;
 }

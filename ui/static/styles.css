@@ -26,6 +26,15 @@
   --gray-700: #515151;
   --gray-800: #363636;
   --gray-900: #1b1b1b;
+  --yellow-100: #fdf8e6;
+  --yellow-200: #f8e9b3;
+  --yellow-300: #f3da80;
+  --yellow-400: #eecb4d;
+  --yellow-500: #e6b400;
+  --yellow-600: #b89000;
+  --yellow-700: #8a6c00;
+  --yellow-800: #5c4800;
+  --yellow-900: #2e2400;
 }
 
 ._flex {
@@ -57,7 +66,35 @@
 }
 
 ._screen-h {
-  min-height: 100vh;
+  min-height: 100vh !important;
+}
+
+._w-1\/2 {
+  width: 50% !important;
+}
+
+._w-full {
+  width: 100% !important;
+}
+
+._h-8 {
+  height: 1.2rem !important;
+}
+
+._h-10 {
+  height: 1.6rem !important;
+}
+
+._h-full {
+  height: 100% !important;
+}
+
+._pt-8 {
+  padding-top: 1.2rem !important;
+}
+
+._mx-center {
+  margin: 0 auto !important;
 }
 
 body {
@@ -128,6 +165,50 @@ body {
   padding: 2rem 10rem;
   border-top: 2px solid var(--gray-100);
 }
+.nahw-para {
+  font-family: "Amiri";
+  font-size: 4rem;
+  overflow-y: scroll;
+  padding: 2rem 6rem;
+  direction: rtl;
+  text-align: justify;
+  flex: 1 0 0;
+}
+
+.progress-bar {
+  --_background: var(--background, var(--gray-300));
+  --_foreground: var(--foreground, var(--green-500));
+  --_glow: var(--glow, rgba(255, 255, 255, 0.2));
+  background-color: var(--_background);
+  border-radius: 25px;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(255, 255, 255, 0.3);
+}
+.progress-bar > .value {
+  height: 100%;
+  border-top-left-radius: 25px;
+  border-bottom-left-radius: 25px;
+  background-color: var(--_foreground);
+  overflow: hidden;
+  position: relative;
+}
+.progress-bar > .value > .glow {
+  position: absolute;
+  top: 25%;
+  width: 98%;
+  left: 1%;
+  height: 3px;
+  background-color: var(--_glow);
+  border-radius: 25px;
+}
+
+.progress-bar.-complete {
+  --foreground: var(--yellow-400);
+}
+.progress-bar.-complete > .value {
+  border-top-right-radius: 25px;
+  border-bottom-right-radius: 25px;
+}
+
 :root {
   --footer-bg: #fff;
   --footer-stroke: #E5E5E5;
@@ -135,11 +216,6 @@ body {
   --footer-wrong: #EE282D;
   --footer-correct-bg: #D7FFB8;
   --footer-correct: #489D26;
-  --progress-bg: #bababa;
-  --progress-value: #58CC02;
-  --progress-glow: rgba(255, 255, 255, 0.2);
-  --progress-complete-value: #FFC800;
-  --progress-complete-glow: #FFD333;
   --input-card: #000;
   --input-card-fill: #fff;
   --input-card-stroke: #e5e5e5;
@@ -183,18 +259,14 @@ body {
   margin-bottom: 1rem;
 }
 
-.card.big {
-  height: 35rem;
-  width: 25rem;
-}
-
 .card.small {
   height: 4rem;
   width: 10rem;
+  background-color: var(--green-600);
 }
 
 .card:hover {
-  box-shadow: -10px 10px 10px 3px var(--accent);
+  box-shadow: -10px 10px 10px 3px var(--green-800);
   top: -3px;
   left: 3px;
 }
