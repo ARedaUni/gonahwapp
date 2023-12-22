@@ -13,6 +13,7 @@ import (
 
 type templateData struct {
 	Questions []models.Question
+	Question models.Question
 }
 
 func newTemplateData() templateData {
