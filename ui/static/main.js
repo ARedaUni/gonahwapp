@@ -1,3 +1,6 @@
+htmx.config.selfRequestsOnly = true;
+htmx.config.includeIndicatorStyles = false;
+
 class ProgressBar extends HTMLElement {
   static #ATT_VALUE = "data-value"
   static #CLASS_COMPLETE = "-complete"

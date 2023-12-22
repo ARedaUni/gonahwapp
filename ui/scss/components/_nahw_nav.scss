@@ -1,0 +1,12 @@
+.nahw-nav {
+	display: flex;
+	flex-direction: row;
+	justify-items: center;
+	align-items: center;
+	gap: .1rem;
+
+	>progress-bar {
+		flex: 1;
+		height: 100%;
+	}
+}

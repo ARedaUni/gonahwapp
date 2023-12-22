@@ -77,6 +77,10 @@
   width: 100% !important;
 }
 
+._h-1 {
+  height: 0.5rem !important;
+}
+
 ._h-8 {
   height: 1.2rem !important;
 }
@@ -207,6 +211,18 @@ body {
 .progress-bar.-complete > .value {
   border-top-right-radius: 25px;
   border-bottom-right-radius: 25px;
+}
+
+.nahw-nav {
+  display: flex;
+  flex-direction: row;
+  justify-items: center;
+  align-items: center;
+  gap: 0.1rem;
+}
+.nahw-nav > progress-bar {
+  flex: 1;
+  height: 100%;
 }
 
 :root {
