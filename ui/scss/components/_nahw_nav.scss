@@ -4,6 +4,8 @@
 	justify-items: center;
 	align-items: center;
 	gap: .1rem;
+	background-color: var(--page-background);
+	padding: .3rem 0;
 
 	>progress-bar {
 		flex: 1;

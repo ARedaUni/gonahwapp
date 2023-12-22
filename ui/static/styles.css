@@ -1,4 +1,5 @@
 :root {
+  --page-background: #fff5eb;
   --red-100: #ffeced;
   --red-200: #ffc7c8;
   --red-300: #ff8e91;
@@ -102,7 +103,7 @@
 }
 
 body {
-  background-color: #fff5eb;
+  background-color: var(--page-background);
   color: black;
   font-family: Roboto, sans-serif;
   height: 100vh;
@@ -219,6 +220,8 @@ body {
   justify-items: center;
   align-items: center;
   gap: 0.1rem;
+  background-color: var(--page-background);
+  padding: 0.3rem 0;
 }
 .nahw-nav > progress-bar {
   flex: 1;
