@@ -1,0 +1,55 @@
+package ui
+
+import "github.com/amrojjeh/kalam"
+
+templ Excerpts(es []kalam.Excerpt) {
+	@base() {
+		<div class="cards">
+			for _, e := range es {
+				<a class="card small" href="/text/0">
+					<h1 class="card-title" lang="ar">{e.Name}</h1>
+				</a>
+			}
+		</div>	
+	}
+}
+
+templ NahwStart(e kalam.Excerpt) {
+	@base() {
+		<div class="_screen-h _flex _flex-col">
+			@navigation("0")
+			<div class="nahw-para">
+				{e.Unpointed(true)}
+			</div>
+			<footer class="nahw-footer">
+				<a href="/text"><button class="nahw-button">Return</button></a>
+				<a href="/text/0/0"><button class="nahw-button -primary">Start</button></a>
+			</footer>
+		</div>
+	}
+}
+
+templ NahwSentence(s kalam.Sentence) {
+	@base() {
+		<div class="_screen-h _flex _flex-col">
+			@navigation("0")
+			<div class="sentence-question">
+				<p class="text">{s.Unpointed(true)}</p>
+				<div class="cards">
+					<nahw-card>{kalam.FromBuckwalter("wa")}</nahw-card>
+				</div>
+			</div>
+			<footer class="nahw-footer">
+				<a href="#"><button class="nahw-button">Skip</button></a>
+				<a href="#"><button class="nahw-button -inactive">Select</button></a>
+			</footer>
+		</div>
+	}
+}
+
+templ navigation(progress string) {
+	<nav class="nahw-nav _h-1 _pt-8 _pb-8 _w-1/2 _mx-center">
+		<a href="/text"><img src="/static/icons/x-circle.svg" alt="close"/></a>
+		<progress-bar data-value={progress}></progress-bar>
+	</nav>
+}

@@ -34,14 +34,7 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	err := app.cacheTemplate()
-	if err != nil {
-		app.logger.Error("failed to cache pages",
-			slog.String("error", err.Error()))
-		os.Exit(1)
-	}
-
-	err = app.GetQuestions()
+	err := app.GetQuestions()
 	if err != nil {
 		app.logger.Error("failed to load questions",
 			slog.String("error", err.Error()))

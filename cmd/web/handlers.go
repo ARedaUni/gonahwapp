@@ -2,29 +2,35 @@ package main
 
 import (
 	"net/http"
+
+	"github.com/amrojjeh/arabic/ui"
 )
 
 func (app *application) textGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		data := newTemplateData()
-		data.Questions = app.excerpts
-		app.renderTemplate(w, "text.tmpl", http.StatusOK, data)
+		err := ui.Excerpts(app.excerpts).Render(r.Context(), w)
+		if err != nil {
+			app.serverError(w, err)
+		}
 	})
 }
 
 func (app *application) nahwStartGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		data := newTemplateData()
-		data.Question = excerptFromContext(r.Context())
-		app.renderTemplate(w, "nahw-start.tmpl", http.StatusOK, data)
+		e := excerptFromContext(r.Context())
+		err := ui.NahwStart(e).Render(r.Context(), w)
+		if err != nil {
+			app.serverError(w, err)
+		}
 	})
 }
 
 func (app *application) nahwSentenceGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		data := newTemplateData()
-		data.Question = excerptFromContext(r.Context())
-		data.Sentence = sentenceFromContext(r.Context())
-		app.renderTemplate(w, "nahw-sentence.tmpl", http.StatusOK, data)
+		s := sentenceFromContext(r.Context())
+		err := ui.NahwSentence(s).Render(r.Context(), w)
+		if err != nil {
+			app.serverError(w, err)
+		}
 	})
 }
