@@ -7,13 +7,14 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/amrojjeh/arabic/internal/models"
 	"github.com/amrojjeh/arabic/ui"
+	"github.com/amrojjeh/kalam"
 )
 
 type templateData struct {
-	Questions []models.Question
-	Question models.Question
+	Questions []kalam.Excerpt
+	Question  kalam.Excerpt
+	Sentence  kalam.Sentence
 }
 
 func newTemplateData() templateData {

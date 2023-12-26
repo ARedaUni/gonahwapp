@@ -1,15 +1,18 @@
 {{define "main"}}
 <div class="_screen-h _flex _flex-col">
+  {{- /* TODO(Amr Ojjeh): turn into a TEMPL partial */ -}}
   <nav class="nahw-nav _h-1 _pt-8 _w-1/2 _mx-center">
     <a href="/text"><img src="/static/icons/x-circle.svg" alt="close"></a>
     <progress-bar data-value="0"></progress-bar>
   </nav>
   <div class="nahw-para">
-    {{- .Question.Unpointed -}}
+    {{- .Question.Unpointed true -}}
   </div>
+  {{- /* TODO(Amr Ojjeh): turn into a TEMPL partial */ -}}
   <footer class="nahw-footer">
-    <button hx-get="/text" hx-swap="innerHTML" hx-target="closest body" class="nahw-button">Return</button>
-    <button class="nahw-button -primary">Start</button>
+    <a href="/text"><button class="nahw-button">Return</button></a>
+    {{- /* TODO(Amr Ojjeh): Change 0 -> actual index */ -}}
+    <a href="/text/0/0"><button class="nahw-button -primary">Start</button></a>
   </footer>
 </div>
 {{end}}

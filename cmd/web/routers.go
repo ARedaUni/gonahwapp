@@ -13,15 +13,19 @@ func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
 	base := alice.New(app.secureHeaders, app.logRequest)
+	excerptRequired := alice.New(app.excerptRequired)
+	sentenceRequired := excerptRequired.Append(app.sentenceRequired)
 
 	router.Handler(http.MethodGet, "/static/*filepath",
-		base.Then(http.FileServer(http.FS(ui.Files))))
+		http.FileServer(http.FS(ui.Files)))
 
 	// TODO(Amr Ojjeh): Write a homepage
 	router.Handler(http.MethodGet, "/", app.textGet())
 	router.Handler(http.MethodGet, "/text", app.textGet())
-	router.Handler(http.MethodGet, "/text/:text",
-		app.nahwQuestionGet())
+	router.Handler(http.MethodGet, "/text/:excerpt",
+		excerptRequired.Then(app.nahwStartGet()))
+	router.Handler(http.MethodGet, "/text/:excerpt/:sentence",
+		sentenceRequired.Then(app.nahwSentenceGet()))
 
 	return base.Then(router)
 }

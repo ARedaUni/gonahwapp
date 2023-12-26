@@ -8,13 +8,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/amrojjeh/arabic/internal/models"
+	"github.com/amrojjeh/kalam"
 )
 
 type application struct {
-	logger    *slog.Logger
-	pages     map[string]*template.Template
-	questions []models.Question
+	logger   *slog.Logger
+	pages    map[string]*template.Template
+	excerpts []kalam.Excerpt
 }
 
 func main() {
@@ -23,8 +23,8 @@ func main() {
 		logger: slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 			AddSource: true,
 		})),
-		pages:     map[string]*template.Template{},
-		questions: make([]models.Question, 0),
+		pages:    map[string]*template.Template{},
+		excerpts: make([]kalam.Excerpt, 0),
 	}
 
 	server := &http.Server{

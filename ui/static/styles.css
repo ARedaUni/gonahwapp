@@ -98,6 +98,10 @@
   padding-top: 1.2rem !important;
 }
 
+._pb-8 {
+  padding-bottom: 1.2rem !important;
+}
+
 ._mx-center {
   margin: 0 auto !important;
 }
@@ -226,6 +230,16 @@ body {
 .nahw-nav > progress-bar {
   flex: 1;
   height: 100%;
+}
+
+.sentence-question {
+  flex: 1;
+}
+.sentence-question > .text {
+  font-family: "Amiri";
+  font-size: 5rem;
+  direction: rtl;
+  text-align: center;
 }
 
 :root {

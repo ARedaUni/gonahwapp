@@ -1,14 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"io/fs"
 	"log/slog"
 	"net/http"
-	"path/filepath"
 
 	"github.com/amrojjeh/arabic/data"
-	"github.com/amrojjeh/arabic/internal/models"
+	"github.com/amrojjeh/kalam"
 )
 
 func (app *application) clientError(w http.ResponseWriter, code int) {
@@ -21,6 +21,14 @@ func (app *application) serverError(w http.ResponseWriter, err error) {
 		http.StatusInternalServerError)
 }
 
+func excerptFromContext(ctx context.Context) kalam.Excerpt {
+	return ctx.Value(excerptKey).(kalam.Excerpt)
+}
+
+func sentenceFromContext(ctx context.Context) kalam.Sentence {
+	return ctx.Value(sentenceKey).(kalam.Sentence)
+}
+
 func (app *application) GetQuestions() error {
 	names, err := fs.Glob(data.Files, "*.json")
 	if err != nil {
@@ -28,19 +36,18 @@ func (app *application) GetQuestions() error {
 	}
 
 	for _, n := range names {
-		q := models.Question{}
+		e := kalam.Excerpt{}
 		file, err := data.Files.ReadFile(n)
 		if err != nil {
 			return err
 		}
-		err = json.Unmarshal(file, &q)
+		err = json.Unmarshal(file, &e)
 		if err != nil {
 			return err
 		}
 
-		q.Name = filepath.Base(n)
-		app.logger.Info("loaded question", slog.String("name", q.Name))
-		app.questions = append(app.questions, q)
+		app.logger.Info("loaded question", slog.String("name", e.Name))
+		app.excerpts = append(app.excerpts, e)
 	}
 	return nil
 }
