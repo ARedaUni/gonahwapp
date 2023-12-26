@@ -1,0 +1,7 @@
+.nahw-highlight {
+	background-color: var(--gray-200);
+
+	&.-active {
+		background-color: var(--blue-400);
+	}
+}

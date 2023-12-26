@@ -18,6 +18,15 @@
   --green-700: #216318;
   --green-800: #143b0e;
   --green-900: #071405;
+  --blue-100: #d9e9f8;
+  --blue-200: #c6dff5;
+  --blue-300: #b3d4f1;
+  --blue-400: #8cbeea;
+  --blue-500: #66a9e3;
+  --blue-600: #4093dc;
+  --blue-700: #3376b0;
+  --blue-800: #265884;
+  --blue-900: #1a3b58;
   --gray-100: #e7e7e7;
   --gray-200: #cfcfcf;
   --gray-300: #b7b7b7;
@@ -241,6 +250,13 @@ body {
   direction: rtl;
   text-align: center;
 }
+.nahw-highlight {
+  background-color: var(--gray-200);
+}
+.nahw-highlight.-active {
+  background-color: var(--blue-400);
+}
+
 :root {
   --footer-bg: #fff;
   --footer-stroke: #E5E5E5;

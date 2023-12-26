@@ -28,7 +28,7 @@ func (app *application) nahwStartGet() http.Handler {
 func (app *application) nahwSentenceGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s := sentenceFromContext(r.Context())
-		err := ui.NahwSentence(s).Render(r.Context(), w)
+		err := ui.NahwSentence(s, 1).Render(r.Context(), w)
 		if err != nil {
 			app.serverError(w, err)
 		}

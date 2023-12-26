@@ -4,6 +4,8 @@ github.com/amrojjeh/kalam v0.0.0-20231215182137-9d67980152cd h1:RELHZLDkM4fUBahO
 github.com/amrojjeh/kalam v0.0.0-20231215182137-9d67980152cd/go.mod h1:rfTF4hy9n+fY213bionhhFpva1G+ggmKWO23GLXuM54=
 github.com/amrojjeh/kalam v0.2.0 h1:v6W9osH17r7JcIOCUS1MxXixJ7q7LiTjNib23hg/cTY=
 github.com/amrojjeh/kalam v0.2.0/go.mod h1:rfTF4hy9n+fY213bionhhFpva1G+ggmKWO23GLXuM54=
+github.com/amrojjeh/kalam v0.3.0 h1:jqUrrAg8r6vmBCwXqWXm8a2ZhPds0ch8f9BJc1uxDD4=
+github.com/amrojjeh/kalam v0.3.0/go.mod h1:rfTF4hy9n+fY213bionhhFpva1G+ggmKWO23GLXuM54=
 github.com/julienschmidt/httprouter v1.3.0 h1:U0609e9tgbseu3rBINet9P48AI/D3oJs4dN7jwJOQ1U=
 github.com/julienschmidt/httprouter v1.3.0/go.mod h1:JR6WtHb+2LUe8TCKY3cZOxFyyO8IZAc4RVcycCCAKdM=
 github.com/justinas/alice v1.2.0 h1:+MHSA/vccVCF4Uq37S42jwlkvI2Xzl7zTPCN5BnZNVo=
