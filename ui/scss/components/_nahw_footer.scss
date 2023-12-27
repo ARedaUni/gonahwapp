@@ -1,17 +1,39 @@
 .nahw-footer {
 	--_background: var(--background, white);
+	--_text: var(--text, black);
 
 	background: var(--_background);
 
 	display: flex;
-	align-content: center;
+	align-items: center;
 	justify-content: space-around;
-	padding: 2rem;
+	padding: 3rem 2rem;
 	gap: 10rem;
 
 	border-top: 2px solid var(--gray-100);
 
 	&.-correct {}
 
-	&.-incorrect {}
+	&.-incorrect {
+		--background: var(--red-200);
+		--text: var(--red-600);
+	}
+}
+
+.nahw-footer>.text {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	color: var(--_text);
+
+	>.icon {
+		border-radius: 100%;
+		background-color: white;
+		padding: 2rem;
+
+		svg {
+			transform: scale(120%);
+		}
+	}
 }
