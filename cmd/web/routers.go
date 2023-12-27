@@ -14,7 +14,7 @@ func (app *application) routes() http.Handler {
 
 	base := alice.New(app.secureHeaders, app.logRequest)
 	excerptRequired := alice.New(app.excerptRequired)
-	sentenceRequired := excerptRequired.Append(app.sentenceRequired)
+	iteratorRequired := excerptRequired.Append(app.iteratorRequired)
 
 	router.Handler(http.MethodGet, "/static/*filepath",
 		http.FileServer(http.FS(ui.Files)))
@@ -24,8 +24,8 @@ func (app *application) routes() http.Handler {
 	router.Handler(http.MethodGet, "/text", app.textGet())
 	router.Handler(http.MethodGet, "/text/:excerpt",
 		excerptRequired.Then(app.nahwStartGet()))
-	router.Handler(http.MethodGet, "/text/:excerpt/:sentence",
-		sentenceRequired.Then(app.nahwSentenceGet()))
+	router.Handler(http.MethodGet, "/text/:excerpt/:word",
+		iteratorRequired.Then(app.nahwSentenceGet()))
 
 	return base.Then(router)
 }

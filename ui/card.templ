@@ -1,0 +1,29 @@
+package ui
+
+type NahwCardViewModel struct {
+	Value string
+	State NahwCardState
+	Shortcut string
+}
+
+type NahwCardState int
+
+const (
+	NahwCardSelected = NahwCardState(iota)
+	NahwCardCorrect
+	NahwCardIncorrect
+	NahwCardDefault
+)
+
+func NewNahwCardViewModel(value string, state NahwCardState, shortcut string) NahwCardViewModel {
+	return NahwCardViewModel{
+		Value: value,
+		State: state,
+		Shortcut: shortcut,
+	}
+}
+
+// TODO(Amr Ojjeh): Take into account state
+templ NahwCard(m NahwCardViewModel) {
+	<nahw-card data-shortcut={m.Shortcut} data-value={m.Value} selected></nahw-card>
+}

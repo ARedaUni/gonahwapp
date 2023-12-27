@@ -25,8 +25,8 @@ func excerptFromContext(ctx context.Context) kalam.Excerpt {
 	return ctx.Value(excerptKey).(kalam.Excerpt)
 }
 
-func sentenceFromContext(ctx context.Context) kalam.Sentence {
-	return ctx.Value(sentenceKey).(kalam.Sentence)
+func iteratorFromContext(ctx context.Context) kalam.ExcerptIterator {
+	return ctx.Value(iteratorKey).(kalam.ExcerptIterator)
 }
 
 func (app *application) GetQuestions() error {

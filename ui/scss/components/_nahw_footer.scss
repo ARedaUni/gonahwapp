@@ -5,8 +5,9 @@
 
 	display: flex;
 	align-content: center;
-	justify-content: space-between;
-	padding: 2rem 10rem;
+	justify-content: space-around;
+	padding: 2rem;
+	gap: 10rem;
 
 	border-top: 2px solid var(--gray-100);
 

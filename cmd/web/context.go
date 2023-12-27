@@ -4,5 +4,5 @@ type contextKey string
 
 const (
 	excerptKey  = contextKey("excerptKey")
-	sentenceKey = contextKey("sentenceKey")
+	iteratorKey = contextKey("iteratorKey")
 )

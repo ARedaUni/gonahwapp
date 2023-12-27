@@ -1,6 +1,3 @@
-htmx.config.selfRequestsOnly = true;
-htmx.config.includeIndicatorStyles = false;
-
 class ProgressBar extends HTMLElement {
   static #ATT_VALUE = "data-value"
   static #CLASS_COMPLETE = "-complete"
@@ -48,4 +45,44 @@ class ProgressBar extends HTMLElement {
   }
 }
 
+class NahwCard extends HTMLElement {
+  static #ATT_SHORTCUT = "data-shortcut";
+  static #ATT_VALUE = "data-value";
+  static #ATT_SELECTED = "selected";
+
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return [NahwCard.#ATT_SHORTCUT, NahwCard.#ATT_VALUE, NahwCard.#ATT_SELECTED];
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+      ${this.innerHTML}
+      <div class="nahw-card _w-full _h-full">
+        <p class="choice">${this.#getValue()}</p>
+        <p class="shortcut">${this.#getShortcut()}</p>
+      </div>
+    `;
+    if (this.#selected()) {
+      this.querySelector(".nahw-card").classList.add("-selected");
+    }
+  }
+
+  #getValue() {
+    return this.getAttribute(NahwCard.#ATT_VALUE);
+  }
+
+  #getShortcut() {
+    return this.getAttribute(NahwCard.#ATT_SHORTCUT);
+  }
+
+  #selected() {
+    return this.getAttribute(NahwCard.#ATT_SELECTED) != null;
+  }
+}
+
 customElements.define("progress-bar", ProgressBar);
+customElements.define("nahw-card", NahwCard);

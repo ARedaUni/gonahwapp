@@ -1,0 +1,36 @@
+.nahw-card {
+  --_input-card-fill: var(--input-card-fill, white);
+  --_input-card-stroke: var(--input-card-stroke, var(--gray-200));
+  --_input-card-shortcut: var(--input-card-shortcut, var(--gray-300));
+
+  background-color: var(--_input-card-fill);
+  border-radius: 12px;
+  border: 2px solid var(--_input-card-stroke);
+  box-shadow: 0 4px var(--_input-card-stroke);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+
+  >.choice {
+    font-size: 7rem;
+    user-select: none;
+    font-family: "Amiri";
+  }
+
+  >.shortcut {
+    position: absolute;
+    right: 10%;
+    bottom: 2%;
+    user-select: none;
+    color: var(--_input-card-shortcut);
+    font-weight: 800;
+    font-size: 1.5rem;
+  }
+
+  &.-selected {
+    --input-card-fill: var(--blue-100);
+    --input-card-stroke: var(--blue-400);
+  }
+}

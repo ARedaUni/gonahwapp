@@ -111,6 +111,10 @@
   padding-bottom: 1.2rem !important;
 }
 
+._pt-12 {
+  padding-top: 5rem !important;
+}
+
 ._mx-center {
   margin: 0 auto !important;
 }
@@ -179,8 +183,9 @@ body {
   background: var(--_background);
   display: flex;
   align-content: center;
-  justify-content: space-between;
-  padding: 2rem 10rem;
+  justify-content: space-around;
+  padding: 2rem;
+  gap: 10rem;
   border-top: 2px solid var(--gray-100);
 }
 .nahw-para {
@@ -243,6 +248,8 @@ body {
 
 .sentence-question {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 .sentence-question > .text {
   font-family: "Amiri";
@@ -250,11 +257,56 @@ body {
   direction: rtl;
   text-align: center;
 }
+.sentence-question > .cards {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+.sentence-question > .cards > nahw-card {
+  width: 12rem;
+  height: 20rem;
+}
+
 .nahw-highlight {
   background-color: var(--gray-200);
 }
 .nahw-highlight.-active {
   background-color: var(--blue-400);
+}
+
+.nahw-card {
+  --_input-card-fill: var(--input-card-fill, white);
+  --_input-card-stroke: var(--input-card-stroke, var(--gray-200));
+  --_input-card-shortcut: var(--input-card-shortcut, var(--gray-300));
+  background-color: var(--_input-card-fill);
+  border-radius: 12px;
+  border: 2px solid var(--_input-card-stroke);
+  box-shadow: 0 4px var(--_input-card-stroke);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+}
+.nahw-card > .choice {
+  font-size: 7rem;
+  user-select: none;
+  font-family: "Amiri";
+}
+.nahw-card > .shortcut {
+  position: absolute;
+  right: 10%;
+  bottom: 2%;
+  user-select: none;
+  color: var(--_input-card-shortcut);
+  font-weight: 800;
+  font-size: 1.5rem;
+}
+.nahw-card.-selected {
+  --input-card-fill: var(--blue-100);
+  --input-card-stroke: var(--blue-400);
 }
 
 :root {

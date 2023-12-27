@@ -50,22 +50,26 @@ func (app *application) excerptRequired(h http.Handler) http.Handler {
 	})
 }
 
-func (app *application) sentenceRequired(h http.Handler) http.Handler {
+func (app *application) iteratorRequired(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		e := excerptFromContext(r.Context())
 		params := httprouter.ParamsFromContext(r.Context())
-		idStr := params.ByName("sentence")
+		idStr := params.ByName("word")
 		id, err := strconv.ParseInt(idStr, 10, 64)
 		if err != nil {
 			app.clientError(w, http.StatusBadRequest)
 			return
 		}
-		if int(id) >= len(e.Sentences) {
-			app.clientError(w, http.StatusBadRequest)
-			return
-		}
 
-		ctx := context.WithValue(r.Context(), sentenceKey, e.Sentences[id])
+		i, found := e.Iterator()
+		for i.Index != int(id) {
+			i, found = i.Next()
+			if !found {
+				app.clientError(w, http.StatusBadRequest)
+				return
+			}
+		}
+		ctx := context.WithValue(r.Context(), iteratorKey, i)
 		h.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

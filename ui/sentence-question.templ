@@ -1,0 +1,81 @@
+package ui
+
+import "github.com/amrojjeh/kalam"
+
+func NewSentenceQuestionViewModel(c kalam.ExcerptIterator) SentenceQuestionViewModel {
+	m := SentenceQuestionViewModel{
+		Words: []SentenceWordViewModel{},
+		Choices: make([]NahwCardViewModel, 4),
+	}
+	for i, w := range c.Sentence().Words {
+		var wm SentenceWordViewModel
+		if w.Quizzable() {
+			wm = SentenceWordViewModel{
+				Base: w.Base().Unpointed(true),
+				Termination: w.Termination().Unpointed(true),
+				Active: i == c.WordI,
+			}
+		} else {
+			wm = SentenceWordViewModel{
+				Base: w.Unpointed(true),
+				Termination: "",
+				Active: false,
+			}
+		}
+		if !w.Preceding {
+			wm.Space = " "
+		}
+
+		m.Words = append(m.Words, wm)
+	}
+
+	activeTerm := c.Word().Termination()
+	activeTermStr := activeTerm.Unpointed(true)
+	if activeTerm.Vowel == kalam.Dammatan ||
+		activeTerm.Vowel == kalam.Kasratan ||
+		activeTerm.Vowel == kalam.Fathatan {
+		m.Choices[0] = NewNahwCardViewModel(activeTermStr + string(kalam.Dammatan), NahwCardDefault, "1")
+		m.Choices[1] = NewNahwCardViewModel(activeTermStr + string(kalam.Fathatan), NahwCardDefault, "2")
+		m.Choices[2] = NewNahwCardViewModel(activeTermStr + string(kalam.Kasratan), NahwCardDefault, "3")
+	} else {
+		m.Choices[0] = NewNahwCardViewModel(activeTermStr + string(kalam.Damma), NahwCardDefault, "1")
+		m.Choices[1] = NewNahwCardViewModel(activeTermStr + string(kalam.Fatha), NahwCardDefault, "2")
+		m.Choices[2] = NewNahwCardViewModel(activeTermStr + string(kalam.Kasra), NahwCardDefault, "3")
+	}
+	m.Choices[3] = NewNahwCardViewModel(activeTermStr + string(kalam.Sukoon), NahwCardDefault, "4")
+
+	return m
+}
+
+
+type SentenceQuestionViewModel struct {
+	Words []SentenceWordViewModel
+	Choices []NahwCardViewModel
+}
+
+type SentenceWordViewModel struct {
+	Base string
+	Termination string
+	Active bool
+	Space string
+}
+
+templ SentenceQuestion(m SentenceQuestionViewModel) {
+	<div class="sentence-question">
+		@sentence(m)
+		<div class="cards">
+			for _, c := range m.Choices {
+				@NahwCard(c)
+			}
+		</div>
+	</div>
+}
+
+templ sentence(m SentenceQuestionViewModel) {
+	<p class="text">
+		for _, w := range m.Words {
+			<span>{w.Base}</span><span
+			class={"nahw-highlight", templ.KV("-active", w.Active)}>{w.Termination}</span><span>{w.Space}</span>
+		}
+	</p>
+}

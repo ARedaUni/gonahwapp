@@ -29,45 +29,16 @@ templ NahwStart(e kalam.Excerpt) {
 	}
 }
 
-templ NahwSentence(s kalam.Sentence, active int) {
+templ NahwSentence(c kalam.ExcerptIterator) {
 	@base() {
 		<div class="_screen-h _flex _flex-col">
 			@navigation("0")
-			<div class="sentence-question">
-				<p class="text">
-					for i, w := range s.Words {
-						if w.Ignore || w.Punctuation {
-							@sentenceWord(w.Unpointed(true), w.Preceding)
-						} else {
-							@sentenceWord(w.Base().Unpointed(true), true)@sentenceSelectedWord(string(w.Termination().Letter), i==active, w.Preceding)
-						}
-					}
-				</p>
-				<div class="cards">
-					<nahw-card>{kalam.FromBuckwalter("wa")}</nahw-card>
-				</div>
-			</div>
+			@SentenceQuestion(NewSentenceQuestionViewModel(c))
 			<footer class="nahw-footer">
 				<a href="#"><button class="nahw-button">Skip</button></a>
 				<a href="#"><button class="nahw-button -inactive">Select</button></a>
 			</footer>
 		</div>
-	}
-}
-
-templ sentenceWord(word string, preceding bool) {
-	if preceding {
-		<span>{word}</span>
-	} else {
-		<span>{word}&nbsp;</span>
-	}
-}
-
-templ sentenceSelectedWord(word string, active, preceding bool) {
-	if preceding {
-		<span class={"nahw-highlight", templ.KV("-active", active)}>{word}</span>
-	} else {
-		<span class={"nahw-highlight", templ.KV("-active", active)}>{word}&nbsp;</span>
 	}
 }
 
