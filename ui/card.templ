@@ -4,6 +4,7 @@ type NahwCardViewModel struct {
 	Value string
 	State NahwCardState
 	Shortcut string
+	SelectCardURL string
 }
 
 type NahwCardState int
@@ -15,15 +16,17 @@ const (
 	NahwCardDefault
 )
 
-func NewNahwCardViewModel(value string, state NahwCardState, shortcut string) NahwCardViewModel {
+func NewNahwCardViewModel(selectURL string, value string, shortcut string) NahwCardViewModel {
 	return NahwCardViewModel{
 		Value: value,
-		State: state,
+		State: NahwCardDefault,
 		Shortcut: shortcut,
+		SelectCardURL: selectURL,
 	}
 }
 
-// TODO(Amr Ojjeh): Take into account state
 templ NahwCard(m NahwCardViewModel) {
-	<nahw-card data-shortcut={m.Shortcut} data-value={m.Value} selected></nahw-card>
+	<nahw-card hx-get={m.SelectCardURL} hx-target="closest body"
+	data-shortcut={m.Shortcut}
+	data-value={m.Value} selected?={m.State==NahwCardSelected}></nahw-card>
 }

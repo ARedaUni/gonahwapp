@@ -3,43 +3,47 @@ package ui
 import "github.com/amrojjeh/kalam"
 
 templ Excerpts(es []kalam.Excerpt) {
-	@base() {
-		<div class="cards">
-			for _, e := range es {
-				<a class="card small" href="/text/0">
-					<h1 class="card-title" lang="ar">{e.Name}</h1>
-				</a>
-			}
-		</div>	
-	}
+	<div class="cards">
+		for _, e := range es {
+			<a class="card small" href="/text/0">
+				<h1 class="card-title" lang="ar">{e.Name}</h1>
+			</a>
+		}
+	</div>	
 }
 
 templ NahwStart(e kalam.Excerpt) {
-	@base() {
-		<div class="_screen-h _flex _flex-col">
-			@navigation("0")
-			<div class="nahw-para">
-				{e.Unpointed(true)}
-			</div>
-			<footer class="nahw-footer">
-				<a href="/text"><button class="nahw-button">Return</button></a>
-				<a href="/text/0/0"><button class="nahw-button -primary">Start</button></a>
-			</footer>
+	<div class="_screen-h _flex _flex-col">
+		@navigation("0")
+		<div class="nahw-para">
+			{e.Unpointed(true)}
 		</div>
-	}
+		<footer class="nahw-footer">
+			<a href="/text"><button class="nahw-button">Return</button></a>
+			<a href="/text/0/0"><button class="nahw-button -primary">Start</button></a>
+		</footer>
+	</div>
 }
 
-templ NahwSentence(c kalam.ExcerptIterator) {
-	@base() {
-		<div class="_screen-h _flex _flex-col">
-			@navigation("0")
-			@SentenceQuestion(NewSentenceQuestionViewModel(c))
-			<footer class="nahw-footer">
-				<a href="#"><button class="nahw-button">Skip</button></a>
+type NahwSentenceViewModel struct {
+	Iter kalam.ExcerptIterator
+	SelectedCard int
+	SelectCardURL string
+}
+
+templ NahwSentence(m NahwSentenceViewModel) {
+	<div class="_screen-h _flex _flex-col">
+		@navigation("0")
+		@SentenceQuestion(NewSentenceQuestionViewModel(m))
+		<footer class="nahw-footer">
+			<a href="#"><button class="nahw-button">Skip</button></a>
+			if m.SelectedCard >= 0 {
+				<a href="#"><button class="nahw-button -primary">Select</button></a>
+			} else {
 				<a href="#"><button class="nahw-button -inactive">Select</button></a>
-			</footer>
-		</div>
-	}
+			}
+		</footer>
+	</div>
 }
 
 templ navigation(progress string) {

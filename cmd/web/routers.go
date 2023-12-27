@@ -26,6 +26,8 @@ func (app *application) routes() http.Handler {
 		excerptRequired.Then(app.nahwStartGet()))
 	router.Handler(http.MethodGet, "/text/:excerpt/:word",
 		iteratorRequired.Then(app.nahwSentenceGet()))
+	router.Handler(http.MethodGet, "/text/:excerpt/:word/:selected",
+		iteratorRequired.Then(app.nahwCardSelect()))
 
 	return base.Then(router)
 }

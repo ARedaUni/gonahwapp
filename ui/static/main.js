@@ -60,7 +60,6 @@ class NahwCard extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-      ${this.innerHTML}
       <div class="nahw-card _w-full _h-full">
         <p class="choice">${this.#getValue()}</p>
         <p class="shortcut">${this.#getShortcut()}</p>

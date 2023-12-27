@@ -46,6 +46,7 @@ func (app *application) excerptRequired(h http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), excerptKey, app.excerpts[id])
+		ctx = context.WithValue(ctx, excerptIdKey, int(id))
 		h.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

@@ -11,9 +11,10 @@ import "io"
 import "bytes"
 
 type NahwCardViewModel struct {
-	Value    string
-	State    NahwCardState
-	Shortcut string
+	Value         string
+	State         NahwCardState
+	Shortcut      string
+	SelectCardURL string
 }
 
 type NahwCardState int
@@ -25,15 +26,14 @@ const (
 	NahwCardDefault
 )
 
-func NewNahwCardViewModel(value string, state NahwCardState, shortcut string) NahwCardViewModel {
+func NewNahwCardViewModel(selectURL string, value string, shortcut string) NahwCardViewModel {
 	return NahwCardViewModel{
-		Value:    value,
-		State:    state,
-		Shortcut: shortcut,
+		Value:         value,
+		State:         NahwCardDefault,
+		Shortcut:      shortcut,
+		SelectCardURL: selectURL,
 	}
 }
-
-// TODO(Amr Ojjeh): Take into account state
 
 func NahwCard(m NahwCardViewModel) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
@@ -48,7 +48,15 @@ func NahwCard(m NahwCardViewModel) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<nahw-card data-shortcut=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<nahw-card hx-get=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(m.SelectCardURL))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"closest body\" data-shortcut=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -64,7 +72,17 @@ func NahwCard(m NahwCardViewModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" selected></nahw-card>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if m.State == NahwCardSelected {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" selected")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("></nahw-card>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
