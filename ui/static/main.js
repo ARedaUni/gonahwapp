@@ -85,7 +85,3 @@ class NahwCard extends HTMLElement {
 
 customElements.define("progress-bar", ProgressBar);
 customElements.define("nahw-card", NahwCard);
-
-function vowel() {
-  return document.querySelector("[selected]").getAttribute("data-value")
-}

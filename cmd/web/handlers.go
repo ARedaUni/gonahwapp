@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/a-h/templ"
 	"github.com/amrojjeh/arabic/ui"
+	"github.com/amrojjeh/kalam"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -65,7 +67,7 @@ func (app *application) nahwSentenceSelectPut() http.Handler {
 		if value == i.Word().Termination().String() {
 			footer = templ.NopComponent
 		} else {
-			footer = ui.IncorrectFooter("asd")
+			footer = ui.IncorrectFooter(strings.Join(i.Word().Tags, string(kalam.ArabicComma)+" "))
 		}
 		m := ui.NewNahwSentenceViewModel(eid, i, value, footer)
 		err := ui.NahwSentence(m).Render(r.Context(), w)
