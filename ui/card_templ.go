@@ -10,11 +10,13 @@ import "context"
 import "io"
 import "bytes"
 
+import "fmt"
+
 type NahwCardViewModel struct {
-	Value         string
-	State         NahwCardState
-	Shortcut      string
-	SelectCardURL string
+	Value     string
+	State     NahwCardState
+	Shortcut  string
+	SelectURL string
 }
 
 type NahwCardState int
@@ -26,12 +28,12 @@ const (
 	NahwCardDefault
 )
 
-func NewNahwCardViewModel(selectURL string, value string, shortcut string) NahwCardViewModel {
+func NewNahwCardViewModel(eid int, index int, value string, shortcut string) NahwCardViewModel {
 	return NahwCardViewModel{
-		Value:         value,
-		State:         NahwCardDefault,
-		Shortcut:      shortcut,
-		SelectCardURL: selectURL,
+		Value:     value,
+		State:     NahwCardDefault,
+		Shortcut:  shortcut,
+		SelectURL: fmt.Sprintf("/text/%v/%v/select/%v", eid, index, value),
 	}
 }
 
@@ -52,7 +54,7 @@ func NahwCard(m NahwCardViewModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(m.SelectCardURL))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(m.SelectURL))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -25,6 +25,10 @@ func excerptFromContext(ctx context.Context) kalam.Excerpt {
 	return ctx.Value(excerptKey).(kalam.Excerpt)
 }
 
+func excerptIdFromContext(ctx context.Context) int {
+	return ctx.Value(excerptIdKey).(int)
+}
+
 func iteratorFromContext(ctx context.Context) kalam.ExcerptIterator {
 	return ctx.Value(iteratorKey).(kalam.ExcerptIterator)
 }

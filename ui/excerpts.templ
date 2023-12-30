@@ -1,0 +1,13 @@
+package ui
+
+import "github.com/amrojjeh/kalam"
+
+templ Excerpts(es []kalam.Excerpt) {
+	<div class="cards">
+		for _, e := range es {
+			<a class="card small" href="/text/0">
+				<h1 class="card-title" lang="ar">{e.Name}</h1>
+			</a>
+		}
+	</div>
+}

@@ -1,10 +1,12 @@
 package ui
 
+import "fmt"
+
 type NahwCardViewModel struct {
-	Value string
-	State NahwCardState
-	Shortcut string
-	SelectCardURL string
+	Value     string
+	State     NahwCardState
+	Shortcut  string
+	SelectURL string
 }
 
 type NahwCardState int
@@ -16,17 +18,17 @@ const (
 	NahwCardDefault
 )
 
-func NewNahwCardViewModel(selectURL string, value string, shortcut string) NahwCardViewModel {
+func NewNahwCardViewModel(eid int, index int, value string, shortcut string) NahwCardViewModel {
 	return NahwCardViewModel{
 		Value: value,
 		State: NahwCardDefault,
 		Shortcut: shortcut,
-		SelectCardURL: selectURL,
+		SelectURL: fmt.Sprintf("/text/%v/%v/select/%v", eid, index, value),
 	}
 }
 
 templ NahwCard(m NahwCardViewModel) {
-	<nahw-card hx-get={m.SelectCardURL} hx-target="closest body"
+	<nahw-card hx-get={m.SelectURL} hx-target="closest body"
 	data-shortcut={m.Shortcut}
 	data-value={m.Value} selected?={m.State==NahwCardSelected}></nahw-card>
 }

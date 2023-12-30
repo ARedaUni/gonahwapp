@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
+	"github.com/a-h/templ"
 	"github.com/amrojjeh/arabic/ui"
 	"github.com/julienschmidt/httprouter"
 )
@@ -21,7 +21,7 @@ func (app *application) textGet() http.Handler {
 func (app *application) nahwStartGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		e := excerptFromContext(r.Context())
-		err := ui.Base(ui.NahwStart(e)).Render(r.Context(), w)
+		err := ui.Base(ui.NahwStart(e.Unpointed(true))).Render(r.Context(), w)
 		if err != nil {
 			app.serverError(w, err)
 		}
@@ -31,12 +31,9 @@ func (app *application) nahwStartGet() http.Handler {
 func (app *application) nahwSentenceGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		i := iteratorFromContext(r.Context())
-		model := ui.NahwSentenceViewModel{
-			Iter:         i,
-			SelectedCard: -1,
-			SelectCardURL: fmt.Sprintf("/text/%v/%v/",
-				r.Context().Value(excerptIdKey).(int), i.Index),
-		}
+		id := excerptIdFromContext(r.Context())
+		footer := ui.InactiveFooter()
+		model := ui.NewNahwSentenceViewModel(id, i, "", footer)
 		err := ui.Base(ui.NahwSentence(model)).Render(r.Context(), w)
 		if err != nil {
 			app.serverError(w, err)
@@ -44,30 +41,37 @@ func (app *application) nahwSentenceGet() http.Handler {
 	})
 }
 
-func (app *application) nahwCardSelect() http.Handler {
+func (app *application) nahwCardSelectGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		i := iteratorFromContext(r.Context())
-		err := r.ParseForm()
-		if err != nil {
-			app.clientError(w, http.StatusBadRequest)
-			return
-		}
+		eid := excerptIdFromContext(r.Context())
 		params := httprouter.ParamsFromContext(r.Context())
-		sstr := params.ByName("selected")
-		s, err := strconv.ParseInt(sstr, 10, 64)
-		if err != nil {
-			app.clientError(w, http.StatusBadRequest)
-			return
-		}
-		model := ui.NahwSentenceViewModel{
-			Iter:         i,
-			SelectedCard: int(s),
-			SelectCardURL: fmt.Sprintf("/text/%v/%v/",
-				r.Context().Value(excerptIdKey).(int), i.Index),
-		}
-		err = ui.NahwSentence(model).Render(r.Context(), w)
+		value := params.ByName("value")
+		footer := ui.SelectFooter(fmt.Sprintf("/text/%v/%v/select/%v", eid, i.Index, value))
+		err := ui.NahwSentence(ui.NewNahwSentenceViewModel(eid, i, value, footer)).Render(r.Context(), w)
 		if err != nil {
 			app.serverError(w, err)
+		}
+	})
+}
+
+func (app *application) nahwSentenceSelectPut() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		i := iteratorFromContext(r.Context())
+		eid := excerptIdFromContext(r.Context())
+		params := httprouter.ParamsFromContext(r.Context())
+		value := params.ByName("value")
+		var footer templ.Component
+		if value == i.Word().Termination().String() {
+			footer = templ.NopComponent
+		} else {
+			footer = ui.IncorrectFooter("asd")
+		}
+		m := ui.NewNahwSentenceViewModel(eid, i, value, footer)
+		err := ui.NahwSentence(m).Render(r.Context(), w)
+		if err != nil {
+			app.serverError(w, err)
+			return
 		}
 	})
 }
