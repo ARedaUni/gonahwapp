@@ -23,7 +23,9 @@ func (app *application) textGet() http.Handler {
 func (app *application) nahwStartGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		e := excerptFromContext(r.Context())
-		err := ui.Base(ui.NahwStart(e.Unpointed(true))).Render(r.Context(), w)
+		eid := excerptIdFromContext(r.Context())
+		err := ui.Base(ui.NahwStart(e.Unpointed(true),
+			templ.URL(fmt.Sprintf("/text/%v/0", eid)))).Render(r.Context(), w)
 		if err != nil {
 			app.serverError(w, err)
 		}
@@ -72,7 +74,7 @@ func (app *application) nahwSentenceSelectPut() http.Handler {
 			Feedback:    strings.Join(i.Word().Tags, string(kalam.ArabicComma)+" "),
 			ContinueURL: templ.URL(fmt.Sprintf("/text/%v/%v", eid, nextI.Index)),
 		}
-		if value == i.Word().Termination().String() {
+		if kalam.LetterPackFromString(value).EqualTo(i.Word().Termination()) {
 			footerM.State = ui.CorrectFooterState
 		} else {
 			footerM.State = ui.IncorrectFooterState

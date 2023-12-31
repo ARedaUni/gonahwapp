@@ -1,6 +1,6 @@
 package ui
 
-templ NahwStart(paragraph string) {
+templ NahwStart(paragraph string, start templ.SafeURL) {
 	<div class="_screen-h _flex _flex-col">
 		@navigation("0")
 		<div class="nahw-para">
@@ -8,7 +8,7 @@ templ NahwStart(paragraph string) {
 		</div>
 		<footer class="nahw-footer">
 			<a href="/text"><button class="nahw-button">Return</button></a>
-			<a href="/text/0/0"><button class="nahw-button -primary">Start</button></a>
+			<a href={start}><button class="nahw-button -primary">Start</button></a>
 		</footer>
 	</div>
 }
