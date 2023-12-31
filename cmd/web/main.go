@@ -19,6 +19,7 @@ type application struct {
 
 func main() {
 	addr := flag.String("addr", ":8080", "HTTP Address")
+	flag.Parse()
 	app := application{
 		logger: slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 			AddSource: true,
