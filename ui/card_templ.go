@@ -22,10 +22,11 @@ type NahwCardViewModel struct {
 type NahwCardState int
 
 const (
-	NahwCardSelected = NahwCardState(iota)
+	NahwCardDefault = NahwCardState(iota)
+	NahwCardUnselectable
+	NahwCardSelected
 	NahwCardCorrect
 	NahwCardIncorrect
-	NahwCardDefault
 )
 
 func NewNahwCardViewModel(eid int, index int, value string, shortcut string) NahwCardViewModel {
@@ -50,43 +51,66 @@ func NahwCard(m NahwCardViewModel) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<nahw-card hx-get=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(m.SelectURL))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"closest body\" data-shortcut=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(m.Shortcut))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" data-value=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(m.Value))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if m.State == NahwCardSelected {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" selected")
+		if m.State == NahwCardDefault {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<nahw-card hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("></nahw-card>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(m.SelectURL))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"closest body\" data-shortcut=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(m.Shortcut))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" data-value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(m.Value))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></nahw-card>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<nahw-card data-shortcut=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(m.Shortcut))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" data-value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(m.Value))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if m.State == NahwCardSelected {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" selected")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("></nahw-card>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		if !templ_7745c5c3_IsBuffer {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)

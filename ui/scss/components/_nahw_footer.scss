@@ -12,7 +12,10 @@
 
 	border-top: 2px solid var(--gray-100);
 
-	&.-correct {}
+	&.-correct {
+		--background: var(--green-200);
+		--text: var(--green-700);
+	}
 
 	&.-incorrect {
 		--background: var(--red-200);

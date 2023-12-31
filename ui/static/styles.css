@@ -189,6 +189,10 @@ body {
   gap: 10rem;
   border-top: 2px solid var(--gray-100);
 }
+.nahw-footer.-correct {
+  --background: var(--green-200);
+  --text: var(--green-700);
+}
 .nahw-footer.-incorrect {
   --background: var(--red-200);
   --text: var(--red-600);

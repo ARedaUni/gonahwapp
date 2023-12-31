@@ -34,7 +34,7 @@ func (app *application) nahwSentenceGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		i := iteratorFromContext(r.Context())
 		id := excerptIdFromContext(r.Context())
-		footer := ui.InactiveFooter()
+		footer := ui.Footer(ui.FooterViewModel{})
 		model := ui.NewNahwSentenceViewModel(id, i, "", footer)
 		err := ui.Base(ui.NahwSentence(model)).Render(r.Context(), w)
 		if err != nil {
@@ -49,7 +49,11 @@ func (app *application) nahwCardSelectGet() http.Handler {
 		eid := excerptIdFromContext(r.Context())
 		params := httprouter.ParamsFromContext(r.Context())
 		value := params.ByName("value")
-		footer := ui.SelectFooter(fmt.Sprintf("/text/%v/%v/select/%v", eid, i.Index, value))
+		footerM := ui.FooterViewModel{
+			SelectURL: templ.URL(fmt.Sprintf("/text/%v/%v/select/%v", eid, i.Index, value)),
+			State:     ui.SelectFooterState,
+		}
+		footer := ui.Footer(footerM)
 		err := ui.NahwSentence(ui.NewNahwSentenceViewModel(eid, i, value, footer)).Render(r.Context(), w)
 		if err != nil {
 			app.serverError(w, err)
@@ -63,13 +67,18 @@ func (app *application) nahwSentenceSelectPut() http.Handler {
 		eid := excerptIdFromContext(r.Context())
 		params := httprouter.ParamsFromContext(r.Context())
 		value := params.ByName("value")
-		var footer templ.Component
-		if value == i.Word().Termination().String() {
-			footer = templ.NopComponent
-		} else {
-			footer = ui.IncorrectFooter(strings.Join(i.Word().Tags, string(kalam.ArabicComma)+" "))
+		nextI, _ := i.Next()
+		footerM := ui.FooterViewModel{
+			Feedback:    strings.Join(i.Word().Tags, string(kalam.ArabicComma)+" "),
+			ContinueURL: templ.URL(fmt.Sprintf("/text/%v/%v", eid, nextI.Index)),
 		}
-		m := ui.NewNahwSentenceViewModel(eid, i, value, footer)
+		if value == i.Word().Termination().String() {
+			footerM.State = ui.CorrectFooterState
+		} else {
+			footerM.State = ui.IncorrectFooterState
+		}
+		m := ui.NewNahwSentenceViewModel(eid, i, value, ui.Footer(footerM))
+		m = m.DeactivateCards()
 		err := ui.NahwSentence(m).Render(r.Context(), w)
 		if err != nil {
 			app.serverError(w, err)

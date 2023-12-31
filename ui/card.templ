@@ -12,10 +12,11 @@ type NahwCardViewModel struct {
 type NahwCardState int
 
 const (
-	NahwCardSelected = NahwCardState(iota)
+	NahwCardDefault = NahwCardState(iota)
+	NahwCardUnselectable
+	NahwCardSelected
 	NahwCardCorrect
 	NahwCardIncorrect
-	NahwCardDefault
 )
 
 func NewNahwCardViewModel(eid int, index int, value string, shortcut string) NahwCardViewModel {
@@ -28,7 +29,11 @@ func NewNahwCardViewModel(eid int, index int, value string, shortcut string) Nah
 }
 
 templ NahwCard(m NahwCardViewModel) {
-	<nahw-card hx-get={m.SelectURL} hx-target="closest body"
-	data-shortcut={m.Shortcut}
-	data-value={m.Value} selected?={m.State==NahwCardSelected}></nahw-card>
+	if m.State == NahwCardDefault {
+		<nahw-card hx-get={m.SelectURL} hx-target="closest body"
+		data-shortcut={m.Shortcut}
+		data-value={m.Value}></nahw-card>
+	} else {
+		<nahw-card data-shortcut={m.Shortcut} data-value={m.Value} selected?={m.State==NahwCardSelected}></nahw-card>
+	}
 }
