@@ -46,7 +46,7 @@ class ProgressBar extends HTMLElement {
 }
 
 class NahwCard extends HTMLElement {
-  static #ATT_SHORTCUT = "data-shortcut";
+  static #ATT_SHORTCUT = "na-shortcut";
   static #ATT_VALUE = "data-value";
   static #ATT_SELECTED = "selected";
 
@@ -68,14 +68,6 @@ class NahwCard extends HTMLElement {
     if (this.#selected()) {
       this.querySelector(".nahw-card").classList.add("-selected");
     }
-
-    if (this.#getShortcut()) {
-      document.body.addEventListener("keypress", (e) => {
-        if (e.key == this.#getShortcut()) {
-          this.click();
-        }
-      })
-    }
   }
 
   #getValue() {
@@ -90,6 +82,14 @@ class NahwCard extends HTMLElement {
     return this.getAttribute(NahwCard.#ATT_SELECTED) != null;
   }
 }
+
+document.addEventListener("keypress", (e) => {
+  document.body.querySelectorAll("[na-shortcut]").forEach((x) => {
+    if (e.key == x.getAttribute("na-shortcut")) {
+      x.click();
+    }
+  });
+});
 
 customElements.define("progress-bar", ProgressBar);
 customElements.define("nahw-card", NahwCard);

@@ -131,7 +131,7 @@ func selectFooter(selectURL templ.SafeURL) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></a> <button hx-swap=\"outerHTML\" hx-target=\"closest body\" hx-put=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></a> <button na-shortcut=\"Enter\" hx-swap=\"outerHTML\" hx-target=\"closest body\" hx-put=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
