@@ -53,7 +53,7 @@ templ correctFooter(feedback string, continueURL templ.SafeURL) {
 				<p>{feedback}</p>
 			</div>
 		</div>
-		<a href={continueURL}><button class="nahw-button -primary">Continue</button></a>
+		<a href={continueURL}><button na-shortcut="Enter" class="nahw-button -primary">Continue</button></a>
 	</footer>
 }
 
@@ -68,7 +68,7 @@ templ incorrectFooter(feedback string, continueURL templ.SafeURL) {
 				<p>{feedback}</p>
 			</div>
 		</div>
-		<a href={continueURL}><button class="nahw-button -incorrect">Continue</button></a>
+		<a href={continueURL}><button na-shortcut="Enter" class="nahw-button -incorrect">Continue</button></a>
 	</footer>
 }
 

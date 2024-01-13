@@ -207,7 +207,7 @@ func correctFooter(feedback string, continueURL templ.SafeURL) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button class=\"nahw-button -primary\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button na-shortcut=\"Enter\" class=\"nahw-button -primary\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -275,7 +275,7 @@ func incorrectFooter(feedback string, continueURL templ.SafeURL) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button class=\"nahw-button -incorrect\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button na-shortcut=\"Enter\" class=\"nahw-button -incorrect\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
