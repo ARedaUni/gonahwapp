@@ -68,6 +68,14 @@ class NahwCard extends HTMLElement {
     if (this.#selected()) {
       this.querySelector(".nahw-card").classList.add("-selected");
     }
+
+    if (this.#getShortcut()) {
+      document.body.addEventListener("keypress", (e) => {
+        if (e.key == this.#getShortcut()) {
+          this.click();
+        }
+      })
+    }
   }
 
   #getValue() {
