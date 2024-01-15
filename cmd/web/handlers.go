@@ -56,14 +56,15 @@ func (app *application) nahwCardSelectGet() http.Handler {
 			State:     ui.SelectFooterState,
 		}
 		footer := ui.Footer(footerM)
-		err := ui.NahwSentence(ui.NewNahwSentenceViewModel(eid, i, value, footer)).Render(r.Context(), w)
+		err := ui.Base(ui.NahwSentence(ui.NewNahwSentenceViewModel(eid, i,
+			value, footer))).Render(r.Context(), w)
 		if err != nil {
 			app.serverError(w, err)
 		}
 	})
 }
 
-func (app *application) nahwSentenceSelectPut() http.Handler {
+func (app *application) nahwSentenceSelectPost() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		i := iteratorFromContext(r.Context())
 		eid := excerptIdFromContext(r.Context())
@@ -81,7 +82,7 @@ func (app *application) nahwSentenceSelectPut() http.Handler {
 		}
 		m := ui.NewNahwSentenceViewModel(eid, i, value, ui.Footer(footerM))
 		m = m.DeactivateCards()
-		err := ui.NahwSentence(m).Render(r.Context(), w)
+		err := ui.Base(ui.NahwSentence(m)).Render(r.Context(), w)
 		if err != nil {
 			app.serverError(w, err)
 			return

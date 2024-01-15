@@ -131,7 +131,7 @@ func selectFooter(selectURL templ.SafeURL) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></a> <button na-shortcut=\"Enter\" hx-swap=\"outerHTML\" hx-target=\"closest body\" hx-put=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></a> <button up-href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -139,7 +139,7 @@ func selectFooter(selectURL templ.SafeURL) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"nahw-button -primary\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" up-method=\"post\" na-shortcut=\"Enter\" class=\"nahw-button -primary\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

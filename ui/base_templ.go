@@ -32,7 +32,7 @@ func Base(page templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><meta charset=\"utf-8\"><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=Amiri&amp;family=Roboto:wght@400;700&amp;display=swap\" rel=\"stylesheet\"><link rel=\"stylesheet\" type=\"text/css\" href=\"/static/styles.css\"><link rel=\"icon\" type=\"image/x-icon\" href=\"/static/img/favicon.ico\"><script src=\"/static/htmx-1.9.10.min.js\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><meta charset=\"utf-8\"><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=Amiri&amp;family=Roboto:wght@400;700&amp;display=swap\" rel=\"stylesheet\"><link rel=\"stylesheet\" type=\"text/css\" href=\"/static/unpoly.min.css\"><link rel=\"stylesheet\" type=\"text/css\" href=\"/static/styles.css\"><link rel=\"icon\" type=\"image/x-icon\" href=\"/static/img/favicon.ico\"><script defer src=\"/static/unpoly.min.js\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +50,7 @@ func Base(page templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script></head><body hx-boost=\"true\"><main>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script></head><body><main up-main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

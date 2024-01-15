@@ -1,3 +1,6 @@
+up.link.config.followSelectors.push("a[href]")
+up.link.config.preloadSelectors.push("a[href]")
+
 class ProgressBar extends HTMLElement {
   static #ATT_VALUE = "data-value"
   static #CLASS_COMPLETE = "-complete"

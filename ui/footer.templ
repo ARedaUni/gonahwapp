@@ -38,7 +38,8 @@ templ inactiveFooter() {
 templ selectFooter(selectURL templ.SafeURL) {
 	<footer class="nahw-footer">
 		<a href="#"><button class="nahw-button">Skip</button></a>
-		<button na-shortcut="Enter" hx-swap="outerHTML" hx-target="closest body" hx-put={string(selectURL)} class="nahw-button -primary">Select</button>
+			<button up-href={string(selectURL)} up-method="post"
+			na-shortcut="Enter" class="nahw-button -primary">Select</button>
 	</footer>
 }
 

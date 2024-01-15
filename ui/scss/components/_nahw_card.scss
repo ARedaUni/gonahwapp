@@ -2,6 +2,7 @@
   --_input-card-fill: var(--input-card-fill, white);
   --_input-card-stroke: var(--input-card-stroke, var(--gray-200));
   --_input-card-shortcut: var(--input-card-shortcut, var(--gray-300));
+  --_input-card-color: var(--input-card-color, black);
 
   background-color: var(--_input-card-fill);
   border-radius: 12px;
@@ -12,6 +13,7 @@
   align-items: center;
   position: relative;
   cursor: pointer;
+  color: var(--_input-card-color);
 
   >.choice {
     font-size: 7rem;

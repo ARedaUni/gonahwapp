@@ -6,7 +6,7 @@ type NahwCardViewModel struct {
 	Value     string
 	State     NahwCardState
 	Shortcut  string
-	SelectURL string
+	SelectURL templ.SafeURL
 }
 
 type NahwCardState int
@@ -24,16 +24,14 @@ func NewNahwCardViewModel(eid int, index int, value string, shortcut string) Nah
 		Value: value,
 		State: NahwCardDefault,
 		Shortcut: shortcut,
-		SelectURL: fmt.Sprintf("/text/%v/%v/select/%v", eid, index, value),
+		SelectURL: templ.URL(fmt.Sprintf("/text/%v/%v/select/%v", eid, index, value)),
 	}
 }
 
 templ NahwCard(m NahwCardViewModel) {
-	if m.State == NahwCardDefault {
-		<nahw-card hx-get={m.SelectURL} hx-target="closest body"
-		na-shortcut={m.Shortcut}
-		data-value={m.Value}></nahw-card>
-	} else {
-		<nahw-card na-shortcut={m.Shortcut} data-value={m.Value} selected?={m.State==NahwCardSelected}></nahw-card>
-	}
+	<a class="link" na-shortcut={m.Shortcut} href={m.SelectURL}><div class={"nahw-card",
+	templ.KV("-selected", m.State==NahwCardSelected)}>
+		<p class="choice">{m.Value}</p>
+		<p class="shortcut">{m.Shortcut}</p>
+	</div></a>
 }
