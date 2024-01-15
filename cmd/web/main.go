@@ -19,6 +19,8 @@ type application struct {
 
 func main() {
 	addr := flag.String("addr", ":8080", "HTTP Address")
+	cert := flag.String("cert", "./tls/cert.pem", "Path to TLS certificate")
+	key := flag.String("key", "./tls/key.pem", "Path to TLS private key")
 	flag.Parse()
 	app := application{
 		logger: slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
@@ -43,7 +45,7 @@ func main() {
 	}
 
 	app.logger.Info("starting server", slog.String("addr", *addr))
-	if err := server.ListenAndServe(); err != nil {
+	if err := server.ListenAndServeTLS(*cert, *key); err != nil {
 		app.logger.Error("server failed", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
