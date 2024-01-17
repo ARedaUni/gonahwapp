@@ -19,7 +19,7 @@ type WordViewModel struct {
 	Selected    bool
 }
 
-func NewWordViewModel(w kalam.Word, selected bool) WordViewModel {
+func NewWordViewModel(w kalam.Word, selected bool, pointedTerm bool) WordViewModel {
 	var res WordViewModel
 	if w.Ignore || w.Punctuation {
 		res = WordViewModel{
@@ -30,6 +30,9 @@ func NewWordViewModel(w kalam.Word, selected bool) WordViewModel {
 		res = WordViewModel{
 			Base:        w.Base().Unpointed(true),
 			Termination: w.Termination().Unpointed(true),
+		}
+		if pointedTerm {
+			res.Termination = w.Termination().String()
 		}
 	}
 	if !w.Preceding {

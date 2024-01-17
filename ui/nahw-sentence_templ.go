@@ -13,7 +13,7 @@ import "bytes"
 import "github.com/amrojjeh/kalam"
 
 type NahwSentenceViewModel struct {
-	Words      []templ.Component
+	Words      []WordViewModel
 	Navigation templ.Component
 	Cards      []NahwCardViewModel
 	Footer     FooterViewModel
@@ -29,14 +29,14 @@ const (
 
 func NewNahwSentenceViewModel(excerptId int, i kalam.ExcerptIterator, selected string, footer FooterViewModel) NahwSentenceViewModel {
 	m := NahwSentenceViewModel{
-		Words:      []templ.Component{},
+		Words:      []WordViewModel{},
 		Navigation: navigation("0"),
 		Cards:      []NahwCardViewModel{},
 		Footer:     footer,
 	}
 
 	for wi, w := range i.Sentence().Words {
-		m.Words = append(m.Words, Word(NewWordViewModel(w, i.WordI == wi)))
+		m.Words = append(m.Words, NewWordViewModel(w, i.WordI == wi, wi < i.WordI))
 	}
 
 	term := i.Word().Termination()
@@ -106,6 +106,17 @@ func (m NahwSentenceViewModel) SetFooterState(
 	return m
 }
 
+func (m NahwSentenceViewModel) SetSelectedTermination(term string) NahwSentenceViewModel {
+	for x := 0; x < len(m.Words); x++ {
+		w := &m.Words[x]
+		if w.Selected {
+			w.Termination = term
+			return m
+		}
+	}
+	return m
+}
+
 func NahwSentence(m NahwSentenceViewModel) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
@@ -132,7 +143,7 @@ func NahwSentence(m NahwSentenceViewModel) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		for _, w := range m.Words {
-			templ_7745c5c3_Err = w.Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Word(w).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

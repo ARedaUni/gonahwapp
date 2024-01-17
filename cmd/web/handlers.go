@@ -54,8 +54,9 @@ func (app *application) nahwCardSelectGet() http.Handler {
 			SelectURL: templ.URL(fmt.Sprintf("/text/%v/%v/select/%v", eid, i.Index, value)),
 			State:     ui.SelectFooterState,
 		}
-		err := ui.Base(ui.NahwSentence(ui.NewNahwSentenceViewModel(eid, i,
-			value, footerM))).Render(r.Context(), w)
+		m := ui.NewNahwSentenceViewModel(eid, i, value, footerM).
+			SetSelectedTermination(value)
+		err := ui.Base(ui.NahwSentence(m)).Render(r.Context(), w)
 		if err != nil {
 			app.serverError(w, err)
 		}
@@ -76,7 +77,8 @@ func (app *application) nahwSentenceSelectPost() http.Handler {
 		correctTerm := i.Word().Termination()
 		m := ui.NewNahwSentenceViewModel(eid, i, value, footerM).
 			DeactivateCards().
-			SetValueToCardState(correctTerm.String(), ui.NahwCardCorrect)
+			SetValueToCardState(correctTerm.String(), ui.NahwCardCorrect).
+			SetSelectedTermination(correctTerm.String())
 		if kalam.LetterPackFromString(value).EqualTo(correctTerm) {
 			m = m.SetFooterState(ui.CorrectFooterState)
 		} else {
