@@ -35,7 +35,10 @@ templ NahwCard(m NahwCardViewModel) {
 			<p class="shortcut">{m.Shortcut}</p>
 		</button>
 	} else {
-		<button class={"nahw-card", templ.KV("-selected", m.State==NahwCardSelected)}>
+		<button class={"nahw-card",
+			templ.KV("-selected", m.State==NahwCardSelected),
+			templ.KV("-incorrect", m.State==NahwCardIncorrect),
+			templ.KV("-correct", m.State==NahwCardCorrect)}>
 			<p class="choice">{m.Value}</p>
 			<p class="shortcut">{m.Shortcut}</p>
 		</button>

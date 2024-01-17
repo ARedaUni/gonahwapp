@@ -16,7 +16,7 @@ type NahwSentenceViewModel struct {
 	Words      []templ.Component
 	Navigation templ.Component
 	Cards      []NahwCardViewModel
-	Footer     templ.Component
+	Footer     FooterViewModel
 }
 
 type NahwSentenceState int
@@ -27,7 +27,7 @@ const (
 	NahwSentenceIncorrect
 )
 
-func NewNahwSentenceViewModel(excerptId int, i kalam.ExcerptIterator, selected string, footer templ.Component) NahwSentenceViewModel {
+func NewNahwSentenceViewModel(excerptId int, i kalam.ExcerptIterator, selected string, footer FooterViewModel) NahwSentenceViewModel {
 	m := NahwSentenceViewModel{
 		Words:      []templ.Component{},
 		Navigation: navigation("0"),
@@ -78,6 +78,34 @@ func (m NahwSentenceViewModel) DeactivateCards() NahwSentenceViewModel {
 	return m
 }
 
+func (m NahwSentenceViewModel) SwapCardState(
+	prev, new NahwCardState) NahwSentenceViewModel {
+	for x := 0; x < len(m.Cards); x++ {
+		c := &m.Cards[x]
+		if c.State == prev {
+			c.State = new
+		}
+	}
+	return m
+}
+
+func (m NahwSentenceViewModel) SetValueToCardState(
+	value string, state NahwCardState) NahwSentenceViewModel {
+	for x := 0; x < len(m.Cards); x++ {
+		c := &m.Cards[x]
+		if c.Value == value {
+			c.State = state
+		}
+	}
+	return m
+}
+
+func (m NahwSentenceViewModel) SetFooterState(
+	state FooterState) NahwSentenceViewModel {
+	m.Footer.State = state
+	return m
+}
+
 func NahwSentence(m NahwSentenceViewModel) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
@@ -123,7 +151,7 @@ func NahwSentence(m NahwSentenceViewModel) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = m.Footer.Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Footer(m.Footer).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

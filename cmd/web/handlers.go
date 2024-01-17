@@ -36,8 +36,7 @@ func (app *application) nahwSentenceGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		i := iteratorFromContext(r.Context())
 		id := excerptIdFromContext(r.Context())
-		footer := ui.Footer(ui.FooterViewModel{})
-		model := ui.NewNahwSentenceViewModel(id, i, "", footer)
+		model := ui.NewNahwSentenceViewModel(id, i, "", ui.FooterViewModel{})
 		err := ui.Base(ui.NahwSentence(model)).Render(r.Context(), w)
 		if err != nil {
 			app.serverError(w, err)
@@ -55,9 +54,8 @@ func (app *application) nahwCardSelectGet() http.Handler {
 			SelectURL: templ.URL(fmt.Sprintf("/text/%v/%v/select/%v", eid, i.Index, value)),
 			State:     ui.SelectFooterState,
 		}
-		footer := ui.Footer(footerM)
 		err := ui.Base(ui.NahwSentence(ui.NewNahwSentenceViewModel(eid, i,
-			value, footer))).Render(r.Context(), w)
+			value, footerM))).Render(r.Context(), w)
 		if err != nil {
 			app.serverError(w, err)
 		}
@@ -75,13 +73,16 @@ func (app *application) nahwSentenceSelectPost() http.Handler {
 			Feedback:    strings.Join(i.Word().Tags, string(kalam.ArabicComma)+" "),
 			ContinueURL: templ.URL(fmt.Sprintf("/text/%v/%v", eid, nextI.Index)),
 		}
-		if kalam.LetterPackFromString(value).EqualTo(i.Word().Termination()) {
-			footerM.State = ui.CorrectFooterState
+		correctTerm := i.Word().Termination()
+		m := ui.NewNahwSentenceViewModel(eid, i, value, footerM).
+			DeactivateCards().
+			SetValueToCardState(correctTerm.String(), ui.NahwCardCorrect)
+		if kalam.LetterPackFromString(value).EqualTo(correctTerm) {
+			m = m.SetFooterState(ui.CorrectFooterState)
 		} else {
-			footerM.State = ui.IncorrectFooterState
+			m = m.SetFooterState(ui.IncorrectFooterState).
+				SwapCardState(ui.NahwCardSelected, ui.NahwCardIncorrect)
 		}
-		m := ui.NewNahwSentenceViewModel(eid, i, value, ui.Footer(footerM))
-		m = m.DeactivateCards()
 		err := ui.Base(ui.NahwSentence(m)).Render(r.Context(), w)
 		if err != nil {
 			app.serverError(w, err)

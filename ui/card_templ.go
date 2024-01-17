@@ -91,7 +91,10 @@ func NahwCard(m NahwCardViewModel) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			var templ_7745c5c3_Var4 = []any{"nahw-card", templ.KV("-selected", m.State == NahwCardSelected)}
+			var templ_7745c5c3_Var4 = []any{"nahw-card",
+				templ.KV("-selected", m.State == NahwCardSelected),
+				templ.KV("-incorrect", m.State == NahwCardIncorrect),
+				templ.KV("-correct", m.State == NahwCardCorrect)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var4...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

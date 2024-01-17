@@ -35,4 +35,14 @@
     --input-card-fill: var(--blue-100);
     --input-card-stroke: var(--blue-400);
   }
+
+  &.-incorrect {
+    --input-card-fill: var(--red-100);
+    --input-card-stroke: var(--red-400);
+  }
+
+  &.-correct {
+    --input-card-fill: var(--green-100);
+    --input-card-stroke: var(--green-400);
+  }
 }

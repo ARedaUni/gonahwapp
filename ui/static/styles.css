@@ -342,6 +342,14 @@ body {
   --input-card-fill: var(--blue-100);
   --input-card-stroke: var(--blue-400);
 }
+.nahw-card.-incorrect {
+  --input-card-fill: var(--red-100);
+  --input-card-stroke: var(--red-400);
+}
+.nahw-card.-correct {
+  --input-card-fill: var(--green-100);
+  --input-card-stroke: var(--green-400);
+}
 
 :root {
   --footer-bg: #fff;
