@@ -29,9 +29,9 @@ func NewNahwCardViewModel(eid int, index int, value string, shortcut string) Nah
 }
 
 templ NahwCard(m NahwCardViewModel) {
-	<a class="link" na-shortcut={m.Shortcut} href={m.SelectURL}><div class={"nahw-card",
+	<button up-href={string(m.SelectURL)} na-shortcut={m.Shortcut} class={"nahw-card",
 	templ.KV("-selected", m.State==NahwCardSelected)}>
 		<p class="choice">{m.Value}</p>
 		<p class="shortcut">{m.Shortcut}</p>
-	</div></a>
+	</button>
 }

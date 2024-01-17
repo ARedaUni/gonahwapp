@@ -290,10 +290,7 @@ body {
   justify-content: center;
   gap: 1rem;
 }
-.sentence-question > .cards > .link {
-  text-decoration: none;
-}
-.sentence-question > .cards > .link > .nahw-card {
+.sentence-question > .cards .nahw-card {
   width: 12rem;
   height: 20rem;
 }
