@@ -198,20 +198,26 @@ body {
   --text: var(--red-600);
 }
 
-.nahw-footer > .text {
+.nahw-footer > .wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1rem;
   color: var(--_text);
 }
-.nahw-footer > .text > .icon {
+.nahw-footer > .wrapper > .icon {
   border-radius: 100%;
   background-color: white;
   padding: 2rem;
 }
-.nahw-footer > .text > .icon svg {
+.nahw-footer > .wrapper > .icon > svg {
   transform: scale(120%);
+}
+.nahw-footer > .wrapper > .text > .header {
+  font-size: 1.5rem;
+}
+.nahw-footer > .wrapper > .text > .paragraph {
+  font-size: 2rem;
 }
 
 .nahw-para {

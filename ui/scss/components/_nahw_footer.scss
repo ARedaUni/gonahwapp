@@ -23,7 +23,7 @@
 	}
 }
 
-.nahw-footer>.text {
+.nahw-footer>.wrapper {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -35,8 +35,18 @@
 		background-color: white;
 		padding: 2rem;
 
-		svg {
+		>svg {
 			transform: scale(120%);
+		}
+	}
+
+	>.text {
+		>.header {
+			font-size: 1.5rem;
+		}
+
+		>.paragraph {
+			font-size: 2rem;
 		}
 	}
 }

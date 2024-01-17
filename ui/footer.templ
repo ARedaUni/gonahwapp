@@ -60,13 +60,13 @@ templ correctFooter(feedback string, continueURL templ.SafeURL) {
 
 templ incorrectFooter(feedback string, continueURL templ.SafeURL) {
 	<footer class="nahw-footer -incorrect">
-		<div class="text">
+		<div class="wrapper">
 			<div class="icon">
 				@wrongIcon()
 			</div>
-			<div>
-				<h1>Explanation</h1>
-				<p>{feedback}</p>
+			<div class="text">
+				<h2 class="header">Explanation</h2>
+				<p lang="ar" class="paragraph">{feedback}</p>
 			</div>
 		</div>
 		<a href={continueURL}><button na-shortcut=" " class="nahw-button -incorrect">Continue</button></a>
