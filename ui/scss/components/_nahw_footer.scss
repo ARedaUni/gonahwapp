@@ -29,6 +29,7 @@
 	justify-content: center;
 	gap: 1rem;
 	color: var(--_text);
+	max-width: 100%;
 
 	>.icon {
 		border-radius: 100%;
@@ -41,12 +42,16 @@
 	}
 
 	>.text {
+		max-width: 100%;
+
 		>.header {
 			font-size: 1.5rem;
 		}
 
 		>.paragraph {
 			font-size: 2rem;
+			white-space: nowrap;
+			overflow-x: scroll;
 		}
 	}
 }

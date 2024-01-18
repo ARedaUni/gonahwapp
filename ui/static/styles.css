@@ -204,6 +204,7 @@ body {
   justify-content: center;
   gap: 1rem;
   color: var(--_text);
+  max-width: 100%;
 }
 .nahw-footer > .wrapper > .icon {
   border-radius: 100%;
@@ -213,11 +214,16 @@ body {
 .nahw-footer > .wrapper > .icon > svg {
   transform: scale(120%);
 }
+.nahw-footer > .wrapper > .text {
+  max-width: 100%;
+}
 .nahw-footer > .wrapper > .text > .header {
   font-size: 1.5rem;
 }
 .nahw-footer > .wrapper > .text > .paragraph {
   font-size: 2rem;
+  white-space: nowrap;
+  overflow-x: scroll;
 }
 
 @media (max-width: 600px) {
