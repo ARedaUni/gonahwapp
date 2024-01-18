@@ -10,6 +10,14 @@ up.compiler(".nahw-card", function(el) {
   }
 })
 
+up.compiler(".sentence-question>.text", function(el) {
+  el.querySelector(".-active").scrollIntoView({
+    behavior: "instant",
+    block: "center",
+    inline: "center",
+  })
+})
+
 class ProgressBar extends HTMLElement {
   static #ATT_VALUE = "data-value"
   static #CLASS_COMPLETE = "-complete"

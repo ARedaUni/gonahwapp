@@ -220,6 +220,12 @@ body {
   font-size: 2rem;
 }
 
+@media (max-width: 600px) {
+  .nahw-footer {
+    gap: 1rem;
+    flex-direction: column;
+  }
+}
 .nahw-para {
   font-family: "Amiri";
   font-size: 4rem;
@@ -230,6 +236,12 @@ body {
   flex: 1 0 0;
 }
 
+@media (max-width: 900px) {
+  .nahw-para {
+    font-size: 3rem;
+    padding: 2rem 3rem;
+  }
+}
 .progress-bar {
   --_background: var(--background, var(--gray-300));
   --_foreground: var(--foreground, var(--green-500));
@@ -288,6 +300,8 @@ body {
   font-size: 5rem;
   direction: rtl;
   text-align: center;
+  white-space: nowrap;
+  overflow-x: scroll;
 }
 .sentence-question > .cards {
   flex: 1;
@@ -296,11 +310,25 @@ body {
   justify-content: center;
   gap: 1rem;
 }
-.sentence-question > .cards .nahw-card {
+.sentence-question > .cards > .nahw-card {
   width: 12rem;
   height: 20rem;
 }
 
+@media (max-width: 600px) {
+  .sentence-question > .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 1rem;
+    justify-items: center;
+  }
+  .sentence-question > .cards > .nahw-card {
+    height: 16rem;
+  }
+  .sentence-question > .text {
+    font-size: 4rem;
+  }
+}
 .nahw-highlight {
   background-color: var(--gray-200);
 }
@@ -377,71 +405,6 @@ body {
 * {
   margin: 0;
   padding: 0;
-}
-
-/* =============== */
-/*     CARDS       */
-/* =============== */
-.cards {
-  display: flex;
-  padding-top: 2rem;
-  margin-left: 2rem;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-}
-
-.card {
-  display: block;
-  position: relative;
-  top: 0;
-  left: 0;
-  cursor: pointer;
-  text-decoration: none;
-  margin-right: 1rem;
-  margin-bottom: 1rem;
-}
-
-.card.small {
-  height: 4rem;
-  width: 10rem;
-  background-color: var(--green-600);
-}
-
-.card:hover {
-  box-shadow: -10px 10px 10px 3px var(--green-800);
-  top: -3px;
-  left: 3px;
-}
-
-.card img {
-  object-fit: none;
-  object-position: center;
-  width: inherit;
-  height: 70%;
-  margin: 0;
-  padding: 0;
-}
-
-.card-container {
-  margin-top: 1.5rem;
-  margin-left: 1rem;
-  margin-right: 1rem;
-}
-
-.card-title-type-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.card-type {
-  color: var(--accent);
-  font-size: 1.6rem;
-}
-
-.small h1 {
-  margin-left: 1rem;
 }
 
 /*# sourceMappingURL=styles.css.map */

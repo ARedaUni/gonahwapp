@@ -7,3 +7,10 @@
 	text-align: justify;
 	flex: 1 0 0;
 }
+
+@media(max-width: 900px) {
+	.nahw-para {
+		font-size: 3rem;
+		padding: 2rem 3rem;
+	}
+}

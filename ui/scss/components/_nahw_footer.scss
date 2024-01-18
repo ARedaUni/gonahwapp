@@ -50,3 +50,10 @@
 		}
 	}
 }
+
+@media (max-width: 600px) {
+	.nahw-footer {
+		gap: 1rem;
+		flex-direction: column;
+	}
+}

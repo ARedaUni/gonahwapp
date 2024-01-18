@@ -8,6 +8,8 @@
 		font-size: 5rem;
 		direction: rtl;
 		text-align: center;
+		white-space: nowrap;
+		overflow-x: scroll;
 	}
 
 	>.cards {
@@ -17,9 +19,26 @@
 		justify-content: center;
 		gap: 1rem;
 
-		.nahw-card {
+		>.nahw-card {
 			width: 12rem;
 			height: 20rem;
 		}
+	}
+}
+
+@media (max-width: 600px) {
+	.sentence-question>.cards {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		padding: 1rem;
+		justify-items: center;
+
+		>.nahw-card {
+			height: 16rem;
+		}
+	}
+
+	.sentence-question>.text {
+		font-size: 4rem;
 	}
 }
