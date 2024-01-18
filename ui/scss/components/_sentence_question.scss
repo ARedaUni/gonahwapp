@@ -27,6 +27,10 @@
 }
 
 @media (max-width: 600px) {
+	.sentence-question>.text {
+		font-size: 3rem;
+	}
+
 	.sentence-question>.cards {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
