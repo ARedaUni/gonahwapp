@@ -224,6 +224,16 @@ body {
   .nahw-footer {
     gap: 1rem;
     flex-direction: column;
+    padding: 1rem 2rem;
+  }
+  .nahw-footer .icon {
+    display: none;
+  }
+  .nahw-footer .header {
+    font-size: 1rem;
+  }
+  .nahw-footer .paragraph {
+    font-size: 1.5rem;
   }
 }
 .nahw-para {
@@ -323,10 +333,8 @@ body {
     justify-items: center;
   }
   .sentence-question > .cards > .nahw-card {
-    height: 16rem;
-  }
-  .sentence-question > .text {
-    font-size: 4rem;
+    height: 10rem;
+    width: 10rem;
   }
 }
 .nahw-highlight {
@@ -378,7 +386,21 @@ body {
   --input-card-fill: var(--green-100);
   --input-card-stroke: var(--green-400);
 }
+.nahw-card.-small > .shortcut {
+  display: none;
+}
+.nahw-card.-small > .choice {
+  font-size: 4rem;
+}
 
+@media (max-width: 600px) {
+  .nahw-card > .shortcut {
+    display: none;
+  }
+  .nahw-card > .choice {
+    font-size: 4rem;
+  }
+}
 :root {
   --footer-bg: #fff;
   --footer-stroke: #E5E5E5;

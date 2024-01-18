@@ -45,4 +45,28 @@
     --input-card-fill: var(--green-100);
     --input-card-stroke: var(--green-400);
   }
+
+  &.-small {
+    >.shortcut {
+      display: none;
+    }
+
+    >.choice {
+      font-size: 4rem;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+
+  // Equivalent to -small
+  .nahw-card {
+    >.shortcut {
+      display: none;
+    }
+
+    >.choice {
+      font-size: 4rem;
+    }
+  }
 }

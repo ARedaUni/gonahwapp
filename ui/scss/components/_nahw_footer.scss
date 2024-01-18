@@ -55,5 +55,18 @@
 	.nahw-footer {
 		gap: 1rem;
 		flex-direction: column;
+		padding: 1rem 2rem;
+
+		.icon {
+			display: none;
+		}
+
+		.header {
+			font-size: 1rem;
+		}
+
+		.paragraph {
+			font-size: 1.5rem;
+		}
 	}
 }
