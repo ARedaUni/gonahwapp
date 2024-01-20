@@ -76,7 +76,7 @@
 }
 
 ._screen-h {
-  min-height: 100vh !important;
+  height: 100% !important;
 }
 
 ._w-1\/2 {
@@ -119,11 +119,19 @@
   margin: 0 auto !important;
 }
 
+html {
+  height: 100%;
+}
+
 body {
   background-color: var(--page-background);
   color: black;
   font-family: Roboto, sans-serif;
-  height: 100vh;
+  height: 100%;
+}
+
+main {
+  height: 100%;
 }
 
 [lang=ar] {
