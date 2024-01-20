@@ -6,9 +6,6 @@ templ NahwStart(paragraph string, start templ.SafeURL) {
 		<div class="nahw-para">
 			{paragraph}
 		</div>
-		<footer class="nahw-footer">
-			<a href="/text"><button class="nahw-button">Return</button></a>
-			<a href={start}><button class="nahw-button -primary">Start</button></a>
-		</footer>
+		@homeFooter(start)
 	</div>
 }
