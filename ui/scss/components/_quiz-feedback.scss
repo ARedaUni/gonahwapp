@@ -1,0 +1,50 @@
+.quiz-feedback {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	color: var(--_text);
+	max-width: 100%;
+
+	&__icon {
+		border-radius: 100%;
+		background-color: white;
+		padding: 2rem;
+	}
+
+	&__inner {
+		transform: scale(120%);
+	}
+
+	&__text {
+		max-width: 100%;
+	}
+
+	&__header {
+		margin: 0;
+		font-size: 1.5rem;
+	}
+
+	&__paragraph {
+		margin: 0;
+		font-size: 2rem;
+		white-space: nowrap;
+		overflow-x: auto;
+	}
+}
+
+@media (max-width: 600px) {
+	.quiz-feedback {
+		&__icon {
+			display: none;
+		}
+
+		&__header {
+			font-size: 1rem;
+		}
+
+		&__paragraph {
+			font-size: 1.5rem;
+		}
+	}
+}

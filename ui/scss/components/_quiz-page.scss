@@ -1,0 +1,16 @@
+.quiz-page {
+	margin: 0;
+	padding: 0;
+	color: black;
+	font-family: Roboto, sans-serif;
+	background-color: #fff5eb;
+	height: 100%;
+
+	&__inner {
+		margin: 0;
+		padding: 0;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+}

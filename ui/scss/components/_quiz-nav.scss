@@ -1,13 +1,16 @@
-.nahw-nav {
+.quiz-nav {
 	display: flex;
 	flex-direction: row;
 	justify-items: center;
 	align-items: center;
 	gap: .1rem;
 	background-color: var(--page-background);
-	padding: .3rem 0;
+	padding: 1.2rem;
+	height: 0.5rem;
+	width: 50%;
+	margin: 0 auto;
 
-	>progress-bar {
+	>.progress-bar {
 		flex: 1;
 		height: 100%;
 	}

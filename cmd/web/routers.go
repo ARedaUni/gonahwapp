@@ -19,17 +19,17 @@ func (app *application) routes() http.Handler {
 	router.Handler(http.MethodGet, "/static/*filepath",
 		http.FileServer(http.FS(ui.Files)))
 
-	// TODO(Amr Ojjeh): Write a homepage
-	router.Handler(http.MethodGet, "/", app.textGet())
-	router.Handler(http.MethodGet, "/text", app.textGet())
-	router.Handler(http.MethodGet, "/text/:excerpt",
-		excerptRequired.Then(app.nahwStartGet()))
-	router.Handler(http.MethodGet, "/text/:excerpt/:word",
-		iteratorRequired.Then(app.nahwSentenceGet()))
-	router.Handler(http.MethodPost, "/text/:excerpt/:word/select/:value",
-		iteratorRequired.Then(app.nahwSentenceSelectPost()))
-	router.Handler(http.MethodGet, "/text/:excerpt/:word/select/:value",
-		iteratorRequired.Then(app.nahwCardSelectGet()))
+	// TODO(Amr Ojjeh): Write an index page
+	router.Handler(http.MethodGet, "/", app.homeGet())
+	router.Handler(http.MethodGet, "/home", app.homeGet())
+	router.Handler(http.MethodGet, "/quiz/:excerpt",
+		excerptRequired.Then(app.quizStartGet()))
+	router.Handler(http.MethodGet, "/quiz/:excerpt/:word",
+		iteratorRequired.Then(app.quizSentenceGet()))
+	router.Handler(http.MethodGet, "/quiz/:excerpt/:word/select/:value",
+		iteratorRequired.Then(app.quizCardSelectGet()))
+	router.Handler(http.MethodPost, "/quiz/:excerpt/:word/select/:value",
+		iteratorRequired.Then(app.quizCardSelectPost()))
 
 	return base.Then(router)
 }

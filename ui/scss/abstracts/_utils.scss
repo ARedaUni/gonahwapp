@@ -1,11 +1,3 @@
-._flex {
-	display: flex !important;
-}
-
-._flex-row {
-	flex-direction: row !important;
-}
-
 ._flex-col {
 	flex-direction: column !important;
 }
@@ -30,16 +22,8 @@
 	height: 100% !important;
 }
 
-._w-1\/2 {
-	width: 50% !important;
-}
-
 ._w-full {
 	width: 100% !important;
-}
-
-._h-1 {
-	height: .5rem !important;
 }
 
 ._h-8 {
@@ -54,18 +38,6 @@
 	height: 100% !important;
 }
 
-._pt-8 {
-	padding-top: 1.2rem !important;
-}
-
-._pb-8 {
-	padding-bottom: 1.2rem !important;
-}
-
 ._pt-12 {
 	padding-top: 5rem !important;
-}
-
-._mx-center {
-	margin: 0 auto !important;
 }

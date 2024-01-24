@@ -56,7 +56,7 @@ func (app *application) iteratorRequired(h http.Handler) http.Handler {
 		e := excerptFromContext(r.Context())
 		params := httprouter.ParamsFromContext(r.Context())
 		idStr := params.ByName("word")
-		id, err := strconv.ParseInt(idStr, 10, 64)
+		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			app.clientError(w, http.StatusBadRequest)
 			return

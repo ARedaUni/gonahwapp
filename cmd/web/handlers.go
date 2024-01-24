@@ -5,90 +5,127 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/a-h/templ"
-	"github.com/amrojjeh/arabic/ui"
+	"github.com/amrojjeh/arabic/ui/pages"
 	"github.com/amrojjeh/kalam"
 	"github.com/julienschmidt/httprouter"
 )
 
-func (app *application) textGet() http.Handler {
+func (app *application) homeGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		err := ui.Base(ui.Excerpts(app.excerpts)).Render(r.Context(), w)
+		excerpts := []pages.HomeExcerpt{}
+		// TODO(Amr Ojjeh): Change i to an ID from MySQL
+		for i, e := range app.excerpts {
+			excerpts = append(excerpts, pages.HomeExcerpt{
+				Name: e.Name,
+				Link: fmt.Sprintf("/quiz/%v", i),
+			})
+		}
+		err := pages.HomePage(pages.HomeProps{
+			Excerpts: excerpts,
+		}).Render(w)
 		if err != nil {
 			app.serverError(w, err)
 		}
 	})
 }
 
-func (app *application) nahwStartGet() http.Handler {
+func (app *application) quizStartGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		e := excerptFromContext(r.Context())
 		eid := excerptIdFromContext(r.Context())
-		err := ui.Base(ui.NahwStart(e.Unpointed(true),
-			templ.URL(fmt.Sprintf("/text/%v/0", eid)))).Render(r.Context(), w)
+		err := pages.QuizStartPage(pages.QuizStartProps{
+			Title:     fmt.Sprintf("NahwApp - %s", e.Name),
+			Paragraph: e.Unpointed(true),
+			StartURL:  fmt.Sprintf("/quiz/%v/0", eid),
+		}).Render(w)
 		if err != nil {
 			app.serverError(w, err)
 		}
 	})
 }
 
-func (app *application) nahwSentenceGet() http.Handler {
+func (app *application) quizSentenceGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		e := excerptFromContext(r.Context())
 		i := iteratorFromContext(r.Context())
-		id := excerptIdFromContext(r.Context())
-		model := ui.NewNahwSentenceViewModel(id, i, "", ui.FooterViewModel{})
-		err := ui.Base(ui.NahwSentence(model)).Render(r.Context(), w)
+		eid := excerptIdFromContext(r.Context())
+		err := pages.QuizSentencePage(pages.QuizSentenceProps{
+			Title: fmt.Sprintf("NahwApp - %s", e.Name),
+			Words: pages.QuizSentenceGenWords(i.Sentence()).
+				Select(i.WordI).
+				Build(),
+			Cards: pages.QuizSentenceGenCards(i.Word().Termination(),
+				pages.QuizSentenceSelectURL(eid, i.Index)).Build(),
+			Footer: pages.QuizSentenceInactiveFooter(),
+		}).Render(w)
 		if err != nil {
 			app.serverError(w, err)
 		}
 	})
 }
 
-func (app *application) nahwCardSelectGet() http.Handler {
+func (app *application) quizCardSelectGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		i := iteratorFromContext(r.Context())
+		e := excerptFromContext(r.Context())
 		eid := excerptIdFromContext(r.Context())
 		params := httprouter.ParamsFromContext(r.Context())
 		value := params.ByName("value")
-		footerM := ui.FooterViewModel{
-			SelectURL: templ.URL(fmt.Sprintf("/text/%v/%v/select/%v", eid, i.Index, value)),
-			State:     ui.SelectFooterState,
-		}
-		m := ui.NewNahwSentenceViewModel(eid, i, value, footerM).
-			SetSelectedTermination(value)
-		err := ui.Base(ui.NahwSentence(m)).Render(r.Context(), w)
+		err := pages.QuizSentencePage(pages.QuizSentenceProps{
+			Title: fmt.Sprintf("NahwApp - %s", e.Name),
+			Words: pages.QuizSentenceGenWords(i.Sentence()).
+				Select(i.WordI).
+				TerminateSelectWith(value).
+				Build(),
+			Cards: pages.QuizSentenceGenCards(i.Word().Termination(),
+				pages.QuizSentenceSelectURL(eid, i.Index)).
+				Select(value).
+				Build(),
+			// The repitition of the URL is fine since it's semantically different
+			// One is GET and this one is POST (comparing to ui/pages/quiz-sentence.go)
+			Footer: pages.QuizSentenceActiveFooter(
+				fmt.Sprintf("/quiz/%v/%v/select/%v", eid, i.Index, value)),
+		}).Render(w)
 		if err != nil {
 			app.serverError(w, err)
 		}
 	})
 }
 
-func (app *application) nahwSentenceSelectPost() http.Handler {
+func (app *application) quizCardSelectPost() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		i := iteratorFromContext(r.Context())
+		e := excerptFromContext(r.Context())
 		eid := excerptIdFromContext(r.Context())
 		params := httprouter.ParamsFromContext(r.Context())
 		value := params.ByName("value")
 		nextI, _ := i.Next()
-		footerM := ui.FooterViewModel{
-			Feedback:    strings.Join(i.Word().Tags, string(kalam.ArabicComma)+" "),
-			ContinueURL: templ.URL(fmt.Sprintf("/text/%v/%v", eid, nextI.Index)),
-		}
 		correctTerm := i.Word().Termination()
-		m := ui.NewNahwSentenceViewModel(eid, i, value, footerM).
-			DeactivateCards().
-			SetValueToCardState(correctTerm.String(), ui.NahwCardCorrect).
-			SetSelectedTermination(correctTerm.String())
-		if kalam.LetterPackFromString(value).EqualTo(correctTerm) {
-			m = m.SetFooterState(ui.CorrectFooterState)
-		} else {
-			m = m.SetFooterState(ui.IncorrectFooterState).
-				SwapCardState(ui.NahwCardSelected, ui.NahwCardIncorrect)
+		p := pages.QuizSentenceProps{
+			Title: fmt.Sprintf("NahwApp - %s", e.Name),
+			Words: pages.QuizSentenceGenWords(i.Sentence()).
+				Select(i.WordI).
+				Build(),
 		}
-		err := ui.Base(ui.NahwSentence(m)).Render(r.Context(), w)
+		if kalam.LetterPackFromString(value).EqualTo(correctTerm) {
+			p.Cards = pages.QuizSentenceGenCards(i.Word().Termination(), nil).
+				MarkCorrect(value).
+				Build()
+			p.Footer = pages.QuizSentenceCorrectFooter(
+				strings.Join(i.Word().Tags, string(kalam.ArabicComma)),
+				fmt.Sprintf("/quiz/%v/%v", eid, nextI.Index))
+		} else {
+			p.Cards = pages.QuizSentenceGenCards(i.Word().Termination(), nil).
+				MarkCorrect(correctTerm.String()).
+				MarkIncorrect(value).
+				Build()
+			p.Footer = pages.QuizSentenceIncorrectFooter(
+				strings.Join(i.Word().Tags, string(kalam.ArabicComma)),
+				fmt.Sprintf("/quiz/%v/%v", eid, nextI.Index))
+		}
+		err := pages.QuizSentencePage(p).Render(w)
 		if err != nil {
 			app.serverError(w, err)
-			return
 		}
 	})
 }

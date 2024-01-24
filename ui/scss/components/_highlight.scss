@@ -1,7 +1,7 @@
-.nahw-highlight {
+.highlight {
 	background-color: var(--gray-200);
 
-	&.-active {
+	&--active {
 		background-color: var(--blue-400);
 	}
 }

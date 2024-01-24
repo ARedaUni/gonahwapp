@@ -1,45 +1,37 @@
-.sentence-question {
+.quiz-sentence {
 	flex: 1;
 	display: flex;
 	flex-direction: column;
 
-	>.text {
+	&__text {
+		margin: 0;
 		font-family: "Amiri";
 		font-size: 5rem;
 		direction: rtl;
 		text-align: center;
 		white-space: nowrap;
-		overflow-x: scroll;
+		overflow-x: auto;
+		padding-top: 1rem;
 	}
 
-	>.cards {
+	&__cards {
 		flex: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 1rem;
-
-		>.nahw-card {
-			width: 12rem;
-			height: 20rem;
-		}
 	}
 }
 
 @media (max-width: 600px) {
-	.sentence-question>.text {
+	.quiz-sentence__text {
 		font-size: 3rem;
 	}
 
-	.sentence-question>.cards {
+	.quiz-sentence__cards {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		padding: 1rem;
 		justify-items: center;
-
-		>.nahw-card {
-			height: 10rem;
-			width: 10rem;
-		}
 	}
 }

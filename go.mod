@@ -8,4 +8,4 @@ require (
 	github.com/justinas/alice v1.2.0
 )
 
-require github.com/a-h/templ v0.2.501
+require github.com/maragudk/gomponents v0.20.1

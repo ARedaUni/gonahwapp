@@ -1,4 +1,4 @@
-.nahw-card {
+.quiz-card {
   --_input-card-fill: var(--input-card-fill, white);
   --_input-card-stroke: var(--input-card-stroke, var(--gray-200));
   --_input-card-shortcut: var(--input-card-shortcut, var(--gray-300));
@@ -14,14 +14,16 @@
   position: relative;
   cursor: pointer;
   color: var(--_input-card-color);
+  width: 12rem;
+  height: 20rem;
 
-  >.choice {
+  &__choice {
     font-size: 7rem;
     user-select: none;
     font-family: "Amiri";
   }
 
-  >.shortcut {
+  &__shortcut {
     position: absolute;
     right: 10%;
     bottom: 2%;
@@ -31,27 +33,30 @@
     font-size: 1.5rem;
   }
 
-  &.-selected {
+  &--selected {
     --input-card-fill: var(--blue-100);
     --input-card-stroke: var(--blue-400);
   }
 
-  &.-incorrect {
+  &--incorrect {
     --input-card-fill: var(--red-100);
     --input-card-stroke: var(--red-400);
   }
 
-  &.-correct {
+  &--correct {
     --input-card-fill: var(--green-100);
     --input-card-stroke: var(--green-400);
   }
 
-  &.-small {
-    >.shortcut {
+  &--small {
+    height: 10rem;
+    width: 10rem;
+
+    .quiz-card__shortcut {
       display: none;
     }
 
-    >.choice {
+    .quiz-card__choice {
       font-size: 4rem;
     }
   }
@@ -60,12 +65,16 @@
 @media (max-width: 600px) {
 
   // Equivalent to -small
-  .nahw-card {
-    >.shortcut {
+  // TODO(Amr Ojjeh): Use a mixin
+  .quiz-card {
+    height: 10rem;
+    width: 10rem;
+
+    &__shortcut {
       display: none;
     }
 
-    >.choice {
+    &__choice {
       font-size: 4rem;
     }
   }

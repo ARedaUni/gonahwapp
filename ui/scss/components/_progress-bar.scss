@@ -9,7 +9,7 @@
     inset 0 1px 1px rgba(255, 255, 255, 0.3),
     inset 0 -1px 1px rgba(255, 255, 255, 0.3);
 
-  >.value {
+  &__value {
     height: 100%;
     border-top-left-radius: 25px;
     border-bottom-left-radius: 25px;
@@ -18,7 +18,7 @@
     position: relative;
   }
 
-  >.value>.glow {
+  &__glow {
     position: absolute;
     top: 25%;
     width: 98%;
@@ -27,13 +27,13 @@
     background-color: var(--_glow);
     border-radius: 25px;
   }
-}
 
-.progress-bar.-complete {
-  --foreground: var(--yellow-400);
+  &--complete {
+    --foreground: var(--yellow-400);
 
-  >.value {
-    border-top-right-radius: 25px;
-    border-bottom-right-radius: 25px;
+    .progress-bar--value {
+      border-top-right-radius: 25px;
+      border-bottom-right-radius: 25px;
+    }
   }
 }
