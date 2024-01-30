@@ -21,6 +21,8 @@ func (app *application) routes() http.Handler {
 
 	// TODO(Amr Ojjeh): Write an index page
 	router.Handler(http.MethodGet, "/", app.homeGet())
+	router.Handler(http.MethodGet, "/register", app.registerGet())
+	router.Handler(http.MethodPost, "/register", app.registerPost())
 	router.Handler(http.MethodGet, "/home", app.homeGet())
 	router.Handler(http.MethodGet, "/quiz/:excerpt",
 		excerptRequired.Then(app.quizStartGet()))

@@ -10,6 +10,21 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+func (app *application) registerGet() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		err := pages.RegisterPage().Render(w)
+		if err != nil {
+			app.serverError(w, err)
+		}
+	})
+}
+
+func (app *application) registerPost() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+	})
+}
+
 func (app *application) homeGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		excerpts := []pages.HomeExcerpt{}
