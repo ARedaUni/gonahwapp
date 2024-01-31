@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/amrojjeh/arabic/internal/validator"
 	"github.com/amrojjeh/arabic/ui/pages"
 	"github.com/amrojjeh/kalam"
 	"github.com/julienschmidt/httprouter"
@@ -12,7 +13,7 @@ import (
 
 func (app *application) registerGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		err := pages.RegisterPage().Render(w)
+		err := pages.RegisterPage(pages.RegisterProps{}).Render(w)
 		if err != nil {
 			app.serverError(w, err)
 		}
@@ -21,7 +22,48 @@ func (app *application) registerGet() http.Handler {
 
 func (app *application) registerPost() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseForm()
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
 
+		props := pages.RegisterProps{}
+		props.Username = r.Form.Get("username")
+		props.UsernameError = validator.NewValidator("username", props.Username).
+			Required().
+			MaxLength(50).
+			Validate()
+		props.Email = r.Form.Get("email")
+		props.EmailError = validator.NewValidator("email", props.Email).
+			Required().
+			MaxLength(255).
+			IsEmail().
+			Validate()
+		password := r.Form.Get("pass")
+		conf_pass := r.Form.Get("conf_pass")
+		props.PasswordError = validator.NewValidator("password", password).
+			Required().
+			MaxBytes(72).
+			CustomMessage("Your password is too long").
+			SameAs(conf_pass).
+			Validate()
+		props.PasswordConfirmError = validator.NewValidator("confirm password", conf_pass).
+			Required().
+			CustomMessage("Please confirm your password").
+			Validate()
+
+		if !props.NoError() {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			err := pages.RegisterPage(props).Render(w)
+			if err != nil {
+				app.serverError(w, err)
+			}
+			return
+		}
+
+		// TODO(Amr Ojjeh): Handle registration
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	})
 }
 
