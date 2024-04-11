@@ -6,7 +6,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
 
-	"github.com/amrojjeh/arabic/ui"
+	"github.com/amrojjeh/nahwapp/ui"
 )
 
 func (app *application) routes() http.Handler {
@@ -23,6 +23,8 @@ func (app *application) routes() http.Handler {
 	router.Handler(http.MethodGet, "/", app.homeGet())
 	router.Handler(http.MethodGet, "/register", app.registerGet())
 	router.Handler(http.MethodPost, "/register", app.registerPost())
+	router.Handler(http.MethodGet, "/login", app.loginGet())
+	router.Handler(http.MethodPost, "/login", app.loginPost())
 	router.Handler(http.MethodGet, "/home", app.homeGet())
 	router.Handler(http.MethodGet, "/quiz/:excerpt",
 		excerptRequired.Then(app.quizStartGet()))

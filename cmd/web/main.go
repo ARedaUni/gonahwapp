@@ -10,8 +10,8 @@ import (
 
 	"github.com/alexedwards/scs/mysqlstore"
 	"github.com/alexedwards/scs/v2"
-	"github.com/amrojjeh/arabic/internal/models"
 	"github.com/amrojjeh/kalam"
+	"github.com/amrojjeh/nahwapp/internal/models"
 	_ "github.com/go-sql-driver/mysql"
 )
 

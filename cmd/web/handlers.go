@@ -5,11 +5,26 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/amrojjeh/arabic/internal/validator"
-	"github.com/amrojjeh/arabic/ui/pages"
 	"github.com/amrojjeh/kalam"
+	"github.com/amrojjeh/nahwapp/internal/validator"
+	"github.com/amrojjeh/nahwapp/ui/pages"
 	"github.com/julienschmidt/httprouter"
 )
+
+func (app *application) loginGet() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		err := pages.LoginPage(pages.LoginProps{}).Render(w)
+		if err != nil {
+			app.serverError(w, err)
+		}
+	})
+}
+
+func (app *application) loginPost() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+	})
+}
 
 func (app *application) registerGet() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

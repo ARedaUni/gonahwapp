@@ -1,4 +1,4 @@
-module github.com/amrojjeh/arabic
+module github.com/amrojjeh/nahwapp
 
 go 1.21
 

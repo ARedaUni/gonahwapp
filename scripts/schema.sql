@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    hashed_password CHAR(60) NOT NULL,
+    password_hash CHAR(60) NOT NULL,
     created DATETIME NOT NULL,
     CONSTRAINT users_uc_email UNIQUE (email),
     CONSTRAINT users_uc_username UNIQUE (username)

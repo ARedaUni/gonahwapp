@@ -7,8 +7,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/amrojjeh/arabic/data"
 	"github.com/amrojjeh/kalam"
+	"github.com/amrojjeh/nahwapp/data"
 )
 
 func (app *application) clientError(w http.ResponseWriter, code int) {
