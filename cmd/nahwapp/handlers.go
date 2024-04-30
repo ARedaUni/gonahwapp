@@ -1,28 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 
 	"github.com/amrojjeh/nahwapp/model"
 	"github.com/amrojjeh/nahwapp/ui/pages"
 )
-
-// func (app *application) loginGet() http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		err := pages.LoginPage(pages.LoginProps{}).Render(w)
-// 		if err != nil {
-// 			app.serverError(w, err)
-// 		}
-// 	})
-// }
-
-// func (app *application) loginPost() http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-// 	})
-// }
 
 // func (app *application) registerGet() http.Handler {
 // 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -80,18 +65,21 @@ import (
 // 	})
 // }
 
-func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	excerpts := []pages.HomeExcerpt{}
-	quizzes, err := app.queries.ListQuiz(r.Context(), model.ListQuizParams{
+func listQuiz(r *http.Request, q *model.Queries) []model.Quiz {
+	quizzes, err := q.ListQuiz(r.Context(), model.ListQuizParams{
+		Name:   "%%",
 		Limit:  50,
 		Offset: 0,
 	})
-
 	if err != nil {
-		app.logger.Debug("home: could not fetch quizzes", slog.String("error", err.Error()))
-		app.serverError(w, err)
-		return
+		panic(errors.Join(errors.New("unable to list quizzes"), err))
 	}
+	return quizzes
+}
+
+func (app *application) homePage(w http.ResponseWriter, r *http.Request) {
+	excerpts := []pages.HomeExcerpt{}
+	quizzes := listQuiz(r, app.queries)
 
 	for _, e := range quizzes {
 		excerpts = append(excerpts, pages.HomeExcerpt{
@@ -100,44 +88,31 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	app.render(w, pages.HomePage(pages.HomeProps{
+	app.mustRender(w, pages.HomePage(pages.HomeProps{
 		Excerpts: excerpts,
 	}))
 }
 
-// func (app *application) quizStartGet() http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		e := excerptFromContext(r.Context())
-// 		eid := excerptIdFromContext(r.Context())
-// 		err := pages.QuizStartPage(pages.QuizStartProps{
-// 			Title:     fmt.Sprintf("NahwApp - %s", e.Name),
-// 			Paragraph: e.Unpointed(true),
-// 			StartURL:  fmt.Sprintf("/quiz/%v/0", eid),
-// 		}).Render(w)
-// 		if err != nil {
-// 			app.serverError(w, err)
-// 		}
-// 	})
-// }
+func (qr *quizRouter) startPage(w http.ResponseWriter, r *http.Request) {
+	qr.mustRender(w, pages.QuizStartPage(pages.QuizStartProps{
+		Title:     fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
+		Paragraph: qr.quizData.Unpointed(true),
+		StartURL:  fmt.Sprintf("/quiz/%v", qr.quiz.ID),
+	}))
+}
 
-// func (app *application) quizSentenceGet() http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		e := excerptFromContext(r.Context())
-// 		i := iteratorFromContext(r.Context())
-// 		eid := excerptIdFromContext(r.Context())
-// 		err := pages.QuizSentencePage(pages.QuizSentenceProps{
-// 			Title: fmt.Sprintf("NahwApp - %s", e.Name),
+// func (qr *quizRouter) quizSentenceGet(w http.ResponseWriter, r *http.Request) {
+// 	qr.render(w,
+// 		pages.QuizSentencePage(pages.QuizSentenceProps{
+// 			Title: fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
 // 			Words: pages.QuizSentenceGenWords(i.Sentence()).
 // 				Select(i.WordI).
 // 				Build(),
 // 			Cards: pages.QuizSentenceGenCards(i.Word().Termination(),
 // 				pages.QuizSentenceSelectURL(eid, i.Index)).Build(),
 // 			Footer: pages.QuizSentenceInactiveFooter(),
-// 		}).Render(w)
-// 		if err != nil {
-// 			app.serverError(w, err)
-// 		}
-// 	})
+// 		}),
+// 	)
 // }
 
 // func (app *application) quizCardSelectGet() http.Handler {

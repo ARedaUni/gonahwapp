@@ -1,6 +1,6 @@
-package ui
+package static
 
 import "embed"
 
-//go:embed "static"
+//go:embed "*"
 var Files embed.FS

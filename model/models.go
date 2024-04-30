@@ -17,12 +17,13 @@ type Quiz struct {
 }
 
 type QuizSession struct {
-	ID        int64
-	StudentID int64
-	QuizID    int64
-	Data      interface{}
-	Created   time.Time
-	Updated   time.Time
+	ID                int64
+	StudentID         int64
+	QuizID            int64
+	QuestionsAnswered int64
+	Active            bool
+	Created           time.Time
+	Updated           time.Time
 }
 
 type Session struct {
@@ -32,11 +33,10 @@ type Session struct {
 }
 
 type Student struct {
-	ID           int64
-	Email        string
-	Username     string
-	PasswordHash string
-	Statistics   interface{}
-	Created      time.Time
-	Updated      time.Time
+	ID         int64
+	Username   string
+	ClassCode  string
+	Statistics interface{}
+	Created    time.Time
+	Updated    time.Time
 }

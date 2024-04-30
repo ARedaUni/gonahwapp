@@ -33,7 +33,7 @@ func homeFooter(p QuizStartProps) g.Node {
 }
 
 func startButton(p QuizStartProps) g.Node {
-	return A(Href(p.StartURL),
+	return FormEl(Method("post"), Action(p.StartURL),
 		Button(Class("button button--primary"),
 			g.Text("Start"),
 		),

@@ -62,22 +62,18 @@ var addStudentCommand = &cli.Command{
 			Aliases:  []string{"u"},
 		},
 		&cli.StringFlag{
-			Name:     "password",
-			Usage:    "password of student to add",
+			Name:     "code",
+			Usage:    "class code of the student",
 			Required: true,
-			Aliases:  []string{"p"},
-		},
-		&cli.StringFlag{
-			Name:     "email",
-			Usage:    "email of student to add",
-			Required: true,
-			Aliases:  []string{"e"},
+			Aliases:  []string{"c"},
 		},
 	},
 	Action: func(ctx *cli.Context) error {
 		q := getQueries(ctx)
-		s, err := createStudent(ctx.Context, q, ctx.String("email"), ctx.String("username"),
-			ctx.String("password"))
+		s, err := q.CreateStudent(ctx.Context, model.CreateStudentParams{
+			Username:  ctx.String("username"),
+			ClassCode: ctx.String("code"),
+		})
 		if err != nil {
 			return errors.Join(errors.New("could not create student"),
 				err)
@@ -143,22 +139,22 @@ var listStudentCommand = &cli.Command{
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:    "username",
-			Usage:   "query users containing username",
+			Usage:   "query students containing username",
 			Aliases: []string{"u"},
 		},
 		&cli.StringFlag{
-			Name:    "email",
-			Usage:   "query users containing email",
-			Aliases: []string{"e"},
+			Name:    "code",
+			Usage:   "query students containing class code",
+			Aliases: []string{"c"},
 		},
 	},
 	Action: func(ctx *cli.Context) error {
 		q := getQueries(ctx)
 		students, err := q.ListStudents(ctx.Context, model.ListStudentsParams{
-			Username: fmt.Sprintf("%%%s%%", ctx.String("username")),
-			Email:    fmt.Sprintf("%%%s%%", ctx.String("email")),
-			Limit:    int64(ctx.Int("limit")),
-			Offset:   0,
+			Username:  fmt.Sprintf("%%%s%%", ctx.String("username")),
+			ClassCode: fmt.Sprintf("%%%s%%", ctx.String("code")),
+			Limit:     int64(ctx.Int("limit")),
+			Offset:    0,
 		})
 		if err != nil {
 			return errors.Join(errors.New("could not retrieve users"), err)

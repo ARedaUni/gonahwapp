@@ -12,7 +12,7 @@ import (
 	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
 	"github.com/amrojjeh/nahwapp/model"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
@@ -38,7 +38,7 @@ func main() {
 	}
 
 	server := &http.Server{
-		Handler:      app,
+		Handler:      sessionManager.LoadAndSave(app),
 		Addr:         *addr,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
@@ -67,6 +67,6 @@ func openDB(filename string) *sql.DB {
 
 func createLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		AddSource: true,
+		AddSource: false,
 	}))
 }

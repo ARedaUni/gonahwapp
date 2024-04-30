@@ -29,18 +29,22 @@ WHERE id=?;
 
 -- name: CreateStudent :one
 INSERT INTO student (
-    email, username, password_hash, statistics, created, updated
+    username, class_code, statistics, created, updated
 ) VALUES (
-    ?, ?, ?, "{}", datetime("now"), datetime("now")
+    ?, ?, "{}", datetime("now"), datetime("now")
 ) RETURNING *;
 
 -- name: GetStudent :one
 SELECT * FROM student
 WHERE id=?;
 
+-- name: GetStudentByUsernameAndClassCode :one
+SELECT * FROM student
+WHERE username=? AND class_code=?;
+
 -- name: ListStudents :many
 SELECT * FROM student
-WHERE username LIKE ? AND email LIKE ?
+WHERE username LIKE ? AND class_code LIKE ?
 LIMIT ? OFFSET ?;
 
 -- name: DeleteStudent :exec
@@ -53,14 +57,19 @@ WHERE id=?;
 
 -- name: CreateQuizSession :one
 INSERT INTO quiz_session (
-    student_id, quiz_id, data
+    student_id, quiz_id, active, questions_answered, created, updated
 ) VALUES (
-    ?, ?, "{}"
+    ?, ?, ?, 0, datetime("now"), datetime("now")
 ) RETURNING *;
 
 -- name: GetQuizSession :one
 SELECT * FROM quiz_session
 WHERE id=?;
+
+-- name: GetActiveQuizSession :one
+SELECT * FROM quiz_session
+WHERE active=true
+LIMIT 1;
 
 -- name: DeleteQuizSession :exec
 DELETE FROM quiz_session

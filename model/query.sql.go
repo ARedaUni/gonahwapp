@@ -42,28 +42,30 @@ func (q *Queries) CreateQuiz(ctx context.Context, arg CreateQuizParams) (Quiz, e
 const createQuizSession = `-- name: CreateQuizSession :one
 
 INSERT INTO quiz_session (
-    student_id, quiz_id, data
+    student_id, quiz_id, active, questions_answered, created, updated
 ) VALUES (
-    ?, ?, "{}"
-) RETURNING id, student_id, quiz_id, data, created, updated
+    ?, ?, ?, 0, datetime("now"), datetime("now")
+) RETURNING id, student_id, quiz_id, questions_answered, active, created, updated
 `
 
 type CreateQuizSessionParams struct {
 	StudentID int64
 	QuizID    int64
+	Active    bool
 }
 
 // *****
 // QUIZ_SESSION TABLE
 // *****
 func (q *Queries) CreateQuizSession(ctx context.Context, arg CreateQuizSessionParams) (QuizSession, error) {
-	row := q.db.QueryRowContext(ctx, createQuizSession, arg.StudentID, arg.QuizID)
+	row := q.db.QueryRowContext(ctx, createQuizSession, arg.StudentID, arg.QuizID, arg.Active)
 	var i QuizSession
 	err := row.Scan(
 		&i.ID,
 		&i.StudentID,
 		&i.QuizID,
-		&i.Data,
+		&i.QuestionsAnswered,
+		&i.Active,
 		&i.Created,
 		&i.Updated,
 	)
@@ -73,29 +75,27 @@ func (q *Queries) CreateQuizSession(ctx context.Context, arg CreateQuizSessionPa
 const createStudent = `-- name: CreateStudent :one
 
 INSERT INTO student (
-    email, username, password_hash, statistics, created, updated
+    username, class_code, statistics, created, updated
 ) VALUES (
-    ?, ?, ?, "{}", datetime("now"), datetime("now")
-) RETURNING id, email, username, password_hash, statistics, created, updated
+    ?, ?, "{}", datetime("now"), datetime("now")
+) RETURNING id, username, class_code, statistics, created, updated
 `
 
 type CreateStudentParams struct {
-	Email        string
-	Username     string
-	PasswordHash string
+	Username  string
+	ClassCode string
 }
 
 // *****
 // STUDENT TABLE
 // *****
 func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (Student, error) {
-	row := q.db.QueryRowContext(ctx, createStudent, arg.Email, arg.Username, arg.PasswordHash)
+	row := q.db.QueryRowContext(ctx, createStudent, arg.Username, arg.ClassCode)
 	var i Student
 	err := row.Scan(
 		&i.ID,
-		&i.Email,
 		&i.Username,
-		&i.PasswordHash,
+		&i.ClassCode,
 		&i.Statistics,
 		&i.Created,
 		&i.Updated,
@@ -133,6 +133,27 @@ func (q *Queries) DeleteStudent(ctx context.Context, id int64) error {
 	return err
 }
 
+const getActiveQuizSession = `-- name: GetActiveQuizSession :one
+SELECT id, student_id, quiz_id, questions_answered, active, created, updated FROM quiz_session
+WHERE active=true
+LIMIT 1
+`
+
+func (q *Queries) GetActiveQuizSession(ctx context.Context) (QuizSession, error) {
+	row := q.db.QueryRowContext(ctx, getActiveQuizSession)
+	var i QuizSession
+	err := row.Scan(
+		&i.ID,
+		&i.StudentID,
+		&i.QuizID,
+		&i.QuestionsAnswered,
+		&i.Active,
+		&i.Created,
+		&i.Updated,
+	)
+	return i, err
+}
+
 const getQuiz = `-- name: GetQuiz :one
 SELECT id, name, data, created, updated FROM quiz
 WHERE id=?
@@ -152,7 +173,7 @@ func (q *Queries) GetQuiz(ctx context.Context, id int64) (Quiz, error) {
 }
 
 const getQuizSession = `-- name: GetQuizSession :one
-SELECT id, student_id, quiz_id, data, created, updated FROM quiz_session
+SELECT id, student_id, quiz_id, questions_answered, active, created, updated FROM quiz_session
 WHERE id=?
 `
 
@@ -163,7 +184,8 @@ func (q *Queries) GetQuizSession(ctx context.Context, id int64) (QuizSession, er
 		&i.ID,
 		&i.StudentID,
 		&i.QuizID,
-		&i.Data,
+		&i.QuestionsAnswered,
+		&i.Active,
 		&i.Created,
 		&i.Updated,
 	)
@@ -171,7 +193,7 @@ func (q *Queries) GetQuizSession(ctx context.Context, id int64) (QuizSession, er
 }
 
 const getStudent = `-- name: GetStudent :one
-SELECT id, email, username, password_hash, statistics, created, updated FROM student
+SELECT id, username, class_code, statistics, created, updated FROM student
 WHERE id=?
 `
 
@@ -180,9 +202,32 @@ func (q *Queries) GetStudent(ctx context.Context, id int64) (Student, error) {
 	var i Student
 	err := row.Scan(
 		&i.ID,
-		&i.Email,
 		&i.Username,
-		&i.PasswordHash,
+		&i.ClassCode,
+		&i.Statistics,
+		&i.Created,
+		&i.Updated,
+	)
+	return i, err
+}
+
+const getStudentByUsernameAndClassCode = `-- name: GetStudentByUsernameAndClassCode :one
+SELECT id, username, class_code, statistics, created, updated FROM student
+WHERE username=? AND class_code=?
+`
+
+type GetStudentByUsernameAndClassCodeParams struct {
+	Username  string
+	ClassCode string
+}
+
+func (q *Queries) GetStudentByUsernameAndClassCode(ctx context.Context, arg GetStudentByUsernameAndClassCodeParams) (Student, error) {
+	row := q.db.QueryRowContext(ctx, getStudentByUsernameAndClassCode, arg.Username, arg.ClassCode)
+	var i Student
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.ClassCode,
 		&i.Statistics,
 		&i.Created,
 		&i.Updated,
@@ -233,22 +278,22 @@ func (q *Queries) ListQuiz(ctx context.Context, arg ListQuizParams) ([]Quiz, err
 }
 
 const listStudents = `-- name: ListStudents :many
-SELECT id, email, username, password_hash, statistics, created, updated FROM student
-WHERE username LIKE ? AND email LIKE ?
+SELECT id, username, class_code, statistics, created, updated FROM student
+WHERE username LIKE ? AND class_code LIKE ?
 LIMIT ? OFFSET ?
 `
 
 type ListStudentsParams struct {
-	Username string
-	Email    string
-	Limit    int64
-	Offset   int64
+	Username  string
+	ClassCode string
+	Limit     int64
+	Offset    int64
 }
 
 func (q *Queries) ListStudents(ctx context.Context, arg ListStudentsParams) ([]Student, error) {
 	rows, err := q.db.QueryContext(ctx, listStudents,
 		arg.Username,
-		arg.Email,
+		arg.ClassCode,
 		arg.Limit,
 		arg.Offset,
 	)
@@ -261,9 +306,8 @@ func (q *Queries) ListStudents(ctx context.Context, arg ListStudentsParams) ([]S
 		var i Student
 		if err := rows.Scan(
 			&i.ID,
-			&i.Email,
 			&i.Username,
-			&i.PasswordHash,
+			&i.ClassCode,
 			&i.Statistics,
 			&i.Created,
 			&i.Updated,

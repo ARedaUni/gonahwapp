@@ -1,6 +1,10 @@
 package model
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/amrojjeh/nahwapp/arabic"
+)
 
 type QuizData struct {
 	Sentences []QuizSentence
@@ -24,6 +28,10 @@ func (q QuizData) String() string {
 		builder.WriteString(s.String())
 	}
 	return builder.String()
+}
+
+func (q QuizData) Unpointed(showShadda bool) string {
+	return arabic.Unpointed(q.String(), showShadda)
 }
 
 func (s QuizSentence) String() string {

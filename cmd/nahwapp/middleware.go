@@ -1,16 +1,12 @@
 package main
 
 import (
-	"context"
 	"log/slog"
 	"net/http"
-	"strconv"
-
-	"github.com/julienschmidt/httprouter"
 )
 
-func (app *application) logRequest(r *http.Request) {
-	app.logger.Info("request made", slog.String("url", r.URL.String()),
+func logRequest(logger *slog.Logger, r *http.Request) {
+	logger.Info("request made", slog.String("url", r.URL.String()),
 		slog.String("proto", r.Proto),
 		slog.String("method", r.Method),
 		slog.String("remote-addr", r.RemoteAddr))
@@ -47,27 +43,3 @@ func (app *application) secureHeaders(h http.Handler) http.Handler {
 // 		h.ServeHTTP(w, r.WithContext(ctx))
 // 	})
 // }
-
-func (app *application) iteratorRequired(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		e := excerptFromContext(r.Context())
-		params := httprouter.ParamsFromContext(r.Context())
-		idStr := params.ByName("word")
-		id, err := strconv.Atoi(idStr)
-		if err != nil {
-			app.clientError(w, http.StatusBadRequest)
-			return
-		}
-
-		i, found := e.Iterator()
-		for i.Index != int(id) {
-			i, found = i.Next()
-			if !found {
-				app.clientError(w, http.StatusBadRequest)
-				return
-			}
-		}
-		ctx := context.WithValue(r.Context(), iteratorKey, i)
-		h.ServeHTTP(w, r.WithContext(ctx))
-	})
-}

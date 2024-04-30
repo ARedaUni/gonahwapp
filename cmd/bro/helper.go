@@ -12,7 +12,6 @@ import (
 	"github.com/amrojjeh/nahwapp/arabic"
 	"github.com/amrojjeh/nahwapp/model"
 	"github.com/urfave/cli/v2"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func openDB(file string) (*sql.DB, error) {
@@ -30,19 +29,6 @@ func openDB(file string) (*sql.DB, error) {
 	}
 
 	return db, nil
-}
-
-func createStudent(ctx context.Context, q *model.Queries,
-	email, username, password string) (model.Student, error) {
-	hashed, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-	if err != nil {
-		return model.Student{}, err
-	}
-	return q.CreateStudent(ctx, model.CreateStudentParams{
-		Email:        email,
-		Username:     username,
-		PasswordHash: string(hashed),
-	})
 }
 
 func beforeOpenDB(ctx *cli.Context) error {
@@ -63,9 +49,8 @@ func afterOpenDB(ctx *cli.Context) error {
 
 func printStudent(s model.Student) {
 	fmt.Printf("ID: %d\n", s.ID)
-	fmt.Printf("Email: %s\n", s.Email)
 	fmt.Printf("Username: %s\n", s.Username)
-	fmt.Printf("Password: ****\n")
+	fmt.Printf("Class Code: %s\n", s.ClassCode)
 	fmt.Printf("Created: %s\n", s.Created)
 	fmt.Printf("Updated: %s\n", s.Updated)
 }

@@ -6,12 +6,15 @@ import (
 )
 
 type LoginProps struct {
-	Email      string
-	EmailError string
+	Error          string
+	Username       string
+	UsernameError  string
+	ClassCode      string
+	ClassCodeError string
 }
 
 func (p LoginProps) NoError() bool {
-	return true
+	return p.ClassCodeError == "" && p.UsernameError == ""
 }
 
 func LoginPage(p LoginProps) g.Node {
@@ -21,11 +24,18 @@ func LoginPage(p LoginProps) g.Node {
 		SubmitButton: "Login",
 		Action:       "/login",
 		Inputs: []g.Node{
-			Label(For("email"), g.Text("Email")),
-			g.If(p.EmailError != "",
-				Span(Class("error"), g.Text(p.EmailError))),
-			Input(ID("email"), Name("email"), Type("text"),
-				Value(p.Email)),
+			g.If(p.Error != "",
+				Span(Class("error"), g.Text(p.Error))),
+			Label(For("username"), g.Text("Username")),
+			g.If(p.UsernameError != "",
+				Span(Class("error"), g.Text(p.UsernameError))),
+			Input(ID("username"), Name("username"), Type("text"),
+				Value(p.Username)),
+			Label(For("code"), g.Text("Class code")),
+			g.If(p.ClassCodeError != "",
+				Span(Class("error"), g.Text(p.ClassCodeError))),
+			Input(ID("code"), Name("code"), Type("text"),
+				Value(p.ClassCode)),
 		},
 	})
 }

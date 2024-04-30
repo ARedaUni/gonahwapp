@@ -21,7 +21,7 @@ func NewValidator(field, value string) Validator {
 	}
 }
 
-func (v Validator) SetError(message string) Validator {
+func (v Validator) setError(message string) Validator {
 	v.valid = false
 	v.errMessage = message
 	return v
@@ -29,7 +29,7 @@ func (v Validator) SetError(message string) Validator {
 
 func (v Validator) MaxLength(max int) Validator {
 	if utf8.RuneCountInString(v.value) > max {
-		v = v.SetError(fmt.Sprintf("Your %s exceeds the max length of %v",
+		v = v.setError(fmt.Sprintf("Your %s exceeds the max length of %v",
 			v.field, max))
 	}
 	return v
@@ -37,7 +37,7 @@ func (v Validator) MaxLength(max int) Validator {
 
 func (v Validator) MaxBytes(max int) Validator {
 	if len(v.value) > max {
-		v = v.SetError(fmt.Sprintf("Your %s exceeds the max length of %v",
+		v = v.setError(fmt.Sprintf("Your %s exceeds the max length of %v",
 			v.field, max))
 	}
 	return v
@@ -45,14 +45,14 @@ func (v Validator) MaxBytes(max int) Validator {
 
 func (v Validator) Required() Validator {
 	if v.value == "" {
-		v = v.SetError(fmt.Sprintf("Please provide a %s", v.field))
+		v = v.setError(fmt.Sprintf("Please provide a %s", v.field))
 	}
 	return v
 }
 
 func (v Validator) SameAs(val string) Validator {
 	if v.value != val {
-		v = v.SetError(fmt.Sprintf("Your %s did not match", v.field))
+		v = v.setError(fmt.Sprintf("Your %s did not match", v.field))
 	}
 	return v
 }
@@ -60,7 +60,7 @@ func (v Validator) SameAs(val string) Validator {
 func (v Validator) IsEmail() Validator {
 	_, err := mail.ParseAddress(v.value)
 	if err != nil {
-		v = v.SetError(fmt.Sprintf("Your %s is not a valid email address", v.field))
+		v = v.setError(fmt.Sprintf("Your %s is not a valid email address", v.field))
 	}
 	return v
 }

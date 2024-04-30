@@ -8,20 +8,21 @@ CREATE TABLE IF NOT EXISTS quiz (
 
 CREATE TABLE IF NOT EXISTS student (
     id INTEGER NOT NULL PRIMARY KEY,
-    email TEXT NOT NULL,
     username TEXT NOT NULL,
-    password_hash TEXT NOT NULL,
+    class_code TEXT NOT NULL,
     statistics JSON NOT NULL, -- map[case]{correct, total}
     created DATETIME NOT NULL,
     updated DATETIME NOT NULL,
-    CONSTRAINT student_uc_email UNIQUE (email)
+
+    CONSTRAINT student_username_code_uc UNIQUE (username, class_code)
 );
 
 CREATE TABLE IF NOT EXISTS quiz_session (
     id INTEGER NOT NULL PRIMARY KEY,
     student_id INTEGER NOT NULL,
     quiz_id INTEGER NOT NULL,
-    data JSON NOT NULL,
+    questions_answered INTEGER NOT NULL,
+    active BOOLEAN NOT NULL,
     created DATETIME NOT NULL,
     updated DATETIME NOT NULL,
     
