@@ -1,7 +1,7 @@
 package pages
 
 import (
-	"github.com/amrojjeh/arabic/ui"
+	"github.com/amrojjeh/nahwapp/ui"
 	g "github.com/maragudk/gomponents"
 	. "github.com/maragudk/gomponents/html"
 )

@@ -2,13 +2,11 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"io/fs"
 	"log/slog"
 	"net/http"
 
 	"github.com/amrojjeh/kalam"
-	"github.com/amrojjeh/nahwapp/data"
+	"github.com/maragudk/gomponents"
 )
 
 func (app *application) clientError(w http.ResponseWriter, code int) {
@@ -21,6 +19,13 @@ func (app *application) serverError(w http.ResponseWriter, err error) {
 		http.StatusInternalServerError)
 }
 
+func (app *application) render(w http.ResponseWriter, node gomponents.Node) {
+	err := node.Render(w)
+	if err != nil {
+		app.serverError(w, err)
+	}
+}
+
 func excerptFromContext(ctx context.Context) kalam.Excerpt {
 	return ctx.Value(excerptKey).(kalam.Excerpt)
 }
@@ -31,27 +36,4 @@ func excerptIdFromContext(ctx context.Context) int {
 
 func iteratorFromContext(ctx context.Context) kalam.ExcerptIterator {
 	return ctx.Value(iteratorKey).(kalam.ExcerptIterator)
-}
-
-func (app *application) GetQuestions() error {
-	names, err := fs.Glob(data.Files, "*.json")
-	if err != nil {
-		return err
-	}
-
-	for _, n := range names {
-		e := kalam.Excerpt{}
-		file, err := data.Files.ReadFile(n)
-		if err != nil {
-			return err
-		}
-		err = json.Unmarshal(file, &e)
-		if err != nil {
-			return err
-		}
-
-		app.logger.Info("loaded question", slog.String("name", e.Name))
-		app.excerpts = append(app.excerpts, e)
-	}
-	return nil
 }

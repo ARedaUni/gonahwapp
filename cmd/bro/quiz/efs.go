@@ -1,4 +1,4 @@
-package data
+package quiz
 
 import "embed"
 

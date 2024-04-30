@@ -3,28 +3,20 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/sqlite3store"
 	"github.com/alexedwards/scs/v2"
-	"github.com/amrojjeh/kalam"
-	"github.com/amrojjeh/nahwapp/internal/models"
+	"github.com/amrojjeh/nahwapp/model"
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type application struct {
-	logger *slog.Logger
-	users  models.UsersModel
-	sm     *scs.SessionManager
-	// TODO(Amr Ojjeh): Replace with a model
-	excerpts []kalam.Excerpt
-}
-
 func main() {
-	dsn := flag.String("dsn", "web:pass@/nahwapp?parseTime=true", "Data Source Name")
+	dsn := flag.String("dsn", "default.db", "Data Source Name")
 	addr := flag.String("addr", ":8080", "HTTP Address")
 	cert := flag.String("cert", "./tls/cert.pem", "Path to TLS certificate")
 	key := flag.String("key", "./tls/key.pem", "Path to TLS private key")
@@ -36,29 +28,20 @@ func main() {
 	logger.Info("connected to db")
 
 	sessionManager := scs.New()
-	sessionManager.Store = mysqlstore.New(db)
+	sessionManager.Store = sqlite3store.New(db)
 
-	app := application{
-		logger: logger,
-		sm:     sessionManager,
-		users: models.UsersModel{
-			Db: db,
-		},
-		excerpts: make([]kalam.Excerpt, 0),
+	app := &application{
+		logger:  logger,
+		sm:      sessionManager,
+		db:      db,
+		queries: model.New(db),
 	}
 
 	server := &http.Server{
-		Handler:      app.routes(),
+		Handler:      app,
 		Addr:         *addr,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
-	}
-
-	err := app.GetQuestions()
-	if err != nil {
-		app.logger.Error("failed to load questions",
-			slog.String("error", err.Error()))
-		os.Exit(1)
 	}
 
 	app.logger.Info("starting server", slog.String("addr", *addr))
@@ -68,8 +51,8 @@ func main() {
 	}
 }
 
-func openDB(dsn string) *sql.DB {
-	db, err := sql.Open("mysql", dsn)
+func openDB(filename string) *sql.DB {
+	db, err := sql.Open("sqlite3", fmt.Sprintf("file:%v?mode=rw", filename))
 	if err != nil {
 		panic(err)
 	}
