@@ -133,6 +133,7 @@ var listCommand = &cli.Command{
 	},
 	Subcommands: []*cli.Command{
 		listStudentCommand,
+		listQuizCommand,
 	},
 }
 
@@ -153,7 +154,7 @@ var listStudentCommand = &cli.Command{
 	},
 	Action: func(ctx *cli.Context) error {
 		q := getQueries(ctx)
-		users, err := q.ListStudents(ctx.Context, model.ListStudentsParams{
+		students, err := q.ListStudents(ctx.Context, model.ListStudentsParams{
 			Username: fmt.Sprintf("%%%s%%", ctx.String("username")),
 			Email:    fmt.Sprintf("%%%s%%", ctx.String("email")),
 			Limit:    int64(ctx.Int("limit")),
@@ -163,11 +164,40 @@ var listStudentCommand = &cli.Command{
 			return errors.Join(errors.New("could not retrieve users"), err)
 		}
 
-		for _, user := range users {
-			fmt.Printf("email: %s\nusername: %s\npassword: %s\ncreated: %s\nlast updated: %s\n",
-				user.Email, user.Username, "****", user.Created, user.Updated)
+		for _, student := range students {
+			printStudent(student)
 			fmt.Println("-------")
 		}
+		return nil
+	},
+}
+
+var listQuizCommand = &cli.Command{
+	Name:  "quiz",
+	Usage: "query quizzes from db",
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:    "name",
+			Usage:   "the name of the quiz",
+			Aliases: []string{"n"},
+		},
+	},
+	Action: func(ctx *cli.Context) error {
+		q := getQueries(ctx)
+		quizzes, err := q.ListQuiz(ctx.Context, model.ListQuizParams{
+			Name:   fmt.Sprintf("%%%s%%", ctx.String("name")),
+			Limit:  50,
+			Offset: 0,
+		})
+		if err != nil {
+			return errors.Join(errors.New("could not query quizzes"), err)
+		}
+
+		for _, quiz := range quizzes {
+			printQuiz(quiz)
+			fmt.Println("-------")
+		}
+
 		return nil
 	},
 }

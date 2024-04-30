@@ -5,14 +5,13 @@
 package model
 
 import (
-	"encoding/json"
 	"time"
 )
 
 type Quiz struct {
 	ID      int64
 	Name    string
-	Data    json.RawMessage
+	Data    []byte
 	Created time.Time
 	Updated time.Time
 }

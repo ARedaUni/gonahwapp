@@ -11,6 +11,7 @@ INSERT INTO quiz (
 
 -- name: ListQuiz :many
 SELECT * FROM quiz
+WHERE name LIKE ?
 ORDER BY created
 LIMIT ? OFFSET ?;
 

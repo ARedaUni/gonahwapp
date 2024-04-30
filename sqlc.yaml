@@ -9,5 +9,4 @@ sql:
           overrides:
             - column: "quiz.data"
               go_type:
-                import: "encoding/json"
-                type: "RawMessage"
+                type: "[]byte"

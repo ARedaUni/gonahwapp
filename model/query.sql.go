@@ -7,7 +7,6 @@ package model
 
 import (
 	"context"
-	"encoding/json"
 )
 
 const createQuiz = `-- name: CreateQuiz :one
@@ -21,7 +20,7 @@ INSERT INTO quiz (
 
 type CreateQuizParams struct {
 	Name string
-	Data json.RawMessage
+	Data []byte
 }
 
 // *****
@@ -193,17 +192,19 @@ func (q *Queries) GetStudent(ctx context.Context, id int64) (Student, error) {
 
 const listQuiz = `-- name: ListQuiz :many
 SELECT id, name, data, created, updated FROM quiz
+WHERE name LIKE ?
 ORDER BY created
 LIMIT ? OFFSET ?
 `
 
 type ListQuizParams struct {
+	Name   string
 	Limit  int64
 	Offset int64
 }
 
 func (q *Queries) ListQuiz(ctx context.Context, arg ListQuizParams) ([]Quiz, error) {
-	rows, err := q.db.QueryContext(ctx, listQuiz, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listQuiz, arg.Name, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

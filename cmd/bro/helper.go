@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"log"
 
+	"github.com/amrojjeh/nahwapp/arabic"
 	"github.com/amrojjeh/nahwapp/model"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/crypto/bcrypt"
@@ -66,6 +67,21 @@ func printStudent(s model.Student) {
 	fmt.Printf("Username: %s\n", s.Username)
 	fmt.Printf("Password: ****\n")
 	fmt.Printf("Created: %s\n", s.Created)
+	fmt.Printf("Updated: %s\n", s.Updated)
+}
+
+func printQuiz(q model.Quiz) {
+	data := model.QuizData{}
+	err := json.Unmarshal(q.Data, &data)
+	if err != nil {
+		log.Printf("could not unmarshal quiz data for %s\n", q.Name)
+		log.Fatal(err)
+	}
+	fmt.Printf("ID: %d\n", q.ID)
+	fmt.Printf("Name: %s\n", q.Name)
+	fmt.Printf("Data: %s\n", arabic.ToBuckwalter(data.String()))
+	fmt.Printf("Created: %s\n", q.Created)
+	fmt.Printf("Updated: %s\n", q.Updated)
 }
 
 func insertQuizzes(ctx context.Context, q *model.Queries, fsys fs.FS) {
@@ -76,7 +92,7 @@ func insertQuizzes(ctx context.Context, q *model.Queries, fsys fs.FS) {
 	}
 }
 
-func createQuiz(ctx context.Context, q *model.Queries, name string, data json.RawMessage) model.Quiz {
+func createQuiz(ctx context.Context, q *model.Queries, name string, data []byte) model.Quiz {
 	quiz, err := q.CreateQuiz(ctx, model.CreateQuizParams{
 		Name: name,
 		Data: data,
@@ -87,7 +103,7 @@ func createQuiz(ctx context.Context, q *model.Queries, name string, data json.Ra
 	return quiz
 }
 
-func readQuiz(fsys fs.FS, filename string) (name string, data json.RawMessage) {
+func readQuiz(fsys fs.FS, filename string) (name string, data []byte) {
 	content := readFile(fsys, filename)
 	return readQuizName(content), readQuizData(content)
 }
@@ -103,7 +119,7 @@ func readQuizName(content []byte) string {
 	return name.Name
 }
 
-func readQuizData(content []byte) json.RawMessage {
+func readQuizData(content []byte) []byte {
 	data := model.QuizData{}
 	err := json.Unmarshal(content, &data)
 	if err != nil {
@@ -113,7 +129,7 @@ func readQuizData(content []byte) json.RawMessage {
 	if err != nil {
 		log.Fatal("could not marshal json\n", err)
 	}
-	return json.RawMessage(raw)
+	return raw
 }
 
 func readFile(fsys fs.FS, name string) []byte {
