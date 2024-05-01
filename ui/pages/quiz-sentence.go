@@ -53,7 +53,7 @@ func QuizSentenceGenWords(s model.QuizSentence) QuizSentenceWordProps {
 			})
 		} else {
 			words = append(words, partials.QuizWordProps{
-				Base:        arabic.Unpointed(w.Base(), true),
+				Base:        arabic.Unpointed(w.PointedWord, true),
 				Termination: "",
 				Selected:    false,
 				Space:       !w.Preceding,
