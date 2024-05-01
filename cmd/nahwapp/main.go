@@ -68,5 +68,6 @@ func openDB(filename string) *sql.DB {
 func createLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		AddSource: false,
+		Level:     slog.LevelDebug,
 	}))
 }
