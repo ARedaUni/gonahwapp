@@ -1,14 +1,5 @@
 package main
 
-import (
-	"errors"
-	"fmt"
-	"net/http"
-
-	"github.com/amrojjeh/nahwapp/model"
-	"github.com/amrojjeh/nahwapp/ui/pages"
-)
-
 // func (app *application) registerGet() http.Handler {
 // 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 // 		err := pages.RegisterPage(pages.RegisterProps{}).Render(w)
@@ -63,56 +54,6 @@ import (
 // 		// TODO(Amr Ojjeh): Handle registration
 // 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 // 	})
-// }
-
-func listQuiz(r *http.Request, q *model.Queries) []model.Quiz {
-	quizzes, err := q.ListQuiz(r.Context(), model.ListQuizParams{
-		Name:   "%%",
-		Limit:  50,
-		Offset: 0,
-	})
-	if err != nil {
-		panic(errors.Join(errors.New("unable to list quizzes"), err))
-	}
-	return quizzes
-}
-
-func (app *application) homePage(w http.ResponseWriter, r *http.Request) {
-	excerpts := []pages.HomeExcerpt{}
-	quizzes := listQuiz(r, app.queries)
-
-	for _, e := range quizzes {
-		excerpts = append(excerpts, pages.HomeExcerpt{
-			Name: e.Name,
-			Link: fmt.Sprintf("/quiz/%v", e.ID),
-		})
-	}
-
-	app.mustRender(w, pages.HomePage(pages.HomeProps{
-		Excerpts: excerpts,
-	}))
-}
-
-func (qr *quizRouter) startPage(w http.ResponseWriter, r *http.Request) {
-	qr.mustRender(w, pages.QuizStartPage(pages.QuizStartProps{
-		Title:     fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
-		Paragraph: qr.quizData.Unpointed(true),
-		StartURL:  fmt.Sprintf("/quiz/%v", qr.quiz.ID),
-	}))
-}
-
-// func (qr *quizRouter) quizSentenceGet(w http.ResponseWriter, r *http.Request) {
-// 	qr.render(w,
-// 		pages.QuizSentencePage(pages.QuizSentenceProps{
-// 			Title: fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
-// 			Words: pages.QuizSentenceGenWords(i.Sentence()).
-// 				Select(i.WordI).
-// 				Build(),
-// 			Cards: pages.QuizSentenceGenCards(i.Word().Termination(),
-// 				pages.QuizSentenceSelectURL(eid, i.Index)).Build(),
-// 			Footer: pages.QuizSentenceInactiveFooter(),
-// 		}),
-// 	)
 // }
 
 // func (app *application) quizCardSelectGet() http.Handler {

@@ -49,8 +49,8 @@ INSERT INTO quiz_session (
 `
 
 type CreateQuizSessionParams struct {
-	StudentID int64
-	QuizID    int64
+	StudentID int
+	QuizID    int
 	Active    bool
 }
 
@@ -108,7 +108,7 @@ DELETE FROM quiz
 WHERE id=?
 `
 
-func (q *Queries) DeleteQuiz(ctx context.Context, id int64) error {
+func (q *Queries) DeleteQuiz(ctx context.Context, id int) error {
 	_, err := q.db.ExecContext(ctx, deleteQuiz, id)
 	return err
 }
@@ -118,7 +118,7 @@ DELETE FROM quiz_session
 WHERE id=?
 `
 
-func (q *Queries) DeleteQuizSession(ctx context.Context, id int64) error {
+func (q *Queries) DeleteQuizSession(ctx context.Context, id int) error {
 	_, err := q.db.ExecContext(ctx, deleteQuizSession, id)
 	return err
 }
@@ -128,19 +128,24 @@ DELETE FROM student
 WHERE id=?
 `
 
-func (q *Queries) DeleteStudent(ctx context.Context, id int64) error {
+func (q *Queries) DeleteStudent(ctx context.Context, id int) error {
 	_, err := q.db.ExecContext(ctx, deleteStudent, id)
 	return err
 }
 
 const getActiveQuizSession = `-- name: GetActiveQuizSession :one
 SELECT id, student_id, quiz_id, questions_answered, active, created, updated FROM quiz_session
-WHERE active=true
+WHERE active=true AND student_id=? AND quiz_id=?
 LIMIT 1
 `
 
-func (q *Queries) GetActiveQuizSession(ctx context.Context) (QuizSession, error) {
-	row := q.db.QueryRowContext(ctx, getActiveQuizSession)
+type GetActiveQuizSessionParams struct {
+	StudentID int
+	QuizID    int
+}
+
+func (q *Queries) GetActiveQuizSession(ctx context.Context, arg GetActiveQuizSessionParams) (QuizSession, error) {
+	row := q.db.QueryRowContext(ctx, getActiveQuizSession, arg.StudentID, arg.QuizID)
 	var i QuizSession
 	err := row.Scan(
 		&i.ID,
@@ -159,7 +164,7 @@ SELECT id, name, data, created, updated FROM quiz
 WHERE id=?
 `
 
-func (q *Queries) GetQuiz(ctx context.Context, id int64) (Quiz, error) {
+func (q *Queries) GetQuiz(ctx context.Context, id int) (Quiz, error) {
 	row := q.db.QueryRowContext(ctx, getQuiz, id)
 	var i Quiz
 	err := row.Scan(
@@ -177,7 +182,7 @@ SELECT id, student_id, quiz_id, questions_answered, active, created, updated FRO
 WHERE id=?
 `
 
-func (q *Queries) GetQuizSession(ctx context.Context, id int64) (QuizSession, error) {
+func (q *Queries) GetQuizSession(ctx context.Context, id int) (QuizSession, error) {
 	row := q.db.QueryRowContext(ctx, getQuizSession, id)
 	var i QuizSession
 	err := row.Scan(
@@ -197,7 +202,7 @@ SELECT id, username, class_code, statistics, created, updated FROM student
 WHERE id=?
 `
 
-func (q *Queries) GetStudent(ctx context.Context, id int64) (Student, error) {
+func (q *Queries) GetStudent(ctx context.Context, id int) (Student, error) {
 	row := q.db.QueryRowContext(ctx, getStudent, id)
 	var i Student
 	err := row.Scan(

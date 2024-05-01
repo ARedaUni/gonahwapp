@@ -9,7 +9,7 @@ import (
 )
 
 type Quiz struct {
-	ID      int64
+	ID      int
 	Name    string
 	Data    []byte
 	Created time.Time
@@ -17,10 +17,10 @@ type Quiz struct {
 }
 
 type QuizSession struct {
-	ID                int64
-	StudentID         int64
-	QuizID            int64
-	QuestionsAnswered int64
+	ID                int
+	StudentID         int
+	QuizID            int
+	QuestionsAnswered int
 	Active            bool
 	Created           time.Time
 	Updated           time.Time
@@ -33,7 +33,7 @@ type Session struct {
 }
 
 type Student struct {
-	ID         int64
+	ID         int
 	Username   string
 	ClassCode  string
 	Statistics interface{}

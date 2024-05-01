@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -34,8 +35,8 @@ func (app *application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
-		student, deleted := app.getLoggedInStudent(r)
-		if deleted {
+		student, found := app.getLoggedInStudent(r)
+		if !found {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
@@ -55,6 +56,22 @@ func (app *application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.NotFound(w, r)
 	}
+}
+
+func (app *application) homePage(w http.ResponseWriter, r *http.Request) {
+	excerpts := []pages.HomeExcerpt{}
+	quizzes := listQuiz(r, app.queries)
+
+	for _, e := range quizzes {
+		excerpts = append(excerpts, pages.HomeExcerpt{
+			Name: e.Name,
+			Link: fmt.Sprintf("/quiz/%v", e.ID),
+		})
+	}
+
+	app.mustRender(w, pages.HomePage(pages.HomeProps{
+		Excerpts: excerpts,
+	}))
 }
 
 type clientError struct {
@@ -85,6 +102,7 @@ func (app *application) serveLogin(w http.ResponseWriter, r *http.Request) {
 		if app.isLoggedIn(r) {
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 		} else {
+			// TODO(Amr Ojjeh): Add back arrow link
 			app.mustRender(w, pages.LoginPage(nil))
 		}
 	case http.MethodPost:
@@ -117,19 +135,22 @@ type quizRouter struct {
 func (qr *quizRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch shiftPath(r) {
 	case ".":
-		r.Header.Set("Allow", http.MethodGet)
-		r.Header.Set("Allow", http.MethodPost)
 		switch r.Method {
 		case http.MethodGet:
+			session, found := qr.getActiveQuizSession(r)
+			if found {
+				qr.logger.Debug("quiz session found", "created", session.Created.Format("Jan 2 03:04pm"))
+				qr.serveQuizSentence(w, r, session)
+				return
+			}
 			qr.startPage(w, r)
 		case http.MethodPost:
-			// TODO(Amr Ojjeh): start session if one doesn't exist already
-			qr.queries.CreateQuizSession(r.Context(), model.CreateQuizSessionParams{
-				StudentID: 0,
-				QuizID:    0,
-			})
-			// TODO(Amr Ojjeh): render 1/0
-
+			_, found := qr.getActiveQuizSession(r)
+			if !found {
+				qr.createQuizSession(r)
+				qr.logger.Debug("quiz session created")
+			}
+			http.Redirect(w, r, fmt.Sprintf("/quiz/%v", qr.quiz.ID), http.StatusSeeOther)
 		default:
 			panic(clientError{http.StatusMethodNotAllowed})
 		}
@@ -137,6 +158,29 @@ func (qr *quizRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+}
+
+func (qr *quizRouter) startPage(w http.ResponseWriter, r *http.Request) {
+	qr.mustRender(w, pages.QuizStartPage(pages.QuizStartProps{
+		Title:     fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
+		Paragraph: qr.quizData.Unpointed(true),
+		StartURL:  fmt.Sprintf("/quiz/%v", qr.quiz.ID),
+	}))
+}
+
+func (qr *quizRouter) serveQuizSentence(w http.ResponseWriter, r *http.Request, session model.QuizSession) {
+	i := model.NewQuizIterator(qr.quizData, int(session.QuestionsAnswered))
+	qr.mustRender(w,
+		pages.QuizSentencePage(pages.QuizSentenceProps{
+			Title: fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
+			Words: pages.QuizSentenceGenWords(i.Sentence()).
+				Select(i.WordI).
+				Build(),
+			Cards: pages.QuizSentenceGenCards(i.Word().Termination(),
+				pages.QuizSentenceSelectURL(qr.quiz.ID, i.Index)).Build(),
+			Footer: pages.QuizSentenceInactiveFooter(),
+		}),
+	)
 }
 
 // func (app *application) routes() http.Handler {

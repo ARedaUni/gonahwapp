@@ -6,6 +6,8 @@ import (
 	"strconv"
 
 	"github.com/amrojjeh/kalam"
+	"github.com/amrojjeh/nahwapp/arabic"
+	"github.com/amrojjeh/nahwapp/model"
 	"github.com/amrojjeh/nahwapp/ui/partials"
 	g "github.com/maragudk/gomponents"
 	. "github.com/maragudk/gomponents/html"
@@ -39,19 +41,19 @@ func QuizSentencePage(p QuizSentenceProps) g.Node {
 
 type QuizSentenceWordProps []partials.QuizWordProps
 
-func QuizSentenceGenWords(s kalam.Sentence) QuizSentenceWordProps {
+func QuizSentenceGenWords(s model.QuizSentence) QuizSentenceWordProps {
 	words := QuizSentenceWordProps{}
 	for _, w := range s.Words {
 		if w.Quizzable() {
 			words = append(words, partials.QuizWordProps{
-				Base:        w.Base().Unpointed(true),
+				Base:        arabic.Unpointed(w.Base(), true),
 				Termination: w.Termination().Unpointed(true),
 				Selected:    false,
 				Space:       !w.Preceding,
 			})
 		} else {
 			words = append(words, partials.QuizWordProps{
-				Base:        w.Unpointed(true),
+				Base:        arabic.Unpointed(w.Base(), true),
 				Termination: "",
 				Selected:    false,
 				Space:       !w.Preceding,
@@ -86,7 +88,7 @@ func (q QuizSentenceWordProps) Build() []g.Node {
 type QuizSentenceCardProps []partials.QuizCardProps
 
 func QuizSentenceGenCards(
-	l kalam.LetterPack,
+	l arabic.LetterPack,
 	selectURL func(value string) string,
 ) QuizSentenceCardProps {
 	if selectURL == nil {

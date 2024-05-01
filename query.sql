@@ -68,7 +68,7 @@ WHERE id=?;
 
 -- name: GetActiveQuizSession :one
 SELECT * FROM quiz_session
-WHERE active=true
+WHERE active=true AND student_id=? AND quiz_id=?
 LIMIT 1;
 
 -- name: DeleteQuizSession :exec

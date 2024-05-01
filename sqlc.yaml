@@ -10,3 +10,5 @@ sql:
             - column: "quiz.data"
               go_type:
                 type: "[]byte"
+            - db_type: "INTEGER"
+              go_type: "int"
