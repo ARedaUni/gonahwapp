@@ -15,17 +15,18 @@ import (
 
 // TODO(Amr Ojjeh): Add navigation control
 type QuizSentenceProps struct {
-	Title  string
-	Words  []g.Node
-	Cards  []g.Node
-	Footer g.Node
+	Title    string
+	Words    []g.Node
+	Cards    []g.Node
+	Footer   g.Node
+	Progress int
 }
 
 func QuizSentencePage(p QuizSentenceProps) g.Node {
 	return QuizBase(QuizBaseProps{
 		Title: p.Title,
 		Body: []g.Node{
-			partials.Navigation(0),
+			partials.Navigation(p.Progress),
 			Div(Class("quiz-sentence"),
 				P(Class("quiz-sentence__text"),
 					g.Group(p.Words),

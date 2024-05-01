@@ -8,6 +8,7 @@ import (
 	"github.com/amrojjeh/nahwapp/arabic"
 	"github.com/amrojjeh/nahwapp/cmd/bro/quiz"
 	"github.com/amrojjeh/nahwapp/model"
+	"github.com/amrojjeh/nahwapp/score"
 	"github.com/urfave/cli/v2"
 )
 
@@ -130,19 +131,11 @@ var scoreCommand = &cli.Command{
 	},
 	Action: func(ctx *cli.Context) error {
 		q := getQueries(ctx)
-		id := ctx.Int("student")
 		for _, state := range arabic.States {
-			attempts, err := q.ListTagAttemptsByStudent(ctx.Context, model.ListTagAttemptsByStudentParams{
-				StudentID: id,
-				Tag:       state,
-				Limit:     100,
-				Offset:    0,
-			})
+			score, err := score.CalcScore(ctx.Context, q, ctx.Int("student"), state)
 			if err != nil {
-				return errors.Join(fmt.Errorf("could not retrieve tags (id: %d, tag: %s)", id,
-					arabic.ToBuckwalter(state)), err)
+				return err
 			}
-			score := model.CalcScore(state, attempts)
 			fmt.Println(score.Buckwalter())
 		}
 		return nil

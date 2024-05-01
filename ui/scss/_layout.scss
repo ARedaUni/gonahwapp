@@ -1,0 +1,12 @@
+@layer layout {
+  #dashboard-page {
+    h1 {
+      text-align: center;
+    }
+
+    main {
+      inline-size: 50%;
+      margin-inline: auto;
+    }
+  }
+}

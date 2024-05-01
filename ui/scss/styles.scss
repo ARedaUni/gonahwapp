@@ -1,5 +1,9 @@
-@use 'abstracts';
-@use 'components';
+@use 'global';
+@use 'module';
+@use 'layout';
+@use 'reset';
+
+@layer reset, global, layout, module, util;
 
 :root {
   --footer-bg: #fff;
@@ -22,9 +26,4 @@
   --highlight-inactive: #e0dbd8;
   --highlight-incorrect: #C13535;
   --highlight-skipped: #BABABA;
-
-  --tooltip-bg: #fff;
-  --tooltip-incorrect: #EE282D;
-  --tooltip: #a6a6a6;
-  --tooltip-stroke: #E5E5E5;
 }

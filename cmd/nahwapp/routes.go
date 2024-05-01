@@ -11,6 +11,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/amrojjeh/kalam"
 	"github.com/amrojjeh/nahwapp/arabic"
+	"github.com/amrojjeh/nahwapp/score"
 	"github.com/amrojjeh/nahwapp/ui/pages"
 	"github.com/amrojjeh/nahwapp/ui/static"
 
@@ -74,20 +75,15 @@ func (app *application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) serveDashboard(w http.ResponseWriter, r *http.Request, s model.Student) {
-	scores := make([]model.Score, len(arabic.States))
+	scores := make([]score.Score, len(arabic.States))
 	for i, state := range arabic.States {
-		attempts, err := app.queries.ListTagAttemptsByStudent(r.Context(), model.ListTagAttemptsByStudentParams{
-			StudentID: s.ID,
-			Tag:       state,
-			Limit:     100,
-			Offset:    0,
-		})
+		score, err := score.CalcScore(r.Context(), app.queries, s.ID, state)
 		if err != nil {
 			panic(err)
 		}
-		scores[i] = model.CalcScore(state, attempts)
+		scores[i] = score
 	}
-	app.mustRender(w, pages.StatsPage(scores))
+	app.mustRender(w, pages.DashboardPage(scores))
 }
 
 func (app *application) homePage(w http.ResponseWriter, r *http.Request) {
@@ -210,12 +206,11 @@ func (qr *quizRouter) serveQuizSentence(w http.ResponseWriter, r *http.Request, 
 	qr.mustRender(w,
 		pages.QuizSentencePage(pages.QuizSentenceProps{
 			Title: fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
-			Words: pages.QuizSentenceGenWords(i.Sentence()).
-				Select(i.WordI).
-				Build(),
+			Words: pages.QuizSentenceGenWords(i.Sentence()).Select(i.WordI).Build(),
 			Cards: pages.QuizSentenceGenCards(i.Word().Termination(),
 				pages.QuizSentenceSelectURL(qr.quiz.ID)).Build(),
-			Footer: pages.QuizSentenceInactiveFooter(),
+			Footer:   pages.QuizSentenceInactiveFooter(),
+			Progress: i.Index * 100 / qr.quizData.CountQuizzable(),
 		}),
 	)
 }
@@ -227,26 +222,24 @@ func (qr *quizRouter) serveSelect(w http.ResponseWriter, r *http.Request, sessio
 	case http.MethodGet:
 		qr.mustRender(w, pages.QuizSentencePage(pages.QuizSentenceProps{
 			Title: fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
-			Words: pages.QuizSentenceGenWords(i.Sentence()).
-				Select(i.WordI).
-				TerminateSelectWith(value).
-				Build(),
+			Words: pages.QuizSentenceGenWords(i.Sentence()).Select(i.WordI).TerminateSelectWith(value).Build(),
 			Cards: pages.QuizSentenceGenCards(i.Word().Termination(),
-				pages.QuizSentenceSelectURL(qr.quiz.ID)).
-				Select(value).
-				Build(),
-			Footer: pages.QuizSentenceActiveFooter(
-				fmt.Sprintf("/quiz/%v/select/%v", qr.quiz.ID, arabic.ToBuckwalter(value))),
+				pages.QuizSentenceSelectURL(qr.quiz.ID)).Select(value).Build(),
+			Footer: pages.QuizSentenceActiveFooter(fmt.Sprintf("/quiz/%v/select/%v", qr.quiz.ID,
+				arabic.ToBuckwalter(value))),
+			Progress: i.Index * 100 / qr.quizData.CountQuizzable(),
 		}))
 	case http.MethodPost:
 		correctTerm := i.Word().Termination()
 		var correct bool
+		qr.logger.Debug("progress", "index", i.Index, "total", qr.quizData.CountQuizzable())
 		p := pages.QuizSentenceProps{
 			Title: fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
 			Words: pages.QuizSentenceGenWords(i.Sentence()).
 				Select(i.WordI).
 				TerminateSelectWith(correctTerm.String()).
 				Build(),
+			Progress: (i.Index + 1) * 100 / qr.quizData.CountQuizzable(),
 		}
 		if correct = arabic.LetterPackFromString(value).EqualTo(correctTerm); correct {
 			p.Cards = pages.QuizSentenceGenCards(i.Word().Termination(), nil).
@@ -276,13 +269,15 @@ func (qr *quizRouter) serveSelect(w http.ResponseWriter, r *http.Request, sessio
 		if err != nil {
 			panic(err)
 		}
-		_, err = qr.queries.CreateTagAttempt(r.Context(), model.CreateTagAttemptParams{
-			StudentID: qr.student.ID,
-			Tag:       i.Word().Tags[0],
-			Correct:   correct,
-		})
-		if err != nil {
-			panic(err)
+		if len(i.Word().Tags) != 0 {
+			_, err = qr.queries.CreateTagAttempt(r.Context(), model.CreateTagAttemptParams{
+				StudentID: qr.student.ID,
+				Tag:       i.Word().Tags[0],
+				Correct:   correct,
+			})
+			if err != nil {
+				panic(err)
+			}
 		}
 		qr.mustRender(w, pages.QuizSentencePage(p))
 	default:
