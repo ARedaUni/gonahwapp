@@ -10,11 +10,24 @@ CREATE TABLE IF NOT EXISTS student (
     id INTEGER NOT NULL PRIMARY KEY,
     username TEXT NOT NULL,
     class_code TEXT NOT NULL,
-    statistics JSON NOT NULL, -- map[case]{correct, total}
     created DATETIME NOT NULL,
     updated DATETIME NOT NULL,
 
     CONSTRAINT student_username_code_uc UNIQUE (username, class_code)
+);
+
+CREATE TABLE IF NOT EXISTS tag_attempt (
+    id INTEGER NOT NULL PRIMARY KEY,
+    student_id INTEGER NOT NULL,
+    tag TEXT NOT NULL,
+    correct BOOLEAN NOT NULL,
+    created DATETIME NOT NULL,
+    updated DATETIME NOT NULL,
+
+    FOREIGN KEY (student_id)
+        REFERENCES student(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS quiz_session (

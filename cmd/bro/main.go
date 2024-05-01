@@ -34,6 +34,7 @@ func newApp() *cli.App {
 			deleteDBCommand,
 			listCommand,
 			sqlVersion,
+			scoreCommand,
 		},
 	}
 }

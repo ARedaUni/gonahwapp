@@ -1,5 +1,5 @@
-up.link.config.followSelectors.push("a[href]")
-up.link.config.preloadSelectors.push("a[href]")
+// Disable until we get reactive elements in
+up.fragment.config.navigateOptions.cache = false
 
 up.compiler(".nahw-card", function(el) {
   if (el.getAttribute("up-href") != null) {

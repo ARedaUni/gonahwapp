@@ -33,10 +33,18 @@ type Session struct {
 }
 
 type Student struct {
-	ID         int
-	Username   string
-	ClassCode  string
-	Statistics interface{}
-	Created    time.Time
-	Updated    time.Time
+	ID        int
+	Username  string
+	ClassCode string
+	Created   time.Time
+	Updated   time.Time
+}
+
+type TagAttempt struct {
+	ID        int
+	StudentID int
+	Tag       string
+	Correct   bool
+	Created   time.Time
+	Updated   time.Time
 }

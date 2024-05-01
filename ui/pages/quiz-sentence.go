@@ -107,7 +107,7 @@ func QuizSentenceGenCards(
 				Value:     value,
 				State:     partials.QuizCardStateDefault,
 				Shortcut:  strconv.Itoa(i + 1),
-				SelectURL: selectURL(value),
+				SelectURL: selectURL(arabic.ToBuckwalter(value)),
 			})
 		}
 	} else {
@@ -117,7 +117,7 @@ func QuizSentenceGenCards(
 				Value:     value,
 				State:     partials.QuizCardStateDefault,
 				Shortcut:  strconv.Itoa(i + 1),
-				SelectURL: selectURL(value),
+				SelectURL: selectURL(arabic.ToBuckwalter(value)),
 			})
 		}
 	}
@@ -127,7 +127,7 @@ func QuizSentenceGenCards(
 		Value:     value,
 		State:     partials.QuizCardStateDefault,
 		Shortcut:  "4",
-		SelectURL: selectURL(value),
+		SelectURL: selectURL(arabic.ToBuckwalter(value)),
 	})
 
 	return cards
@@ -215,8 +215,8 @@ func QuizSentenceCorrectFooter(explanation, continueURL string) g.Node {
 	})
 }
 
-func QuizSentenceSelectURL(eid, index int) func(val string) string {
+func QuizSentenceSelectURL(eid int) func(val string) string {
 	return func(val string) string {
-		return fmt.Sprintf("/quiz/%v/%v/select/%v", eid, index, val)
+		return fmt.Sprintf("/quiz/%v/select/%v", eid, val)
 	}
 }

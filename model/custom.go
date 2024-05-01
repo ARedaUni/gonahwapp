@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/amrojjeh/nahwapp/arabic"
@@ -77,14 +78,13 @@ func NewQuizIterator(data QuizData, questions_completed int) *QuizIterator {
 	i := QuizIterator{
 		Data: data,
 	}
+	if !i.Word().Quizzable() {
+		i.nextWord()
+	}
 	for questions_completed > 0 {
 		i.nextWord()
 		questions_completed -= 1
 	}
-	if i.Word().Quizzable() {
-		return &i
-	}
-	i.nextWord()
 	return &i
 }
 
@@ -123,4 +123,46 @@ func (i *QuizIterator) nextWord() bool {
 	}
 	i.Index += 1
 	return true
+}
+
+type Score struct {
+	Tag          string
+	Score        int
+	Determinable bool
+}
+
+func (s Score) String() (out string) {
+	if s.Determinable {
+		out = fmt.Sprintf("%s: %d", s.Tag, s.Score)
+	} else {
+		out = fmt.Sprintf("%s: ---", s.Tag)
+	}
+	return out
+}
+
+func (s Score) Buckwalter() (out string) {
+	if s.Determinable {
+		out = fmt.Sprintf("%s: %d", arabic.ToBuckwalter(s.Tag), s.Score)
+	} else {
+		out = fmt.Sprintf("%s: ---", arabic.ToBuckwalter(s.Tag))
+	}
+	return out
+}
+
+func CalcScore(tag string, attempts []TagAttempt) Score {
+	if len(attempts) == 0 {
+		return Score{Tag: tag, Determinable: false}
+	}
+	score := 0
+	for _, a := range attempts {
+		if a.Correct && a.Tag == tag {
+			score += 100
+		}
+	}
+	score /= len(attempts)
+	return Score{
+		Tag:          tag,
+		Score:        score,
+		Determinable: true,
+	}
 }

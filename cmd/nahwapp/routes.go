@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"runtime/debug"
+	"strings"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/amrojjeh/kalam"
+	"github.com/amrojjeh/nahwapp/arabic"
 	"github.com/amrojjeh/nahwapp/ui/pages"
 	"github.com/amrojjeh/nahwapp/ui/static"
 
@@ -53,9 +57,37 @@ func (app *application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "signout":
 		app.sm.Pop(r.Context(), sm_student_id)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+	case "dashboard":
+		if !app.isLoggedIn(r) {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		student, found := app.getLoggedInStudent(r)
+		if !found {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		app.serveDashboard(w, r, student)
 	default:
 		http.NotFound(w, r)
 	}
+}
+
+func (app *application) serveDashboard(w http.ResponseWriter, r *http.Request, s model.Student) {
+	scores := make([]model.Score, len(arabic.States))
+	for i, state := range arabic.States {
+		attempts, err := app.queries.ListTagAttemptsByStudent(r.Context(), model.ListTagAttemptsByStudentParams{
+			StudentID: s.ID,
+			Tag:       state,
+			Limit:     100,
+			Offset:    0,
+		})
+		if err != nil {
+			panic(err)
+		}
+		scores[i] = model.CalcScore(state, attempts)
+	}
+	app.mustRender(w, pages.StatsPage(scores))
 }
 
 func (app *application) homePage(w http.ResponseWriter, r *http.Request) {
@@ -80,19 +112,17 @@ type clientError struct {
 
 func (app *application) serveErrors(w http.ResponseWriter, r *http.Request) {
 	if rec := recover(); rec != nil {
-		switch rec.(type) {
-		case clientError:
-			ce := rec.(clientError)
+		if ce, ok := rec.(clientError); ok {
 			if ce.code == http.StatusNotFound {
 				http.NotFound(w, r)
 				return
 			}
 			http.Error(w, http.StatusText(ce.code), ce.code)
-		default:
-			app.logger.Error("server error", slog.Any("error", rec))
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
+			return
 		}
+		app.logger.Error("server error", slog.Any("error", rec), slog.String("trace", string(debug.Stack())))
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
 	}
 }
 
@@ -154,6 +184,13 @@ func (qr *quizRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		default:
 			panic(clientError{http.StatusMethodNotAllowed})
 		}
+	case "select":
+		session, found := qr.getActiveQuizSession(r)
+		if !found {
+			http.Redirect(w, r, fmt.Sprintf("/quiz/%v", qr.quiz.ID), http.StatusSeeOther)
+			return
+		}
+		qr.serveSelect(w, r, session)
 	default:
 		http.NotFound(w, r)
 		return
@@ -177,19 +214,78 @@ func (qr *quizRouter) serveQuizSentence(w http.ResponseWriter, r *http.Request, 
 				Select(i.WordI).
 				Build(),
 			Cards: pages.QuizSentenceGenCards(i.Word().Termination(),
-				pages.QuizSentenceSelectURL(qr.quiz.ID, i.Index)).Build(),
+				pages.QuizSentenceSelectURL(qr.quiz.ID)).Build(),
 			Footer: pages.QuizSentenceInactiveFooter(),
 		}),
 	)
 }
 
-// func (app *application) routes() http.Handler {
-// 	// router.Handler(http.MethodGet, "/quiz/:excerpt/:word",
-// 	// 	iteratorRequired.Then(app.quizSentenceGet()))
-// 	// router.Handler(http.MethodGet, "/quiz/:excerpt/:word/select/:value",
-// 	// 	iteratorRequired.Then(app.quizCardSelectGet()))
-// 	// router.Handler(http.MethodPost, "/quiz/:excerpt/:word/select/:value",
-// 	// 	iteratorRequired.Then(app.quizCardSelectPost()))
-
-// 	return base.Then(router)
-// }
+func (qr *quizRouter) serveSelect(w http.ResponseWriter, r *http.Request, session model.QuizSession) {
+	value := arabic.FromBuckwalter(shiftPath(r))
+	i := model.NewQuizIterator(qr.quizData, session.QuestionsAnswered)
+	switch r.Method {
+	case http.MethodGet:
+		qr.mustRender(w, pages.QuizSentencePage(pages.QuizSentenceProps{
+			Title: fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
+			Words: pages.QuizSentenceGenWords(i.Sentence()).
+				Select(i.WordI).
+				TerminateSelectWith(value).
+				Build(),
+			Cards: pages.QuizSentenceGenCards(i.Word().Termination(),
+				pages.QuizSentenceSelectURL(qr.quiz.ID)).
+				Select(value).
+				Build(),
+			Footer: pages.QuizSentenceActiveFooter(
+				fmt.Sprintf("/quiz/%v/select/%v", qr.quiz.ID, arabic.ToBuckwalter(value))),
+		}))
+	case http.MethodPost:
+		correctTerm := i.Word().Termination()
+		var correct bool
+		p := pages.QuizSentenceProps{
+			Title: fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
+			Words: pages.QuizSentenceGenWords(i.Sentence()).
+				Select(i.WordI).
+				TerminateSelectWith(correctTerm.String()).
+				Build(),
+		}
+		if correct = arabic.LetterPackFromString(value).EqualTo(correctTerm); correct {
+			p.Cards = pages.QuizSentenceGenCards(i.Word().Termination(), nil).
+				MarkCorrect(value).
+				Build()
+			p.Footer = pages.QuizSentenceCorrectFooter(
+				strings.Join(i.Word().Tags, string(kalam.ArabicComma)),
+				fmt.Sprintf("/quiz/%v", qr.quiz.ID))
+		} else {
+			p.Cards = pages.QuizSentenceGenCards(i.Word().Termination(), nil).
+				MarkCorrect(correctTerm.String()).
+				MarkIncorrect(value).
+				Build()
+			p.Footer = pages.QuizSentenceIncorrectFooter(
+				strings.Join(i.Word().Tags, string(kalam.ArabicComma)),
+				fmt.Sprintf("/quiz/%v", qr.quiz.ID))
+		}
+		i.Next()
+		if i.Complete {
+			session.Active = false
+		}
+		_, err := qr.queries.UpdateQuizSession(r.Context(), model.UpdateQuizSessionParams{
+			Active:            session.Active,
+			QuestionsAnswered: session.QuestionsAnswered + 1,
+			ID:                session.ID,
+		})
+		if err != nil {
+			panic(err)
+		}
+		_, err = qr.queries.CreateTagAttempt(r.Context(), model.CreateTagAttemptParams{
+			StudentID: qr.student.ID,
+			Tag:       i.Word().Tags[0],
+			Correct:   correct,
+		})
+		if err != nil {
+			panic(err)
+		}
+		qr.mustRender(w, pages.QuizSentencePage(p))
+	default:
+		panic(clientError{http.StatusMethodNotAllowed})
+	}
+}

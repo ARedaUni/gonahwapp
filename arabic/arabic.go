@@ -80,3 +80,22 @@ func LetterPacks(pointedWord string) []LetterPack {
 	letters = append(letters, letter)
 	return letters
 }
+
+func (l LetterPack) EqualTo(o LetterPack) bool {
+	return l.Shadda == o.Shadda && l.Letter == o.Letter && l.Vowel == o.Vowel
+}
+
+func LetterPackFromString(str string) LetterPack {
+	letter := LetterPack{}
+	for _, l := range str {
+		switch l {
+		case Shadda:
+			letter.Shadda = true
+		case Sukoon, Damma, Fatha, Kasra, Dammatan, Fathatan, Kasratan:
+			letter.Vowel = l
+		default:
+			letter.Letter = l
+		}
+	}
+	return letter
+}

@@ -29,9 +29,9 @@ WHERE id=?;
 
 -- name: CreateStudent :one
 INSERT INTO student (
-    username, class_code, statistics, created, updated
+    username, class_code, created, updated
 ) VALUES (
-    ?, ?, "{}", datetime("now"), datetime("now")
+    ?, ?, datetime("now"), datetime("now")
 ) RETURNING *;
 
 -- name: GetStudent :one
@@ -52,6 +52,23 @@ DELETE FROM student
 WHERE id=?;
 
 -- *****
+-- TAG_ATTEMPT TABLE
+-- *****
+
+-- name: CreateTagAttempt :one
+INSERT INTO tag_attempt (
+    student_id, tag, correct, created, updated
+) VALUES (
+    ?, ?, ?, datetime("now"), datetime("now")
+) RETURNING *;
+
+-- name: ListTagAttemptsByStudent :many
+SELECT * FROM tag_attempt
+WHERE student_id=? AND tag=?
+ORDER BY created
+LIMIT ? OFFSET ?;
+
+-- *****
 -- QUIZ_SESSION TABLE
 -- *****
 
@@ -70,6 +87,12 @@ WHERE id=?;
 SELECT * FROM quiz_session
 WHERE active=true AND student_id=? AND quiz_id=?
 LIMIT 1;
+
+-- name: UpdateQuizSession :one
+UPDATE quiz_session
+SET active = ?, questions_answered = ?
+WHERE id=?
+RETURNING *;
 
 -- name: DeleteQuizSession :exec
 DELETE FROM quiz_session

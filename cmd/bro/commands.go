@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/amrojjeh/nahwapp/arabic"
 	"github.com/amrojjeh/nahwapp/cmd/bro/quiz"
 	"github.com/amrojjeh/nahwapp/model"
 	"github.com/urfave/cli/v2"
@@ -109,6 +110,40 @@ var deleteDBCommand = &cli.Command{
 		err := os.Remove(db_file)
 		if err != nil {
 			return errors.Join(errors.New("could not delete file"), err)
+		}
+		return nil
+	},
+}
+
+var scoreCommand = &cli.Command{
+	Name:   "score",
+	Usage:  "calculate tag scores for student",
+	Before: beforeOpenDB,
+	After:  afterOpenDB,
+	Flags: []cli.Flag{
+		&cli.IntFlag{
+			Name:     "student",
+			Usage:    "student id",
+			Required: true,
+			Aliases:  []string{"s", "id"},
+		},
+	},
+	Action: func(ctx *cli.Context) error {
+		q := getQueries(ctx)
+		id := ctx.Int("student")
+		for _, state := range arabic.States {
+			attempts, err := q.ListTagAttemptsByStudent(ctx.Context, model.ListTagAttemptsByStudentParams{
+				StudentID: id,
+				Tag:       state,
+				Limit:     100,
+				Offset:    0,
+			})
+			if err != nil {
+				return errors.Join(fmt.Errorf("could not retrieve tags (id: %d, tag: %s)", id,
+					arabic.ToBuckwalter(state)), err)
+			}
+			score := model.CalcScore(state, attempts)
+			fmt.Println(score.Buckwalter())
 		}
 		return nil
 	},

@@ -75,10 +75,10 @@ func (q *Queries) CreateQuizSession(ctx context.Context, arg CreateQuizSessionPa
 const createStudent = `-- name: CreateStudent :one
 
 INSERT INTO student (
-    username, class_code, statistics, created, updated
+    username, class_code, created, updated
 ) VALUES (
-    ?, ?, "{}", datetime("now"), datetime("now")
-) RETURNING id, username, class_code, statistics, created, updated
+    ?, ?, datetime("now"), datetime("now")
+) RETURNING id, username, class_code, created, updated
 `
 
 type CreateStudentParams struct {
@@ -96,7 +96,38 @@ func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) (S
 		&i.ID,
 		&i.Username,
 		&i.ClassCode,
-		&i.Statistics,
+		&i.Created,
+		&i.Updated,
+	)
+	return i, err
+}
+
+const createTagAttempt = `-- name: CreateTagAttempt :one
+
+INSERT INTO tag_attempt (
+    student_id, tag, correct, created, updated
+) VALUES (
+    ?, ?, ?, datetime("now"), datetime("now")
+) RETURNING id, student_id, tag, correct, created, updated
+`
+
+type CreateTagAttemptParams struct {
+	StudentID int
+	Tag       string
+	Correct   bool
+}
+
+// *****
+// TAG_ATTEMPT TABLE
+// *****
+func (q *Queries) CreateTagAttempt(ctx context.Context, arg CreateTagAttemptParams) (TagAttempt, error) {
+	row := q.db.QueryRowContext(ctx, createTagAttempt, arg.StudentID, arg.Tag, arg.Correct)
+	var i TagAttempt
+	err := row.Scan(
+		&i.ID,
+		&i.StudentID,
+		&i.Tag,
+		&i.Correct,
 		&i.Created,
 		&i.Updated,
 	)
@@ -198,7 +229,7 @@ func (q *Queries) GetQuizSession(ctx context.Context, id int) (QuizSession, erro
 }
 
 const getStudent = `-- name: GetStudent :one
-SELECT id, username, class_code, statistics, created, updated FROM student
+SELECT id, username, class_code, created, updated FROM student
 WHERE id=?
 `
 
@@ -209,7 +240,6 @@ func (q *Queries) GetStudent(ctx context.Context, id int) (Student, error) {
 		&i.ID,
 		&i.Username,
 		&i.ClassCode,
-		&i.Statistics,
 		&i.Created,
 		&i.Updated,
 	)
@@ -217,7 +247,7 @@ func (q *Queries) GetStudent(ctx context.Context, id int) (Student, error) {
 }
 
 const getStudentByUsernameAndClassCode = `-- name: GetStudentByUsernameAndClassCode :one
-SELECT id, username, class_code, statistics, created, updated FROM student
+SELECT id, username, class_code, created, updated FROM student
 WHERE username=? AND class_code=?
 `
 
@@ -233,7 +263,6 @@ func (q *Queries) GetStudentByUsernameAndClassCode(ctx context.Context, arg GetS
 		&i.ID,
 		&i.Username,
 		&i.ClassCode,
-		&i.Statistics,
 		&i.Created,
 		&i.Updated,
 	)
@@ -283,7 +312,7 @@ func (q *Queries) ListQuiz(ctx context.Context, arg ListQuizParams) ([]Quiz, err
 }
 
 const listStudents = `-- name: ListStudents :many
-SELECT id, username, class_code, statistics, created, updated FROM student
+SELECT id, username, class_code, created, updated FROM student
 WHERE username LIKE ? AND class_code LIKE ?
 LIMIT ? OFFSET ?
 `
@@ -313,7 +342,6 @@ func (q *Queries) ListStudents(ctx context.Context, arg ListStudentsParams) ([]S
 			&i.ID,
 			&i.Username,
 			&i.ClassCode,
-			&i.Statistics,
 			&i.Created,
 			&i.Updated,
 		); err != nil {
@@ -328,4 +356,81 @@ func (q *Queries) ListStudents(ctx context.Context, arg ListStudentsParams) ([]S
 		return nil, err
 	}
 	return items, nil
+}
+
+const listTagAttemptsByStudent = `-- name: ListTagAttemptsByStudent :many
+SELECT id, student_id, tag, correct, created, updated FROM tag_attempt
+WHERE student_id=? AND tag=?
+ORDER BY created
+LIMIT ? OFFSET ?
+`
+
+type ListTagAttemptsByStudentParams struct {
+	StudentID int
+	Tag       string
+	Limit     int64
+	Offset    int64
+}
+
+func (q *Queries) ListTagAttemptsByStudent(ctx context.Context, arg ListTagAttemptsByStudentParams) ([]TagAttempt, error) {
+	rows, err := q.db.QueryContext(ctx, listTagAttemptsByStudent,
+		arg.StudentID,
+		arg.Tag,
+		arg.Limit,
+		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []TagAttempt
+	for rows.Next() {
+		var i TagAttempt
+		if err := rows.Scan(
+			&i.ID,
+			&i.StudentID,
+			&i.Tag,
+			&i.Correct,
+			&i.Created,
+			&i.Updated,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateQuizSession = `-- name: UpdateQuizSession :one
+UPDATE quiz_session
+SET active = ?, questions_answered = ?
+WHERE id=?
+RETURNING id, student_id, quiz_id, questions_answered, active, created, updated
+`
+
+type UpdateQuizSessionParams struct {
+	Active            bool
+	QuestionsAnswered int
+	ID                int
+}
+
+func (q *Queries) UpdateQuizSession(ctx context.Context, arg UpdateQuizSessionParams) (QuizSession, error) {
+	row := q.db.QueryRowContext(ctx, updateQuizSession, arg.Active, arg.QuestionsAnswered, arg.ID)
+	var i QuizSession
+	err := row.Scan(
+		&i.ID,
+		&i.StudentID,
+		&i.QuizID,
+		&i.QuestionsAnswered,
+		&i.Active,
+		&i.Created,
+		&i.Updated,
+	)
+	return i, err
 }
