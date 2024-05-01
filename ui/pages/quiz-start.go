@@ -34,7 +34,7 @@ func homeFooter(p QuizStartProps) g.Node {
 
 func startButton(p QuizStartProps) g.Node {
 	return FormEl(Method("post"), Action(p.StartURL),
-		Button(Class("button button--primary"),
+		Button(Class("button button--primary"), g.Attr("na-shortcut", " "),
 			g.Text("Start"),
 		),
 	)
