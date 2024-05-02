@@ -257,6 +257,16 @@ func (qr *quizRouter) serveSelect(w http.ResponseWriter, r *http.Request, sessio
 				strings.Join(i.Word().Tags, string(kalam.ArabicComma)),
 				fmt.Sprintf("/quiz/%v", qr.quiz.ID))
 		}
+		if len(i.Word().Tags) != 0 {
+			_, err := qr.queries.CreateTagAttempt(r.Context(), model.CreateTagAttemptParams{
+				StudentID: qr.student.ID,
+				Tag:       i.Word().Tags[0],
+				Correct:   correct,
+			})
+			if err != nil {
+				panic(err)
+			}
+		}
 		i.Next()
 		if i.Complete {
 			session.Active = false
@@ -268,16 +278,6 @@ func (qr *quizRouter) serveSelect(w http.ResponseWriter, r *http.Request, sessio
 		})
 		if err != nil {
 			panic(err)
-		}
-		if len(i.Word().Tags) != 0 {
-			_, err = qr.queries.CreateTagAttempt(r.Context(), model.CreateTagAttemptParams{
-				StudentID: qr.student.ID,
-				Tag:       i.Word().Tags[0],
-				Correct:   correct,
-			})
-			if err != nil {
-				panic(err)
-			}
 		}
 		qr.mustRender(w, pages.QuizSentencePage(p))
 	default:
