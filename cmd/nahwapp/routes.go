@@ -99,6 +99,7 @@ func (app *application) homePage(w http.ResponseWriter, r *http.Request) {
 
 	app.mustRender(w, pages.HomePage(pages.HomeProps{
 		Excerpts: excerpts,
+		Loggedin: app.isLoggedIn(r),
 	}))
 }
 

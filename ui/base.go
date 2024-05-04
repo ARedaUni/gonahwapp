@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"github.com/amrojjeh/nahwapp/ui/module"
 	g "github.com/maragudk/gomponents"
 	. "github.com/maragudk/gomponents/html"
 )
@@ -12,6 +13,7 @@ type HTML5Props struct {
 	HTMLClasses string
 	Head        []g.Node
 	Body        []g.Node
+	Loggedin    bool
 }
 
 func HTML5(p HTML5Props) g.Node {
@@ -26,7 +28,10 @@ func HTML5(p HTML5Props) g.Node {
 				TitleEl(g.Text(p.Title)),
 				g.Group(p.Head),
 			),
-			Body(g.Group(p.Body)),
+			Body(
+				module.NavBar(p.Loggedin),
+				g.Group(p.Body),
+			),
 		),
 	)
 }

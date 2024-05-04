@@ -9,7 +9,8 @@ import (
 
 func DashboardPage(stats []score.Score) g.Node {
 	return QuizBase(QuizBaseProps{
-		Title: "Dashboard",
+		Title:    "Dashboard",
+		Loggedin: true,
 		Body: []g.Node{ID("dashboard-page"),
 			H1(
 				g.Text("Dashboard"),

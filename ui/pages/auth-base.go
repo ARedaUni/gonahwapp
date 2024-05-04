@@ -12,6 +12,7 @@ type AuthBaseProps struct {
 	Inputs       []g.Node
 	SubmitButton string
 	Action       string
+	Loggedin     bool
 }
 
 func AuthBase(p AuthBaseProps) g.Node {
@@ -19,6 +20,7 @@ func AuthBase(p AuthBaseProps) g.Node {
 		Title:       p.PageTitle,
 		Language:    "en",
 		HTMLClasses: "auth-page",
+		Loggedin:    p.Loggedin,
 		Head: []g.Node{
 			Link(Rel("preconnect"), Href("https://fonts.googleapis.com")),
 			Link(Rel("preconnect"), Href("https://fonts.gstastic.com"),
@@ -36,7 +38,7 @@ func AuthBase(p AuthBaseProps) g.Node {
 			Main(
 				Class("form-box"),
 				H1(Class("form-box__title"),
-					A(Class("form-box__icon"), Href("#"), Img(Src("/static/icons/arrow-left.svg"))), g.Text(p.FormTitle)),
+					g.Text(p.FormTitle)),
 				FormEl(Method("post"), Action(p.Action),
 					Class("form-box__form"),
 					g.Group(p.Inputs),

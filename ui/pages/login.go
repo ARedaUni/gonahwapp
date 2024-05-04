@@ -57,6 +57,7 @@ func LoginPage(p *LoginProps) g.Node {
 		FormTitle:    "Login",
 		SubmitButton: "Login",
 		Action:       "/login",
+		Loggedin:     false,
 		Inputs: []g.Node{
 			g.If(p.Error != "",
 				Span(Class("error"), g.Text(p.Error))),

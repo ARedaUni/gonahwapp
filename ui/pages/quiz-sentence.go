@@ -8,6 +8,7 @@ import (
 	"github.com/amrojjeh/kalam"
 	"github.com/amrojjeh/nahwapp/arabic"
 	"github.com/amrojjeh/nahwapp/model"
+	"github.com/amrojjeh/nahwapp/ui/module"
 	"github.com/amrojjeh/nahwapp/ui/partials"
 	g "github.com/maragudk/gomponents"
 	. "github.com/maragudk/gomponents/html"
@@ -24,9 +25,10 @@ type QuizSentenceProps struct {
 
 func QuizSentencePage(p QuizSentenceProps) g.Node {
 	return QuizBase(QuizBaseProps{
-		Title: p.Title,
-		Body: []g.Node{
-			partials.Navigation(p.Progress),
+		Title:    p.Title,
+		Loggedin: true,
+		Body: []g.Node{ID("quiz-sentence"),
+			module.ProgressBar(p.Progress),
 			Div(Class("quiz-sentence"),
 				P(Class("quiz-sentence__text"),
 					g.Group(p.Words),

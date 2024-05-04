@@ -46,6 +46,21 @@
     --yellow-800: #5c4800;
     --yellow-900: #2e2400;
   }
+  nav {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+  }
+  nav > a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    background-color: var(--green-600);
+    border-radius: 10%;
+    padding: 1rem;
+    margin-block: 1rem;
+  }
 }
 @layer module {
   .button {
@@ -167,21 +182,11 @@
   .progress-bar--complete .progress-bar__value {
     border-radius: 25px;
   }
-  .quiz-nav {
-    display: flex;
-    flex-direction: row;
-    justify-items: center;
-    align-items: center;
-    gap: 0.1rem;
-    background-color: var(--page-background);
-    padding: 1.2rem;
-    height: 0.5rem;
-    width: 50%;
-    margin: 0 auto;
-  }
-  .quiz-nav > .progress-bar {
-    flex: 1;
+  #quiz-start .progress-bar, #quiz-sentence .progress-bar {
     direction: rtl;
+    height: 1rem;
+    width: 50%;
+    margin: 0.5rem auto;
   }
   .quiz-sentence {
     flex: 1;

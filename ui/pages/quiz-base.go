@@ -7,8 +7,9 @@ import (
 )
 
 type QuizBaseProps struct {
-	Title string
-	Body  []g.Node
+	Title    string
+	Body     []g.Node
+	Loggedin bool
 }
 
 func QuizBase(p QuizBaseProps) g.Node {
@@ -16,6 +17,7 @@ func QuizBase(p QuizBaseProps) g.Node {
 		Title:       p.Title,
 		Language:    "en",
 		HTMLClasses: "quiz-page",
+		Loggedin:    p.Loggedin,
 		Head: []g.Node{
 			Link(Rel("preconnect"), Href("https://fonts.googleapis.com")),
 			Link(Rel("preconnect"), Href("https://fonts.gstastic.com"),

@@ -7,6 +7,7 @@ import (
 
 type HomeProps struct {
 	Excerpts []HomeExcerpt
+	Loggedin bool
 }
 
 type HomeExcerpt struct {
@@ -18,8 +19,9 @@ func HomePage(props HomeProps) g.Node {
 	// TODO(Amr Ojjeh): Change to PageBase
 	return QuizBase(
 		QuizBaseProps{
-			Title: "NahwApp",
-			Body:  g.Map(props.Excerpts, homePageExcerpt),
+			Title:    "NahwApp",
+			Body:     g.Map(props.Excerpts, homePageExcerpt),
+			Loggedin: props.Loggedin,
 		},
 	)
 }

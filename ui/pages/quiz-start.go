@@ -1,6 +1,7 @@
 package pages
 
 import (
+	"github.com/amrojjeh/nahwapp/ui/module"
 	"github.com/amrojjeh/nahwapp/ui/partials"
 	g "github.com/maragudk/gomponents"
 	. "github.com/maragudk/gomponents/html"
@@ -14,9 +15,10 @@ type QuizStartProps struct {
 
 func QuizStartPage(p QuizStartProps) g.Node {
 	return QuizBase(QuizBaseProps{
-		Title: p.Title,
-		Body: []g.Node{
-			partials.Navigation(0),
+		Title:    p.Title,
+		Loggedin: true,
+		Body: []g.Node{ID("quiz-start"),
+			module.ProgressBar(0),
 			Div(Class("quiz-para"),
 				g.Text(p.Paragraph),
 			),
