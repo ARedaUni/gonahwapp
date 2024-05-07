@@ -113,8 +113,9 @@ func (app *application) homePage(w http.ResponseWriter, r *http.Request) {
 
 	for _, e := range quizzes {
 		excerpts = append(excerpts, pages.HomeExcerpt{
-			Name: e.Name,
-			Link: fmt.Sprintf("/quiz/%v", e.ID),
+			Name:       e.Name,
+			Link:       fmt.Sprintf("/quiz/%v", e.ID),
+			DeleteLink: fmt.Sprintf("/quiz/%v/delete", e.ID),
 		})
 	}
 
@@ -209,6 +210,12 @@ func (qr *quizRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		qr.serveSelect(w, r, session)
+	case "delete":
+		err := qr.queries.DeleteQuiz(r.Context(), qr.quiz.ID)
+		if err != nil {
+			panic(err)
+		}
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	default:
 		http.NotFound(w, r)
 		return

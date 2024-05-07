@@ -9,6 +9,7 @@
 	  color: var(--_color);
 	  box-shadow: 0 5px var(--_shadow);
 	  border-color: var(--_stroke);
+	  position: relative;
 
 	  min-width: 100px;
 	  padding: 1rem 1.5rem;
@@ -23,6 +24,12 @@
 	  cursor: pointer;
 	  user-select: none;
 	  appearance: none;
+
+	  &__x {
+	  	position: absolute;
+	  	top: -0.5rem;
+	  	left: -0.5rem;
+	  }
 
 	  &:active:not(.-inactive) {
 	    box-shadow: none;
@@ -418,5 +425,15 @@
 		text-decoration: none;
 		text-align: center;
 		color: inherit;
+	}
+
+	.xmark {
+		width: 1.5rem;
+		filter: invert(23%) sepia(85%) saturate(6757%) hue-rotate(1deg) brightness(91%) contrast(125%);
+		appearance: none;
+		background-color: unset;
+		border: none;
+		cursor: pointer;
+		padding: 0;
 	}
 }

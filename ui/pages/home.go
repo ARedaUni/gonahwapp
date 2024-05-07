@@ -11,8 +11,9 @@ type HomeProps struct {
 }
 
 type HomeExcerpt struct {
-	Name string
-	Link string
+	Name       string
+	Link       string
+	DeleteLink string
 }
 
 func HomePage(props HomeProps) g.Node {
@@ -36,8 +37,12 @@ func HomePage(props HomeProps) g.Node {
 }
 
 func homePageExcerpt(h HomeExcerpt) g.Node {
-	return A(Class("excerpt"), Href(h.Link),
-		Button(Class("button"),
-			g.Text(h.Name),
-		))
+	return A(Class("button excerpt"), Href(h.Link),
+		FormEl(Class("button__x"), Method("post"), Action(h.DeleteLink), g.Attr("onsubmit", `return confirm("Are you sure you want to delete the quiz?")`),
+			Button(Class("xmark"), Type("submit"),
+				Img(Src("/static/icons/rectangle-xmark-solid.svg")),
+			),
+		),
+		g.Text(h.Name),
+	)
 }
