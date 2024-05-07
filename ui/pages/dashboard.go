@@ -15,9 +15,7 @@ func DashboardPage(stats []score.Score) g.Node {
 			H1(
 				g.Text("Dashboard"),
 			),
-			Main(Class("tag-stats"),
-				mapToList(stats),
-			),
+			mapToList(stats),
 		},
 	})
 }
@@ -37,5 +35,14 @@ func mapToList(stats []score.Score) g.Node {
 			),
 		)
 	}
-	return g.Group(states)
+	if len(states) == 0 {
+		return P(Class("ltr center"),
+			Em(
+				g.Text("Take a quiz to discover your strengths and weaknesses!"),
+			),
+		)
+	}
+	return Main(Class("tag-stats"),
+		g.Group(states),
+	)
 }

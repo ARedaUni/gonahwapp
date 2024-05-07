@@ -436,4 +436,16 @@
 		cursor: pointer;
 		padding: 0;
 	}
+
+	.ltr {
+		direction: ltr;
+	}
+
+	.rtl {
+		direction: rtl;
+	}
+
+  .center {
+    text-align: center;
+  }
 }
