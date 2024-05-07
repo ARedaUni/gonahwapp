@@ -19,15 +19,25 @@ func HomePage(props HomeProps) g.Node {
 	// TODO(Amr Ojjeh): Change to PageBase
 	return QuizBase(
 		QuizBaseProps{
-			Title:    "NahwApp",
-			Body:     g.Map(props.Excerpts, homePageExcerpt),
+			Title: "NahwApp",
+			Body: []g.Node{ID("home-page"),
+				Div(ID("home-page--grid"),
+					Div(ID("home-page__create"),
+						A(Href("https://tags.nahw.app/"),
+							Button(Class("button button--primary"),
+								g.Text("Create excerpt"))),
+					),
+					g.Group(g.Map(props.Excerpts, homePageExcerpt)),
+				),
+			},
 			Loggedin: props.Loggedin,
 		},
 	)
 }
 
 func homePageExcerpt(h HomeExcerpt) g.Node {
-	return A(Href(h.Link),
-		H1(g.Text(h.Name)),
-	)
+	return A(Class("excerpt"), Href(h.Link),
+		Button(Class("button"),
+			g.Text(h.Name),
+		))
 }

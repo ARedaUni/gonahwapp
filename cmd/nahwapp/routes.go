@@ -11,6 +11,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/amrojjeh/kalam"
 	"github.com/amrojjeh/nahwapp/arabic"
+	"github.com/amrojjeh/nahwapp/quiz"
 	"github.com/amrojjeh/nahwapp/score"
 	"github.com/amrojjeh/nahwapp/ui/pages"
 	"github.com/amrojjeh/nahwapp/ui/static"
@@ -69,9 +70,29 @@ func (app *application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		app.serveDashboard(w, r, student)
+	case "add":
+		if r.Method != http.MethodPost {
+			panic(clientError{http.StatusMethodNotAllowed})
+		}
+		app.addExcerpt(w, r)
 	default:
 		http.NotFound(w, r)
 	}
+}
+
+func (app *application) addExcerpt(w http.ResponseWriter, r *http.Request) {
+	mustParseForm(r)
+	data := r.Form.Get("data")
+	quizData := quiz.ReadQuizData([]byte(data))
+	quizName := quiz.ReadQuizName([]byte(data))
+	q, err := app.queries.CreateQuiz(r.Context(), model.CreateQuizParams{
+		Name: quizName,
+		Data: quizData,
+	})
+	if err != nil {
+		panic(err)
+	}
+	http.Redirect(w, r, fmt.Sprintf("/quiz/%d", q.ID), http.StatusSeeOther)
 }
 
 func (app *application) serveDashboard(w http.ResponseWriter, r *http.Request, s model.Student) {

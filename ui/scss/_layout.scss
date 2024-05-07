@@ -1,4 +1,21 @@
 @layer layout {
+  #home-page {
+    #home-page--grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-inline: auto;
+    }
+
+    #home-page__create {
+      grid-column: span 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  
   #dashboard-page {
     h1 {
       text-align: center;

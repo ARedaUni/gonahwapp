@@ -11,6 +11,7 @@ import (
 
 	"github.com/amrojjeh/nahwapp/arabic"
 	"github.com/amrojjeh/nahwapp/model"
+	"github.com/amrojjeh/nahwapp/quiz"
 	"github.com/urfave/cli/v2"
 )
 
@@ -90,31 +91,7 @@ func createQuiz(ctx context.Context, q *model.Queries, name string, data []byte)
 
 func readQuiz(fsys fs.FS, filename string) (name string, data []byte) {
 	content := readFile(fsys, filename)
-	return readQuizName(content), readQuizData(content)
-}
-
-func readQuizName(content []byte) string {
-	name := struct {
-		Name string
-	}{}
-	err := json.Unmarshal(content, &name)
-	if err != nil {
-		log.Fatal("could not unmarshal json\n", err)
-	}
-	return name.Name
-}
-
-func readQuizData(content []byte) []byte {
-	data := model.QuizData{}
-	err := json.Unmarshal(content, &data)
-	if err != nil {
-		log.Fatal("could not unmarshal json\n", err)
-	}
-	raw, err := json.Marshal(data)
-	if err != nil {
-		log.Fatal("could not marshal json\n", err)
-	}
-	return raw
+	return quiz.ReadQuizName(content), quiz.ReadQuizData(content)
 }
 
 func readFile(fsys fs.FS, name string) []byte {

@@ -7,8 +7,10 @@ import (
 
 func NavBar(loggedin bool) g.Node {
 	return Nav(
-		A(Href("/dashboard"),
-			g.Text("Dashboard"),
+		g.If(loggedin,
+			A(Href("/dashboard"),
+				g.Text("Dashboard"),
+			),
 		),
 		A(Href("/"),
 			g.Text("Home"),

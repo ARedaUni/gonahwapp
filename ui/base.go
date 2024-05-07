@@ -23,6 +23,7 @@ func HTML5(p HTML5Props) g.Node {
 				Meta(Charset("utf-8")),
 				Meta(Name("viewport"),
 					Content("width=device-width, initial-scale=1")),
+				favicon(),
 				g.If(p.Description != "", Meta(Name("description"),
 					Content(p.Description))),
 				TitleEl(g.Text(p.Title)),
@@ -34,4 +35,8 @@ func HTML5(p HTML5Props) g.Node {
 			),
 		),
 	)
+}
+
+func favicon() g.Node {
+	return Link(Rel("icon"), Type("image/x-icon"), Href("/static/img/favicon.ico"))
 }

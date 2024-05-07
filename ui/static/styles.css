@@ -404,8 +404,25 @@
   .tag-stats__score {
     block-size: 1rem;
   }
+  .excerpt {
+    text-decoration: none;
+    text-align: center;
+    color: inherit;
+  }
 }
 @layer layout {
+  #home-page #home-page--grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-inline: auto;
+  }
+  #home-page #home-page__create {
+    grid-column: span 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   #dashboard-page h1 {
     text-align: center;
   }
