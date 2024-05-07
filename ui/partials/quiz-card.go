@@ -30,7 +30,7 @@ func QuizCard(p QuizCardProps) g.Node {
 		"quiz-card--incorrect": p.State == QuizCardStateIncorrect,
 	},
 		g.If(p.SelectURL != "", g.Attr("up-href", p.SelectURL)),
-		g.Attr("na-shortcut", p.Shortcut),
+		g.Attr("na-shortcut", p.Shortcut), g.Attr("up-cache", "false"),
 		P(Class("quiz-card__choice"), g.Text(p.Value)),
 		P(Class("quiz-card__shortcut"), g.Text(p.Shortcut)),
 	)
