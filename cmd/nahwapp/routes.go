@@ -270,12 +270,18 @@ func (qr *quizRouter) serveSelect(w http.ResponseWriter, r *http.Request, sessio
 				Build(),
 			Progress: (i.Index + 1) * 100 / qr.quizData.CountQuizzable(),
 		}
+		var feedback string
+		if i.Word().Feedback == "" {
+			feedback = strings.Join(i.Word().Tags, string(kalam.ArabicComma))
+		} else {
+			feedback = i.Word().Feedback
+		}
 		if correct = arabic.LetterPackFromString(value).EqualTo(correctTerm); correct {
 			p.Cards = pages.QuizSentenceGenCards(i.Word().Termination(), nil).
 				MarkCorrect(value).
 				Build()
 			p.Footer = pages.QuizSentenceCorrectFooter(
-				strings.Join(i.Word().Tags, string(kalam.ArabicComma)),
+				feedback,
 				fmt.Sprintf("/quiz/%v", qr.quiz.ID))
 		} else {
 			p.Cards = pages.QuizSentenceGenCards(i.Word().Termination(), nil).

@@ -17,6 +17,7 @@ type QuizSentence struct {
 type QuizWord struct {
 	PointedWord string
 	Tags        []string
+	Feedback    string
 	Punctuation bool
 	Ignore      bool
 	Preceding   bool
