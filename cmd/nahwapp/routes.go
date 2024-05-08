@@ -235,7 +235,7 @@ func (qr *quizRouter) serveQuizSentence(w http.ResponseWriter, r *http.Request, 
 	qr.mustRender(w,
 		pages.QuizSentencePage(pages.QuizSentenceProps{
 			Title: fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
-			Words: pages.QuizSentenceGenWords(i.Sentence()).Select(i.WordI).Build(),
+			Words: pages.QuizSentenceGenWords(i.Sentence(), i.WordI).Build(),
 			Cards: pages.QuizSentenceGenCards(i.Word().Termination(),
 				pages.QuizSentenceSelectURL(qr.quiz.ID)).Build(),
 			Footer:   pages.QuizSentenceInactiveFooter(),
@@ -251,7 +251,7 @@ func (qr *quizRouter) serveSelect(w http.ResponseWriter, r *http.Request, sessio
 	case http.MethodGet:
 		qr.mustRender(w, pages.QuizSentencePage(pages.QuizSentenceProps{
 			Title: fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
-			Words: pages.QuizSentenceGenWords(i.Sentence()).Select(i.WordI).TerminateSelectWith(value).Build(),
+			Words: pages.QuizSentenceGenWords(i.Sentence(), i.WordI).TerminateSelectWith(value).Build(),
 			Cards: pages.QuizSentenceGenCards(i.Word().Termination(),
 				pages.QuizSentenceSelectURL(qr.quiz.ID)).Select(value).Build(),
 			Footer: pages.QuizSentenceActiveFooter(fmt.Sprintf("/quiz/%v/select/%v", qr.quiz.ID,
@@ -264,8 +264,7 @@ func (qr *quizRouter) serveSelect(w http.ResponseWriter, r *http.Request, sessio
 		qr.logger.Debug("progress", "index", i.Index, "total", qr.quizData.CountQuizzable())
 		p := pages.QuizSentenceProps{
 			Title: fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
-			Words: pages.QuizSentenceGenWords(i.Sentence()).
-				Select(i.WordI).
+			Words: pages.QuizSentenceGenWords(i.Sentence(), i.WordI).
 				TerminateSelectWith(correctTerm.String()).
 				Build(),
 			Progress: (i.Index + 1) * 100 / qr.quizData.CountQuizzable(),

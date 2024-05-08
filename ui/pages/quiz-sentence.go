@@ -44,16 +44,23 @@ func QuizSentencePage(p QuizSentenceProps) g.Node {
 
 type QuizSentenceWordProps []partials.QuizWordProps
 
-func QuizSentenceGenWords(s model.QuizSentence) QuizSentenceWordProps {
+func QuizSentenceGenWords(s model.QuizSentence, selectedWordIndex int) QuizSentenceWordProps {
 	words := QuizSentenceWordProps{}
-	for _, w := range s.Words {
+	for i, w := range s.Words {
 		if w.Quizzable() {
-			words = append(words, partials.QuizWordProps{
-				Base:        arabic.Unpointed(w.Base(), true),
-				Termination: w.Termination().Unpointed(true),
-				Selected:    false,
-				Space:       !w.Preceding,
-			})
+			wprops := partials.QuizWordProps{
+				Space: !w.Preceding,
+			}
+			if i < selectedWordIndex {
+				wprops.Base = arabic.Unpointed(w.Base(), true) + w.Termination().String()
+			} else {
+				wprops.Base = arabic.Unpointed(w.Base(), true)
+				wprops.Termination = w.Termination().Unpointed(true)
+			}
+			if i == selectedWordIndex {
+				wprops.Selected = true
+			}
+			words = append(words, wprops)
 		} else {
 			words = append(words, partials.QuizWordProps{
 				Base:        arabic.Unpointed(w.PointedWord, true),
@@ -65,11 +72,6 @@ func QuizSentenceGenWords(s model.QuizSentence) QuizSentenceWordProps {
 	}
 
 	return words
-}
-
-func (q QuizSentenceWordProps) Select(wordIndex int) QuizSentenceWordProps {
-	q[wordIndex].Selected = true
-	return q
 }
 
 func (q QuizSentenceWordProps) TerminateSelectWith(
