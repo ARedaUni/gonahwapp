@@ -79,6 +79,7 @@ func (app *application) getLoggedInStudent(r *http.Request) (student model.Stude
 
 func (app *application) logStudentIn(r *http.Request, student model.Student) {
 	app.sm.Put(r.Context(), sm_student_id, student.ID)
+	app.sm.RenewToken(r.Context())
 }
 
 func (app *application) getStudent(r *http.Request, username, code string) (student model.Student, found bool) {

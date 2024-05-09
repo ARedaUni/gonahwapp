@@ -58,6 +58,7 @@ func (app *application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		app.serveLogin(w, r)
 	case "signout":
 		app.sm.Pop(r.Context(), sm_student_id)
+		app.sm.RenewToken(r.Context())
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	case "dashboard":
 		if !app.isLoggedIn(r) {
@@ -288,7 +289,7 @@ func (qr *quizRouter) serveSelect(w http.ResponseWriter, r *http.Request, sessio
 				MarkIncorrect(value).
 				Build()
 			p.Footer = pages.QuizSentenceIncorrectFooter(
-				strings.Join(i.Word().Tags, string(kalam.ArabicComma)),
+				feedback,
 				fmt.Sprintf("/quiz/%v", qr.quiz.ID))
 		}
 		if len(i.Word().Tags) != 0 {
