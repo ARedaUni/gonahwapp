@@ -8,6 +8,7 @@ import (
 
 type QuizFeedbackProps struct {
 	Header      string
+	Tags        string
 	Explanation string
 	State       QuizFeedbackState
 }
@@ -32,6 +33,9 @@ func QuizFeedback(p QuizFeedbackProps) g.Node {
 		Div(Class("quiz-feedback__text"),
 			H2(Class("quiz-feedback__header"),
 				g.Text(p.Header),
+			),
+			P(Class("quiz-feedback__paragraph arabic"), Lang("ar"),
+				g.Text(p.Tags),
 			),
 			P(Class("quiz-feedback__paragraph arabic"), Lang("ar"),
 				g.Text(p.Explanation),

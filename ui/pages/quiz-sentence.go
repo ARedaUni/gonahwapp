@@ -188,10 +188,11 @@ func QuizSentenceActiveFooter(selectURL string) g.Node {
 	})
 }
 
-func QuizSentenceIncorrectFooter(explanation, continueURL string) g.Node {
+func QuizSentenceIncorrectFooter(tags, explanation, continueURL string) g.Node {
 	return partials.QuizFooter(partials.QuizFooterProps{
 		Left: partials.QuizFeedback(partials.QuizFeedbackProps{
 			Header:      "Incorrect",
+			Tags:        tags,
 			Explanation: explanation,
 			State:       partials.QuizFeedbackStateIncorrect,
 		}),
@@ -204,10 +205,11 @@ func QuizSentenceIncorrectFooter(explanation, continueURL string) g.Node {
 	})
 }
 
-func QuizSentenceCorrectFooter(explanation, continueURL string) g.Node {
+func QuizSentenceCorrectFooter(tags, explanation, continueURL string) g.Node {
 	return partials.QuizFooter(partials.QuizFooterProps{
 		Left: partials.QuizFeedback(partials.QuizFeedbackProps{
 			Header:      "Good job!",
+			Tags:        tags,
 			Explanation: explanation,
 			State:       partials.QuizFeedbackStateCorrect,
 		}),
