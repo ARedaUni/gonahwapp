@@ -115,15 +115,19 @@ func (app *application) genQuiz(w http.ResponseWriter, r *http.Request, tag stri
 			data := mustGetQuizData(q)
 			for _, s := range data.Sentences {
 				genSentence := model.QuizSentence{}
+				shouldAdd := false
 				for _, w := range s.Words {
 					if w.Quizzable() && len(w.Tags) > 0 && w.Tags[0] == tag {
 						w.Ignore = false
+						shouldAdd = true
 					} else {
 						w.Ignore = true
 					}
 					genSentence.Words = append(genSentence.Words, w)
 				}
-				generatedData.Sentences = append(generatedData.Sentences, genSentence)
+				if shouldAdd {
+					generatedData.Sentences = append(generatedData.Sentences, genSentence)
+				}
 			}
 		}
 		generatedByteData, err := json.Marshal(generatedData)
@@ -290,9 +294,13 @@ func (qr *quizRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (qr *quizRouter) startPage(w http.ResponseWriter, r *http.Request) {
+	sentences := []string{}
+	for _, s := range qr.quizData.Sentences {
+		sentences = append(sentences, arabic.Unpointed(s.String(), true))
+	}
 	qr.mustRender(w, pages.QuizStartPage(pages.QuizStartProps{
 		Title:     fmt.Sprintf("NahwApp - %s", qr.quiz.Name),
-		Paragraph: qr.quizData.Unpointed(true),
+		Sentences: sentences,
 		StartURL:  fmt.Sprintf("/quiz/%v", qr.quiz.ID),
 	}))
 }

@@ -9,7 +9,7 @@ import (
 
 type QuizStartProps struct {
 	Title     string
-	Paragraph string
+	Sentences []string
 	StartURL  string
 }
 
@@ -20,7 +20,11 @@ func QuizStartPage(p QuizStartProps) g.Node {
 		Body: []g.Node{ID("quiz-start"),
 			module.ProgressBar(0),
 			Div(Class("quiz-para"),
-				g.Text(p.Paragraph),
+				g.Group(g.Map(p.Sentences, func(s string) g.Node {
+					return Span(Class("quiz-sen"),
+						g.Text(s),
+					)
+				})),
 			),
 			homeFooter(p),
 		},
