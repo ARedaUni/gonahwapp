@@ -4,9 +4,9 @@
 
 -- name: CreateQuiz :one
 INSERT INTO quiz (
-    name, data, created, updated
+    name, data, hidden, created, updated
 ) VALUES (
-    ?, ?, datetime("now"), datetime("now")
+    ?, ?, ?, datetime("now"), datetime("now")
 ) RETURNING *;
 
 -- name: ListQuiz :many

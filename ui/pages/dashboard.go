@@ -1,6 +1,8 @@
 package pages
 
 import (
+	"fmt"
+
 	"github.com/amrojjeh/nahwapp/score"
 	"github.com/amrojjeh/nahwapp/ui/module"
 	g "github.com/maragudk/gomponents"
@@ -28,7 +30,9 @@ func mapToList(stats []score.Score) g.Node {
 		}
 		states = append(states,
 			P(Class("tag-stats__tag"),
-				g.Text(score.Tag),
+				A(Href(fmt.Sprintf("/gen/%v", score.Tag)),
+					g.Text(score.Tag),
+				),
 			),
 			Div(Class("tag-stats__score"),
 				module.ProgressBar(score.Score),

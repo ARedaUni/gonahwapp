@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS quiz (
     id INTEGER NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
     data JSON NOT NULL,
+    hidden BOOLEAN NOT NULL,
     created DATETIME NOT NULL,
     updated DATETIME NOT NULL
 );

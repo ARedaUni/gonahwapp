@@ -12,27 +12,29 @@ import (
 const createQuiz = `-- name: CreateQuiz :one
 
 INSERT INTO quiz (
-    name, data, created, updated
+    name, data, hidden, created, updated
 ) VALUES (
-    ?, ?, datetime("now"), datetime("now")
-) RETURNING id, name, data, created, updated
+    ?, ?, ?, datetime("now"), datetime("now")
+) RETURNING id, name, data, hidden, created, updated
 `
 
 type CreateQuizParams struct {
-	Name string
-	Data []byte
+	Name   string
+	Data   []byte
+	Hidden bool
 }
 
 // *****
 // QUIZ TABLE
 // *****
 func (q *Queries) CreateQuiz(ctx context.Context, arg CreateQuizParams) (Quiz, error) {
-	row := q.db.QueryRowContext(ctx, createQuiz, arg.Name, arg.Data)
+	row := q.db.QueryRowContext(ctx, createQuiz, arg.Name, arg.Data, arg.Hidden)
 	var i Quiz
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Data,
+		&i.Hidden,
 		&i.Created,
 		&i.Updated,
 	)
@@ -191,7 +193,7 @@ func (q *Queries) GetActiveQuizSession(ctx context.Context, arg GetActiveQuizSes
 }
 
 const getQuiz = `-- name: GetQuiz :one
-SELECT id, name, data, created, updated FROM quiz
+SELECT id, name, data, hidden, created, updated FROM quiz
 WHERE id=?
 `
 
@@ -202,6 +204,7 @@ func (q *Queries) GetQuiz(ctx context.Context, id int) (Quiz, error) {
 		&i.ID,
 		&i.Name,
 		&i.Data,
+		&i.Hidden,
 		&i.Created,
 		&i.Updated,
 	)
@@ -270,7 +273,7 @@ func (q *Queries) GetStudentByUsernameAndClassCode(ctx context.Context, arg GetS
 }
 
 const listQuiz = `-- name: ListQuiz :many
-SELECT id, name, data, created, updated FROM quiz
+SELECT id, name, data, hidden, created, updated FROM quiz
 WHERE name LIKE ?
 ORDER BY created
 LIMIT ? OFFSET ?
@@ -295,6 +298,7 @@ func (q *Queries) ListQuiz(ctx context.Context, arg ListQuizParams) ([]Quiz, err
 			&i.ID,
 			&i.Name,
 			&i.Data,
+			&i.Hidden,
 			&i.Created,
 			&i.Updated,
 		); err != nil {

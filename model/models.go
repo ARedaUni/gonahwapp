@@ -12,6 +12,7 @@ type Quiz struct {
 	ID      int
 	Name    string
 	Data    []byte
+	Hidden  bool
 	Created time.Time
 	Updated time.Time
 }

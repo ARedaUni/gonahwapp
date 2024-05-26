@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -54,6 +55,18 @@ func (app *application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			student:     student,
 		}
 		qr.ServeHTTP(w, r)
+	case "gen":
+		if !app.isLoggedIn(r) {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		_, found := app.getLoggedInStudent(r)
+		if !found {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		tag := shiftPath(r)
+		app.genQuiz(w, r, tag)
 	case "login":
 		app.serveLogin(w, r)
 	case "signout":
@@ -76,6 +89,56 @@ func (app *application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			panic(clientError{http.StatusMethodNotAllowed})
 		}
 		app.addExcerpt(w, r)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (app *application) genQuiz(w http.ResponseWriter, r *http.Request, tag string) {
+	switch shiftPath(r) {
+	case ".":
+		quizzes, err := app.queries.ListQuiz(r.Context(), model.ListQuizParams{
+			Name:   "%%",
+			Limit:  50,
+			Offset: 0,
+		})
+		if err != nil {
+			panic(err)
+		}
+		generatedData := model.QuizData{
+			Sentences: []model.QuizSentence{},
+		}
+		for _, q := range quizzes {
+			if q.Hidden {
+				continue
+			}
+			data := mustGetQuizData(q)
+			for _, s := range data.Sentences {
+				genSentence := model.QuizSentence{}
+				for _, w := range s.Words {
+					if w.Quizzable() && len(w.Tags) > 0 && w.Tags[0] == tag {
+						w.Ignore = false
+					} else {
+						w.Ignore = true
+					}
+					genSentence.Words = append(genSentence.Words, w)
+				}
+				generatedData.Sentences = append(generatedData.Sentences, genSentence)
+			}
+		}
+		generatedByteData, err := json.Marshal(generatedData)
+		if err != nil {
+			panic(err)
+		}
+		quiz, err := app.queries.CreateQuiz(r.Context(), model.CreateQuizParams{
+			Name:   tag,
+			Data:   generatedByteData,
+			Hidden: true,
+		})
+		if err != nil {
+			panic(err)
+		}
+		http.Redirect(w, r, fmt.Sprintf("/quiz/%d", quiz.ID), http.StatusSeeOther)
 	default:
 		http.NotFound(w, r)
 	}
@@ -113,6 +176,9 @@ func (app *application) homePage(w http.ResponseWriter, r *http.Request) {
 	quizzes := listQuiz(r, app.queries)
 
 	for _, e := range quizzes {
+		if e.Hidden {
+			continue
+		}
 		excerpts = append(excerpts, pages.HomeExcerpt{
 			Name:       e.Name,
 			Link:       fmt.Sprintf("/quiz/%v", e.ID),
