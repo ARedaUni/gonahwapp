@@ -18,8 +18,6 @@ import (
 func main() {
 	dsn := flag.String("dsn", "default.db", "Data Source Name")
 	addr := flag.String("addr", ":8080", "HTTP Address")
-	cert := flag.String("cert", "./tls/cert.pem", "Path to TLS certificate")
-	key := flag.String("key", "./tls/key.pem", "Path to TLS private key")
 	flag.Parse()
 
 	logger := createLogger()
