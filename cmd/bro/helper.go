@@ -20,12 +20,16 @@ func openDB(file string) (*sql.DB, error) {
 		return nil, errors.New("db file isn't specified")
 	}
 
+	log.Printf("Opening database: %s", file)
 	db, err := sql.Open("sqlite3", fmt.Sprintf("file:%v?mode=rwc", file))
 	if err != nil {
+		log.Printf("Error opening database: %v", err)
 		return nil, errors.Join(errors.New("could not open db"), err)
 	}
 
-	if db.Ping() != nil {
+	log.Printf("Pinging database")
+	if err := db.Ping(); err != nil {
+		log.Printf("Error pinging database: %v", err)
 		return nil, errors.Join(errors.New("could not ping db"), err)
 	}
 

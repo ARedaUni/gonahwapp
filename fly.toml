@@ -1,23 +1,24 @@
-# fly.toml app configuration file generated for nahwapp-lingering-sunset-1630 on 2024-12-11T10:33:36Z
-#
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
-
 app = 'nahwapp-lingering-sunset-1630'
 primary_region = 'lhr'
 
 [build]
 
 [[mounts]]
-  source = 'data'
-  destination = '/app/data'
+  source = "data"
+  destination = "/app/data"
+  region = "lhr"
+
+[env]
+  STUDENT_USER = "demo"
+  STUDENT_CODE = "demo123"
+  DB_PATH = "/app/data/default.db"
 
 [http_service]
   internal_port = 8080
   force_https = true
   auto_stop_machines = true
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   processes = ['app']
 
 [[vm]]

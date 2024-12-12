@@ -50,13 +50,25 @@ func main() {
 }
 
 func openDB(filename string) *sql.DB {
-	db, err := sql.Open("sqlite3", fmt.Sprintf("file:%v?mode=rw", filename))
+	logger := createLogger()
+	logger.Info("opening database", slog.String("filename", filename))
+	
+	// Add _journal=WAL for better concurrent access and ?mode=rwc for read-write-create
+	db, err := sql.Open("sqlite3", fmt.Sprintf("file:%v?_journal=WAL&mode=rwc", filename))
 	if err != nil {
+		logger.Error("failed to open database", slog.String("error", err.Error()))
+		panic(err)
+	}
+
+	// Enable foreign keys
+	if _, err := db.Exec("PRAGMA foreign_keys = ON"); err != nil {
+		logger.Error("failed to enable foreign keys", slog.String("error", err.Error()))
 		panic(err)
 	}
 
 	err = db.Ping()
 	if err != nil {
+		logger.Error("failed to ping database", slog.String("error", err.Error()))
 		panic(err)
 	}
 
